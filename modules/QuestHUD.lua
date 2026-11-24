@@ -76,6 +76,17 @@ local function writeLivePoints(frame, points)
     for _, point in ipairs(points) do frame:SetPoint(point[1], point[2], point[3], point[4], point[5]) end
 end
 
+local function matchesSaved(live, saved)
+    if #live ~= #saved then return false end
+    for i, point in ipairs(live) do
+        local other = saved[i]
+        if point[1] ~= other[1] or point[3] ~= other[3] or
+            (point[2] or UIParent) ~= (other[2] and _G[other[2]] or UIParent) or
+            math.abs(point[4] - other[4]) > .01 or math.abs(point[5] - other[5]) > .01 then return false end
+    end
+    return true
+end
+
 local function synchronize(targets)
     assert(not InCombatLockdown(), "RXP guide anchors cannot change in combat")
     -- Capture every target before the first write. RXP saves live points on
@@ -129,7 +140,11 @@ V:RegisterProfileAdapter(ADAPTER, {
                 if not usable(frame) or frame.savePosition == false or not validPoints(profile.framePositions[name]) then
                     return nil, "RestedXP guide anchors are not initialized or supported; reload once before setup"
                 end
-                if not pcall(capturePoints, frame) then return nil, "RestedXP live guide anchors are not ready; reload once before setup" end
+                local captured, live = pcall(capturePoints, frame)
+                if not captured then return nil, "RestedXP live guide anchors are not ready; reload once before setup" end
+                if not matchesSaved(live, profile.framePositions[name]) then
+                    return nil, "RestedXP has an unsaved guide position; reload once before reviewing setup"
+                end
                 local scale = V:SafeNumber(frame:GetEffectiveScale())
                 if not scale or scale <= 0 then return nil, "RestedXP guide scale is unavailable" end
                 local ratio = uiScale / scale

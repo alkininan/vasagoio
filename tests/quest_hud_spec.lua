@@ -53,6 +53,11 @@ end
 local review=V:PrepareSetup()
 check(#review.changes==1 and #review.unavailable==0,"initialized RXP guide not reviewed")
 check(positionWrites==0 and V:Equal(profile.framePositions.RXPFrame,original),"review changed guide position")
+guide.points[1][4]=40
+check(adapter.Prepare()==nil,"Unsaved live guide position could be lost during setup recovery")
+check(not V:ApplySetup(review),"A guide dragged after review was overwritten")
+check(positionWrites==0 and guide.points[1][4]==40,"Unsaved position validation mutated the guide")
+guide.points[1][4]=0
 for _=1,20 do V.modules.questHUD.Apply() end
 check(positionWrites==0,"cosmetic refresh moved the guide without explicit setup")
 check(V:ApplySetup(review),"RXP setup failed")

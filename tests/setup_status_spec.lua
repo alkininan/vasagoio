@@ -118,7 +118,7 @@ for _,id in ipairs({"units","nameplates","actions","chat","minimap","meters"}) d
     check(row(model,id).state=="applied","Current matching component wasn't applied: "..id)
 end
 check(V.db.profileBackups[1].presetVersion==V.setupPresetVersion,"Preset compatibility version was not recorded")
-check(V.setupPresetVersion==4,"Status-only changes altered the preset version")
+check(V.setupPresetVersion==5,"Changed HUD/quest/nameplate targets need a new preset version")
 failures.bartender="Main bar 1: native button geometry is unavailable. Reload UI and check again."
 review=V:PrepareSetup();model=V:BuildSetupStatus(review)
 check(model.title=="Needs attention" and model.description=="Apply is blocked by Action bars. No changes were made by this check.",

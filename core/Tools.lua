@@ -64,7 +64,7 @@ function V:CreateToolsView(parent)
         return label(view,description,"compact",40,y+40,560,40,T.colors.muted)
     end
     card(160,112,"Aura test","Start/reset outside combat. Hide remains available during combat.")
-    card(288,112,"Styling","Reload after switching. Applied addon profiles are kept.")
+    card(288,112,"Styling and guide","Reload after styling changes. The guide hides during combat.")
     view.restoreDescription=card(416,176,"Restore last snapshot","Restore the most recent preset changes. Later edits are protected by the restore check.")
     view.message=label(view,"","compact",40,544,560,48,T.colors.muted)
     local function message(text,failed)
@@ -108,8 +108,15 @@ function V:CreateToolsView(parent)
         if V.db.enabled~=enabled then message("Styling was not changed. Check Report before retrying.",true);return end
         message(enabled and "Styling is on. Reload for consistent addon state." or "Styling is off. Reload to finish cleanup; applied profiles are kept.")
     end
-    button(view,"stylingOn","On",40,352,272,function()styling(true)end)
-    button(view,"stylingOff","Off",328,352,272,function()styling(false)end)
+    button(view,"stylingOn","Styling on",40,352,176,function()styling(true)end)
+    button(view,"stylingOff","Styling off",232,352,176,function()styling(false)end)
+    button(view,"guide","Hide guide",424,352,176,function()
+        if not guard() then return end
+        if type(V.ToggleQuestGuide)~="function" then message("Guide presentation is unavailable.",true);return end
+        local ok,changed,reason=pcall(V.ToggleQuestGuide,V)
+        if not ok then failure("Guide presentation could not be changed. Check Report before retrying.");return end
+        message(type(reason)=="string" and reason or "Guide presentation requested.",changed~=true)
+    end)
     button(view,"restore","Restore last snapshot",40,504,360,function()
         if not guard() then return end
         local last,count=snapshot()
@@ -148,6 +155,9 @@ function V:CreateToolsView(parent)
         self.buttons.stylingOff:SetEnabled(stylingAvailable and on)
         self.buttons.stylingOn.selected=on
         self.buttons.stylingOff.selected=not on
+        self.buttons.guide:SetEnabled(canWrite and on and type(V.ToggleQuestGuide)=="function")
+        local guideHidden=type(V.IsQuestGuideHidden)=="function" and V:IsQuestGuideHidden()
+        self.buttons.guide.label:SetText(guideHidden and "Show guide" or "Hide guide")
         self.buttons.restore:SetEnabled(canWrite and last~=nil and type(V.RollbackProfiles)=="function")
         self.buttons.restore.label:SetText(self.confirmSnapshot and "Confirm restore" or "Restore last snapshot")
         self.buttons.restore.selected=self.confirmSnapshot~=nil

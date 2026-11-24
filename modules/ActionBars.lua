@@ -285,6 +285,135 @@ local function hideButtonArtwork(button)
     if normal and normal ~= button.NormalTexture then V:HideArtwork(normal) end
 end
 
+-- Bartender's optional zoom and FTM's flat skin otherwise use different crops.
+-- Match the reviewed flat-item crop while keeping the actual button hitbox and
+-- native state overlays intact. Remember owner writes for a reversible release.
+local appearances = setmetatable({}, {__mode="k"})
+local function ordinaryNumbers(...)
+    if select("#",...)==0 then return end
+    local values = {...}
+    for i=1,select("#",...) do
+        if not V:SafeNumber(values[i]) then return end
+    end
+    return values
+end
+local function ordinaryColor(r,g,b,a)
+    if V:IsSecret(a) then return end
+    if a==nil then a=1 end
+    return ordinaryNumbers(r,g,b,a)
+end
+local function appearanceActive(record)
+    return record.live and not record.releasing and record.allowed()
+end
+local function applyCrop(record)
+    record.writing = true
+    record.icon:SetTexCoord(.08,.92,.08,.92)
+    record.writing = nil
+end
+local function applyTint(record)
+    if not record.tint then return end
+    record.writing = true
+    local c=record.tint
+    record.icon:SetVertexColor(c[1]*A.brightness,c[2]*A.brightness,c[3]*A.brightness,c[4])
+    record.writing = nil
+end
+local function removeSkinnerBackdrop(record, border)
+    -- Skinner reparents hotkeys, counts and proc/autocast regions into sbb.
+    -- Hiding that frame would hide gameplay feedback: clear its backdrop only.
+    if not border or V:IsSecret(border) or not border.GetBackdrop or not border.SetBackdrop then return end
+    if border.IsForbidden then
+        local ok, forbidden=pcall(border.IsForbidden,border)
+        if not ok or V:IsSecret(forbidden) or forbidden then return end
+    end
+    local chrome=record.chrome
+    if not chrome then
+        chrome={frame=border}; record.chrome=chrome
+        if hooksecurefunc then
+            hooksecurefunc(border,"SetBackdrop",function(_,value)
+                if chrome.writing or not appearanceActive(record) or V:IsSecret(value) then return end
+                chrome.backdrop=value
+                if InCombatLockdown() then V:Refresh("action artwork after combat",record.owner); return end
+                chrome.writing=true; border:SetBackdrop(nil); chrome.writing=nil
+            end)
+            for _,property in ipairs({{"SetBackdropColor","fill"},{"SetBackdropBorderColor","edge"}}) do
+                if border[property[1]] then
+                    local key=property[2]
+                    hooksecurefunc(border,property[1],function(_,r,g,b,a)
+                        if not chrome.writing and appearanceActive(record) then chrome[key]=ordinaryColor(r,g,b,a) end
+                    end)
+                end
+            end
+        end
+    end
+    if chrome.frame~=border then return end
+    if not chrome.live then
+        chrome.backdrop=border:GetBackdrop()
+        chrome.fill=border.GetBackdropColor and ordinaryNumbers(border:GetBackdropColor())
+        chrome.edge=border.GetBackdropBorderColor and ordinaryNumbers(border:GetBackdropBorderColor())
+        chrome.live=true
+    end
+    if border:GetBackdrop() then
+        chrome.writing=true; border:SetBackdrop(nil); chrome.writing=nil
+    end
+end
+local function polishButton(button,icon,allowed,owner)
+    local record=appearances[button]
+    if not record then
+        record={icon=icon}; appearances[button]=record
+        if hooksecurefunc then
+            if icon.SetTexCoord and icon.GetTexCoord then
+                hooksecurefunc(icon,"SetTexCoord",function(_, ...)
+                    if record.writing or not appearanceActive(record) then return end
+                    local coords=ordinaryNumbers(...)
+                    if not coords then return end
+                    record.coords=coords
+                    if InCombatLockdown() then V:Refresh("action artwork after combat",record.owner); return end
+                    applyCrop(record)
+                end)
+            end
+            if icon.SetVertexColor and icon.GetVertexColor then
+                hooksecurefunc(icon,"SetVertexColor",function(_,r,g,b,a)
+                    if record.writing or not appearanceActive(record) then return end
+                    record.tint=ordinaryColor(r,g,b,a); applyTint(record)
+                end)
+            end
+        end
+    end
+    record.allowed,record.owner=allowed,owner
+    if not record.live then
+        record.coords=icon.GetTexCoord and ordinaryNumbers(icon:GetTexCoord())
+        record.tint=icon.GetVertexColor and ordinaryNumbers(icon:GetVertexColor())
+        record.live=true
+    end
+    if record.coords and icon.SetTexCoord then applyCrop(record) end
+    if icon.SetVertexColor then applyTint(record) end
+    removeSkinnerBackdrop(record,button.sbb)
+    if button.flatBorder and not V:IsSecret(button.flatBorder) and button.flatBorder.GetAlpha then
+        if record.flatAlpha==nil then record.flatAlpha=V:SafeNumber(button.flatBorder:GetAlpha()) end
+        if record.flatAlpha then button.flatBorder:SetAlpha(0) end
+    end
+end
+local function releaseAppearance(button)
+    local record=appearances[button]
+    if not record or not record.live or InCombatLockdown() then return end
+    local chrome=record.chrome
+    record.releasing=true
+    local ok,reason=pcall(function()
+        if record.coords then record.icon:SetTexCoord(unpack(record.coords)) end
+        if record.tint then record.icon:SetVertexColor(unpack(record.tint)) end
+        if record.flatAlpha and button.flatBorder then button.flatBorder:SetAlpha(record.flatAlpha) end
+        if chrome and chrome.live then
+            chrome.frame:SetBackdrop(chrome.backdrop)
+            if chrome.fill then chrome.frame:SetBackdropColor(unpack(chrome.fill)) end
+            if chrome.edge then chrome.frame:SetBackdropBorderColor(unpack(chrome.edge)) end
+        end
+    end)
+    record.releasing=nil
+    if not ok then error(reason) end -- Keep the captured appearance for a retry.
+    record.live,record.flatAlpha=false,nil
+    if chrome then chrome.live=false end
+end
+
 local function styleButton(button, compact, mainSlot)
     if not button or not button.icon or not button.CreateTexture then return end
     local state = styled[button]
@@ -308,22 +437,6 @@ local function styleButton(button, compact, mainSlot)
             state.empty:Hide()
         end
         if hooksecurefunc then
-            -- Preserve owner's usability/desaturation state; multiply only
-            -- ordinary RGB values, never inspect restricted colors.
-            hooksecurefunc(button.icon, "SetVertexColor", function(icon, r, g, b, a)
-                if not enabled() or state.tinting then return end
-                r, g, b = V:SafeNumber(r), V:SafeNumber(g), V:SafeNumber(b)
-                if not r or not g or not b or V:IsSecret(a) then return end
-                state.tinting = true
-                icon:SetVertexColor(r*A.brightness, g*A.brightness, b*A.brightness, a)
-                state.tinting = nil
-            end)
-            if button.icon.GetVertexColor then
-                local r, g, b, a = button.icon:GetVertexColor()
-                if not V:IsSecret(r) and not V:IsSecret(g) and not V:IsSecret(b) and not V:IsSecret(a) then
-                    button.icon:SetVertexColor(r, g, b, a)
-                end
-            end
             for _, field in ipairs({ "cooldown", "chargeCooldown" }) do
                 local cd = button[field]
                 if cd and cd.SetSwipeColor then
@@ -339,6 +452,7 @@ local function styleButton(button, compact, mainSlot)
             end
         end
     end
+    polishButton(button,button.icon,enabled,"actionBars")
     if V.MaskIcon then
         V:MaskIcon(button.icon, T.radius)
         V:MaskIcon(state.elapsed, T.radius)
@@ -370,6 +484,24 @@ local function utilityEnabled(state)
     return state and not state.suspended and V.db and V.db.enabled ~= false and not V.readOnly
         and not V.profileReloadPending and V:IsModuleEnabled(state.owner)
 end
+local function rememberCountPosition(state,count)
+    if state.countPosition then return state.countPosition.region==count end
+    if not count or not count.GetNumPoints or not count.GetPoint then return false end
+    local ok,position=pcall(function()
+        local result={region=count,points={}}
+        local n=V:SafeNumber(count:GetNumPoints())
+        if not n or n<0 or n>9 then return end
+        for i=1,n do
+            local point,relative,relativePoint,x,y=count:GetPoint(i)
+            if V:IsSecret(point) or V:IsSecret(relative) or V:IsSecret(relativePoint)
+                or not V:SafeNumber(x) or not V:SafeNumber(y) then return end
+            result.points[i]={point,relative,relativePoint,x,y}
+        end
+        return result
+    end)
+    if ok then state.countPosition=position end
+    return ok and position~=nil
+end
 function V:StyleActionButton(button, options)
     options = options or {}
     if V:IsSecret(button) or not button or (InCombatLockdown and InCombatLockdown()) then return false end
@@ -389,9 +521,15 @@ function V:StyleActionButton(button, options)
     local count = options.count or button.Count or button.count
     if V:IsSecret(state.hotkey) or V:IsSecret(state.timer) or V:IsSecret(count) then return false end
     if V.MaskIcon then V:MaskIcon(icon, T.radius) end
+    state.allowed=state.allowed or function() return utilityEnabled(state) end
+    polishButton(button,icon,state.allowed,owner)
     hideButtonArtwork(button)
     styleFont(button, state.hotkey, "hotkey")
     styleFont(button, count, "count")
+    if rememberCountPosition(state,count) then
+        count:ClearAllPoints()
+        count:SetPoint("BOTTOMRIGHT",button,"BOTTOMRIGHT",localPixels(button,-2),localPixels(button,2))
+    end
     if state.hotkey then
         state.hotkey:ClearAllPoints()
         state.hotkey:SetPoint("TOPRIGHT", button, "TOPRIGHT", localPixels(button,-2), localPixels(button,-2))
@@ -428,7 +566,14 @@ function V:ClearActionButtonStyle(button)
     if state then
         state.suspended = true
         if state.hotkey then state.hotkey:SetAlpha(1) end
+        if state.countPosition and not InCombatLockdown() then
+            local saved=state.countPosition
+            saved.region:ClearAllPoints()
+            for _,point in ipairs(saved.points) do saved.region:SetPoint(unpack(point)) end
+            state.countPosition=nil
+        end
     end
+    releaseAppearance(button)
 end
 
 -- Owner adapters must provide a semantic signal; normal buffs receive none.
@@ -481,7 +626,9 @@ V:RegisterModule("actionBars", {
             if button then styleButton(button, false, mainSlots[id]); count = count + 1 end
         end
         for id = 1, 10 do styleButton(_G["BT4PetButton" .. id], true) end
-        if _G.MainMenuBarBackpackButton then V:StyleActionButton(_G.MainMenuBarBackpackButton, {owner="actionBars"}) end
+        if _G.MainMenuBarBackpackButton then
+            V:StyleActionButton(_G.MainMenuBarBackpackButton, {owner="actionBars",count=_G.MainMenuBarBackpackButton.FreeSlots})
+        end
         if LibStub and not V.actionButtonCallbacks then
             local lab = LibStub("LibActionButton-1.0", true)
             if lab and lab.RegisterCallback then
@@ -500,6 +647,8 @@ V:RegisterModule("actionBars", {
                         return
                     end
                     hideButtonArtwork(button)
+                    local appearance=appearances[button]
+                    if appearance then removeSkinnerBackdrop(appearance,button.sbb) end
                 end)
                 V.actionButtonCallbacks = true
             end
@@ -527,6 +676,7 @@ V:RegisterModule("actionBars", {
             if state.owner == "actionBars" then V:ClearActionButtonStyle(button) end
         end
         for button, state in pairs(styled) do
+            releaseAppearance(button)
             state.elapsed:Hide(); state.range:Hide()
             if state.empty then state.empty:Hide() end
             if button.HotKey then button.HotKey:SetAlpha(1) end

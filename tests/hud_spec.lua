@@ -25,6 +25,8 @@ local function widget()
     function w:SetColorTexture(...) self.color = {...} end
     function w:SetVertexColor(...) self.color = {...} end
     function w:GetVertexColor() return unpack(self.color) end
+    function w:SetTexCoord(...) self.coords={...} end
+    function w:GetTexCoord() return unpack(self.coords or {0,1,0,1}) end
     function w:SetFont(path, size, flags) self.font,self.fontSize,self.fontFlags = path,size,flags; self.fontWrites=(self.fontWrites or 0)+1 end
     function w:SetJustifyH(value) self.justify = value end
     function w:SetFrameStrata(value) self.strata = value end
@@ -234,7 +236,11 @@ UnitNameUnmodified = function() return "Example" end
 GetRealmName = function() return "Realm" end
 C_AddOns={GetAddOnMetadata=function(addon) return ({SexyMap="v12.1.7",Details="#Details.20261109.15410.172"})[addon] end}
 SexyMap = {}
-SexyMap2DB = {["Example-Realm"]={core={},borders={backdrop={},borders={sentinel=true}},zonetext={},clock={}}}
+SexyMap2DB = {["Example-Realm"]={core={},borders={backdrop={},borders={sentinel=true}},zonetext={},clock={},coordinates={enabled=true,coordPrecision="%d,%d"},
+    buttons={controlVisibility=false,visibilitySettings={MiniMapMailFrame="always",LibDBIcon10_Test="hover"}}}}
+local addonIcon={GetName=function()return "LibDBIcon10_Test"end}
+LibStub=function(name) if name=="LibDBIcon-1.0" then return {
+    GetButtonList=function()return {"Test"}end,GetMinimapButton=function()return addonIcon end} end end
 local mapPlan = adapters.sexymap.Prepare(); validate(mapPlan)
 check(SexyMap2DB["Example-Realm"].core.scale==nil, "Map review changed geometry")
 commit(mapPlan)
@@ -245,9 +251,15 @@ near(map.core.y*map.core.scale,-7)
 check(map.core.shape==V.Media.minimapMask and map.core.clamp==false,"Map crop must preserve square projection without owner clamp")
 check(map.zonetext.bgColor.a==0 and map.clock.bgColor.a==0,"Map labels must not compound their backdrop")
 check(next(map.zonetext.fontColor)==nil, "Zone relationships must retain native colors")
+check(map.buttons.controlVisibility and map.buttons.visibilitySettings.LibDBIcon10_Test=="never" and
+    map.buttons.visibilitySettings.AddonCompartmentFrame=="never" and map.buttons.visibilitySettings.MiniMapMailFrame=="always",
+    "Map preset must hide addon icons without changing native mail visibility")
+check(map.coordinates.enabled==false and map.coordinates.coordPrecision=="%d,%d","Extra map coordinate strip remained or its format was discarded")
+LibStub=nil
 near(216+16+248,480)
 
-local instance = {baseframe=widget(),bg_alpha=.7,posicao={normal={w=300,h=200}},libwindow={},attribute_text={},row_info={texts={},space={},row_offsets={}}}
+local instance = {baseframe=widget(),bg_alpha=.7,posicao={normal={w=300,h=200}},libwindow={},attribute_text={},
+    menu_icons={true,true,true,true,true,true,space=-2,shadow=true},row_info={texts={},space={},row_offsets={}}}
 for i=1,4 do instance.row_info.texts[i]={font={face="Other",size=13,outline="OUTLINE"},color={byClass=true}} end
 function instance:ChangeSkin(value) self.refreshed = true; check(value==nil, "Do not replace the owner's skin") end
 instance.skin="Test"
@@ -261,7 +273,11 @@ local meterPlan = adapters.details.Prepare(); validate(meterPlan)
 check(instance.posicao.normal.w==300 and not instance.refreshed, "Meter review caused mutations")
 commit(meterPlan)
 check(Details.class_colors.MAGE[1]==V.Tokens.class.MAGE[1] and Details.class_colors.ENEMY==originalEnemy,"Details palette must use shared classes and preserve semantic colors")
-check(instance.posicao.normal.w==248 and instance.posicao.normal.h==154 and instance.titlebar_height==32, "Meter total envelope must include its title")
+check(instance.posicao.normal.w==248 and instance.posicao.normal.h==186 and instance.titlebar_height==0 and not instance.titlebar_shown,
+    "Headerless meter body must occupy the full186px envelope")
+check(not instance.attribute_text.enabled and instance.hide_icon and instance.menu_icons.space==-2 and instance.menu_icons.shadow,
+    "Meter title removal must preserve unrelated toolbar configuration")
+for i=1,6 do check(instance.menu_icons[i]==false,"A hidden meter toolbar retained a clickable button") end
 check(instance.libwindow.x==2072 and instance.libwindow.y==8, "Meter placement")
 check(instance.row_info.space.left+instance.row_info.row_offsets.left==8 and instance.row_info.space.right+instance.row_info.row_offsets.right==-16,"Native sidebar normalization must preserve both row insets")
 check(instance.row_info.height==24 and instance.row_info.space.between==4 and instance.row_info.font_size==16,"Meter shared row rhythm")
@@ -285,6 +301,16 @@ local function cooldown()
 end
 local button = widget()
 button.icon,button.HotKey,button.Count,button.cooldown = widget(),widget(),widget(),cooldown()
+local chrome=widget();chrome.backdrop={edgeFile="Skinner metal",edgeSize=16};chrome.fill={.1,.2,.3,.4};chrome.edge={.6,.7,.8,.9}
+function chrome:GetBackdrop() return self.backdrop end
+function chrome:SetBackdrop(value) self.backdrop=value end
+function chrome:GetBackdropColor() return unpack(self.fill) end
+function chrome:GetBackdropBorderColor() return unpack(self.edge) end
+function chrome:SetBackdropColor(...) self.fill={...} end
+function chrome:SetBackdropBorderColor(...) self.edge={...} end
+button.sbb=chrome
+-- Skinner actually reparents live labels/proc regions into this border frame.
+chrome.Count,chrome.Glow=button.Count,widget()
 button.NormalTexture,button.SlotBackground,button.Border,button.CheckedTexture,button.SpellActivationAlert=widget(),widget(),widget(),widget(),widget()
 local fallbackNormal=widget()
 function button:GetNormalTexture() return fallbackNormal end
@@ -308,6 +334,34 @@ check(button.NormalTexture.alpha==0 and button.SlotBackground.alpha==0 and fallb
     "Native decorative action chrome remained")
 check(button.Border.alpha==1 and button.CheckedTexture.alpha==1 and button.SpellActivationAlert.alpha==1,
     "Equipped/checked/proc feedback was hidden")
+check(chrome.backdrop==nil and chrome.alpha==1 and chrome.shown and chrome.Count.alpha==1 and chrome.Glow.alpha==1,
+    "Skinner chrome survived, or removing it hid a real child state region")
+near(button.icon.coords[1],.08);near(button.icon.coords[2],.92)
+button.icon:SetTexCoord(.07,.93,.07,.93)
+check(button.icon.coords[1]==.08,"Owner zoom restored a different icon crop")
+button.icon:SetVertexColor(.5,.25,1,1)
+near(button.icon.color[1],.46);near(button.icon.color[2],.23)
+button.icon:SetVertexColor(1,1,1,1)
+check(modules.actionBars.Apply(),"Repeat action appearance failed")
+near(button.icon.color[1],.92) -- Refreshes must not multiply already-muted RGB again.
+combat=true
+button.icon:SetTexCoord(.06,.94,.06,.94)
+check(button.icon.coords[1]==.06 and V.lastRefreshModule=="actionBars","Combat crop change was not deferred")
+button.icon:SetVertexColor(.5,.5,.5,1);near(button.icon.color[1],.46)
+combat=false
+check(modules.actionBars.Apply());near(button.icon.coords[1],.08)
+button.icon:SetTexCoord(.07,.93,.07,.93);button.icon:SetVertexColor(1,1,1,1)
+local ownerBackdrop={edgeFile="new owner border",edgeSize=10}
+chrome:SetBackdrop(ownerBackdrop);chrome:SetBackdropBorderColor(.2,.3,.4,.5)
+check(chrome.backdrop==nil and chrome.alpha==1,"Later native border refresh escaped or hid children")
+local backpack=MainMenuBarBackpackButton
+backpack.icon,backpack.FreeSlots=widget(),widget()
+backpack.FreeSlots:SetPoint("CENTER",backpack,"CENTER",0,-10)
+function backpack.FreeSlots:GetNumPoints()return self.point and 1 or 0 end
+function backpack.FreeSlots:GetPoint()return unpack(self.point)end
+check(V:StyleActionButton(backpack,{owner="actionBars",count=backpack.FreeSlots}),"Backpack presentation refused")
+check(backpack.FreeSlots.role=="count" and backpack.FreeSlots.ink==V.Tokens.colors.iconText
+    and backpack.FreeSlots.point[1]=="BOTTOMRIGHT" and backpack.FreeSlots.point[4]==-2,"Backpack free-space count did not use shared action typography/position")
 local priorRefreshes,priorFonts=refreshes,button.HotKey.fontWrites
 empty.icon:Show();callbacks.OnButtonUpdate("OnButtonUpdate",empty)
 check(not emptySlot.shown and refreshes==priorRefreshes and button.HotKey.fontWrites==priorFonts,
@@ -360,6 +414,11 @@ combat=false
 modules.meter.Apply()
 check(instance.baseframe.fullWindowFrame.surface.alpha==.4 and instance.baseframe.fullWindowFrame.surface.radius==10, "Meter outer surface")
 modules.actionBars.Disable()
+check(chrome.backdrop==ownerBackdrop and chrome.edge[1]==.2 and chrome.edge[4]==.5 and chrome.alpha==1,
+    "Disable failed to restore the latest Skinner backdrop while retaining native children")
+near(button.icon.coords[1],.07);near(button.icon.color[1],1)
+check(backpack.FreeSlots.point[1]=="CENTER" and backpack.FreeSlots.point[5]==-10,"Backpack count position was not restored")
+chrome:SetBackdrop({edgeFile="while disabled"});check(chrome.backdrop~=nil,"Inactive chrome hook kept stripping owner art")
 check(button.HotKey.alpha==1, "Disabled module left key hidden")
 check(not emptySlot.shown,"Disabled module left placeholders visible")
 callbacks.OnButtonUpdate("OnButtonUpdate",empty)
@@ -370,19 +429,27 @@ modules.utilityBars={defaultEnabled=true}
 V.db.modules.actionBars=false
 local utility=widget();utility.scale=2
 local icon,key,timer,cd=widget(),widget(),widget(),cooldown()
+utility.flatBorder=widget()
 local nativeTextWrites=0
 function timer:SetText(value) self.value=value;nativeTextWrites=nativeTextWrites+1 end
 local opts={owner="utilityBars",icon=icon,hotkey=key,timer=timer,cooldown=cd}
 utility.flashTex,utility.holdBadge,utility.rotationIcon=widget(),widget(),widget()
 check(V:StyleActionButton(utility,opts),"Utility styles depended on actionBars being enabled")
 check(timer.fontSize==9 and timer.point[1]=="CENTER" and timer.ink==V.Tokens.colors.iconText,"Utility timer is not scale-aware icon text")
+near(icon.coords[1],.08);near(icon.color[1],.92)
+check(utility.flatBorder.alpha==0,"FTM flat border remained around shared action artwork")
 check(key.point[4]==-1 and key.point[5]==-1 and utility.icon==nil and utility.HotKey==nil,"Utility styling added aliases or wrong local offsets")
 timer:SetText("12m")
 check(timer.value=="12m" and nativeTextWrites==1 and key.alpha==0,"Utility styling replaced native timer content or retained a duplicate hotkey")
 timer:SetText("");check(key.alpha==1,"Utility hotkey did not return when native timer cleared")
 timer:SetText({secret=true});check(key.alpha==1,"Restricted utility timer was inspected")
 check(utility.flashTex.alpha==1 and utility.holdBadge.alpha==1 and utility.rotationIcon.alpha==1,"Utility queue/rotation overlays were altered")
+local nativeCoords=icon.SetTexCoord
+icon.SetTexCoord=function()error("native appearance restore refused")end
+check(not pcall(V.ClearActionButtonStyle,V,utility),"Appearance cleanup refusal was hidden")
+icon.SetTexCoord=nativeCoords
 V:ClearActionButtonStyle(utility);timer:SetText("2m");check(key.alpha==1,"Suspended utility hook still hid hotkeys")
+check(utility.flatBorder.alpha==1 and icon.coords[1]==0 and icon.color[1]==1,"Utility appearance was not reversible")
 V.db.modules.utilityBars=false
 check(not V:StyleActionButton(utility,opts),"Disabled utility module accepted styling")
 V.db.modules.utilityBars=nil;V.db.modules.actionBars=nil

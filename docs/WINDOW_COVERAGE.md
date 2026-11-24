@@ -11,6 +11,6 @@ The shared service changes fonts/shadows, known decorative backgrounds, control 
 
 Skinner remains a supported foundation with the reviewed beta12.70938.1 profile. vasagoio also runs its own scoped interior adapters without Skinner. Content-free Skinner `.sf` and `.sb` decorations can be replaced by rounded surfaces only when their parent/child contract matches the reviewed source. Native segmented button chrome is also recognized; coin icons and other content textures are retained.
 
-The native catalog contains 132 interior candidates across 115 primary hosts. Registration does not prove every host exists on the current character/client. Dedicated unit/action/HUD records use their existing owners. Eight frontend records, two media/world-capture overlays and the embedded support browser are outside this window-control adapter.
+The native catalog contains 129 interior candidates across 112 primary hosts. Registration does not prove every host exists on the current character/client. Dedicated unit/action/HUD records use their existing owners. Three native-recovery records, eight frontend records, two media/world-capture overlays and the embedded support browser are outside this window-control adapter.
 
 The build has not been opened in WoW. Pixel rendering, every owner state, locale/scale behavior and combat/taint remain user-run verification. No complete runtime coverage claim is made from source inspection alone.

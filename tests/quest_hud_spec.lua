@@ -17,7 +17,7 @@ end
 UIParent = widget({}); UIParent.scale=1
 InCombatLockdown=function() return combat end
 GetAddOnMetadata=function(name) if name=="RXPGuides" then return version end end
-local V={db={enabled=true,modules={},profileBackups={}}, modules={}, adapters={}, adapterOrder={}, Tokens={revision=10}}
+local V={db={enabled=true,modules={},overrides={},profileBackups={}}, modules={}, adapters={}, adapterOrder={}, Tokens={revision=10}}
 function V:IsSecret(value) return type(value)=="table" and value.secret==true end
 function V:SafeNumber(value) if type(value)=="number" and value==value and value~=math.huge and value~=-math.huge then return value end end
 function V:Pixel(value) return value end
@@ -27,16 +27,18 @@ function V:RegisterProfileAdapter(id,spec) self.adapters[id]=spec; self.adapterO
 function V:Refresh() end
 assert(loadfile(root.."/core/Database.lua"))("vasagoio",V)
 assert(loadfile(root.."/core/Profiles.lua"))("vasagoio",V)
+VasagoioDB=V.db
 assert(loadfile(root.."/modules/QuestHUD.lua"))("vasagoio",V)
 local adapter=V.adapters.restedxp
 check(adapter.Prepare()==nil,"missing RXP owner must be unavailable")
 local original={{"TOPRIGHT",nil,"TOPRIGHT",0,-56}}
 local guide=widget({{"TOPRIGHT",UIParent,"TOPRIGHT",0,-56}})
-local profile={framePositions={RXPFrame=V:Copy(original)}, frameSizes={RXPFrame={220,88}}, enableQuestAutomation=false}
+local profile={framePositions={RXPFrame=V:Copy(original)}, frameSizes={RXPFrame={220,88}}, enableQuestAutomation=false,anchorOrientation="top"}
 local key="Test"
 RXPSettings={profiles={Test=profile}}
 local settings={profile=profile,GetSettingsDB=function() return key end}
 local rxp={enabledFrames={RXPFrame=guide}}
+function guide.SetStepFrameAnchor() guide.orientation=settings.profile.anchorOrientation end
 function rxp:GetModule(name) if name=="Settings" then return settings end end
 LibStub=function(name)
     if name=="AceAddon-3.0" then return {GetAddon=function(_,addon) if addon=="RXPGuides" then return rxp end end} end
@@ -51,7 +53,7 @@ local function ownerSavesPositions()
     end
 end
 local review=V:PrepareSetup()
-check(#review.changes==1 and #review.unavailable==0,"initialized RXP guide not reviewed")
+check(#review.changes==3 and #review.unavailable==0,"initialized RXP guide not reviewed")
 check(positionWrites==0 and V:Equal(profile.framePositions.RXPFrame,original),"review changed guide position")
 guide.points[1][4]=40
 check(adapter.Prepare()==nil,"Unsaved live guide position could be lost during setup recovery")
@@ -61,13 +63,15 @@ guide.points[1][4]=0
 for _=1,20 do V.modules.questHUD.Apply() end
 check(positionWrites==0,"cosmetic refresh moved the guide without explicit setup")
 check(V:ApplySetup(review),"RXP setup failed")
-check(guide.points[1][4]==-384 and guide.points[1][5]==-64,"setup did not synchronize the live guide")
+check(guide.points[1][4]==-8 and guide.points[1][5]==-128,"setup did not synchronize the live guide")
+check(profile.anchorOrientation=="bottom" and guide.orientation=="bottom","active steps were not placed below the guide")
 check(guide.width==220 and guide.height==88 and profile.enableQuestAutomation==false,"guide size or behavior changed")
 local applied=V:Copy(profile.framePositions.RXPFrame)
 ownerSavesPositions()
 check(V:Equal(profile.framePositions.RXPFrame,applied),"owner logout overwrote the reviewed guide anchor")
 check(V:RollbackProfiles(),"RXP restoration failed")
 check(guide.points[1][4]==0 and guide.points[1][5]==-56,"restoration left the live guide at its new anchor")
+check(profile.anchorOrientation=="top" and guide.orientation=="top","native active-step orientation was not restored")
 ownerSavesPositions()
 check(profile.framePositions.RXPFrame[1][4]==0 and profile.framePositions.RXPFrame[1][5]==-56,
     "owner logout overwrote restored guide position")
@@ -90,14 +94,14 @@ check(adapter.Prepare()==nil,"lazy V2 anchor was invented before owner initializ
 profile.framePositions.RXPV2GuideWindow={{"LEFT","UIParent","LEFT",0,35}}
 v2.scale=2
 local plan=assert(adapter.Prepare())
-check(#plan.changes==2 and plan.changes[2].value[1][4]==-192 and plan.changes[2].value[1][5]==-32,
+check(#plan.changes==4 and plan.changes[2].value[1][4]==-4 and plan.changes[2].value[1][5]==-64,
     "guide scale was not accounted for")
 local basePixel=V.Pixel
 function V:Pixel(value) return value*5/6 end
 UIParent.scale=5/6; v2.scale=(5/6)*0.8
 plan=assert(adapter.Prepare())
-check(math.abs(plan.changes[2].value[1][4]+400)<.00001 and
-    math.abs(plan.changes[2].value[1][5]+(200/3))<.00001,
+check(math.abs(plan.changes[2].value[1][4]+(25/3))<.00001 and
+    math.abs(plan.changes[2].value[1][5]+(400/3))<.00001,
     "UI scale and guide-local scale were combined incorrectly")
 V.Pixel=basePixel; UIParent.scale=1
 rxp.enabledFrames.RXPV2GuideWindow=nil
@@ -112,7 +116,7 @@ check(not V:RollbackProfiles(),"later user position was overwritten")
 check(positionWrites==before and guide.points[1][4]==-500,"conflicting restoration touched live guide")
 -- Return the saved/live fields to the snapshot's after value for the next check.
 profile.framePositions.RXPFrame=V:Copy(applied)
-guide.points={{"TOPRIGHT",UIParent,"TOPRIGHT",-384,-64}}
+guide.points={{"TOPRIGHT",UIParent,"TOPRIGHT",-8,-128}}
 guide.forbidden=true
 check(not V:RollbackProfiles(),"restore preflight allowed an unwritable active guide")
 check(V:Equal(profile.framePositions.RXPFrame,applied),"failed restore preflight changed saved position")
@@ -140,7 +144,7 @@ local backupCount=#V.db.profileBackups
 check(not V:RollbackProfiles(),"native restore error was ignored")
 check(#V.db.profileBackups==backupCount and V:Equal(profile.framePositions.RXPFrame,applied),
     "failed live restoration lost its saved settings or snapshot")
-check(guide.points[1][4]==-384,"failed live restoration did not recover applied anchor")
+check(guide.points[1][4]==-8,"failed live restoration did not recover applied anchor")
 check(V:RollbackProfiles(),"restoration could not be retried after native error")
 guide.SetPoint=baseSetPoint
 
@@ -164,7 +168,7 @@ V.db.appliedRevision=73
 review=V:PrepareSetup(); backupCount=#V.db.profileBackups
 failOnce=true
 function guide:SetPoint(point,relative,relativePoint,x,y)
-    if failOnce and x==-384 then failOnce=false; error("simulated initial apply anchor error") end
+    if failOnce and x==-8 then failOnce=false; error("simulated initial apply anchor error") end
     return baseSetPoint(self,point,relative,relativePoint,x,y)
 end
 check(not V:ApplySetup(review),"initial native anchor failure was reported as a successful setup")
@@ -184,7 +188,7 @@ profile.framePositions.RXPV2GuideWindow={{"LEFT","UIParent","LEFT",0,35}}
 local baseV2SetPoint=v2.SetPoint
 failOnce=true
 function v2:SetPoint(point,relative,relativePoint,x,y)
-    if failOnce and x==-384 then failOnce=false; error("simulated second-guide anchor error") end
+    if failOnce and x==-8 then failOnce=false; error("simulated second-guide anchor error") end
     return baseV2SetPoint(self,point,relative,relativePoint,x,y)
 end
 review=V:PrepareSetup(); backupCount=#V.db.profileBackups

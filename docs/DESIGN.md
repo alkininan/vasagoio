@@ -1,6 +1,6 @@
 # Accepted vasagoio design
 
-This is a derived implementation summary of the authoritative Vasagoio Specs, revision 11. Historical experiments are not active options. A design value being listed here does not imply native implementation; see COVERAGE.md and module coverage documents.
+This is a derived implementation summary of the authoritative Vasagoio Specs, revision 12. Historical experiments are not active options. A design value being listed here does not imply native implementation; see COVERAGE.md and module coverage documents.
 
 ## Layout and ownership
 
@@ -43,10 +43,13 @@ Reference canvas: **2560×1440**, centered within UIParent on other aspect ratio
 | Map + gap + meter | 216 + 16 + 248 = 480, equal to chat width |
 | Long / short auras | 36 top right / 28 near units; horizontal gap 8; wrapped-row gap 16; priority changes signal only |
 | Aura clearance | At least 8 from icon edge to health/panel |
-| Nameplate | 192×24 health; 192×16 cast; 8 gap; 28 aura with 8 clearance |
+| Nameplate | 224×24 health; 224×16 cast; 8 gap; 28 aura with 8 clearance; 120px name lane |
+| Nameplate side indicators | Level left in a 32px lane; rare/elite icon right at 16px; 2px gap from selected outline |
+| Selected nameplate | Native 1px blue outline (Threat Plates squarethin, 3px outset); other health/cast borders off |
+| RestedXP | 8px from right edge; top128 below reserved long-aura region; native downward step layout; manual/combat hide |
 | Nameplate envelope | 84; 92 including top-attached count; extra aura rows can grow |
 
-Player and target show current health/power amounts, not percentages. Small names and values use compact14; L/M names and main amounts use16. Details total186 includes its toolbar, padding and content; rows24, gap4, inner padding8 and title24. Raid uses compact percentages. Nameplates show exact current health. Names have no background label anywhere. Party and companion units share one size system; no duplicate Small variants.
+Player and target show current health/power amounts, not percentages. Small names and values use compact14; L/M names and main amounts use16. Details uses the full186 as its row body with no title/toolbar; rows24, gap4, inner padding8. Native right-click menus remain. Raid uses compact percentages. Nameplates show exact current health. Names have no background label anywhere. Party and companion units share one size system; no duplicate Small variants.
 
 The player XP row is a conditional composition within Large, not a new outer size variant. Target keeps the original Large health/resource split. Hide the old standalone XP/status strip after explicit setup. Empty main-action slots and empty bag spaces use stronger borderless placeholders so available positions remain readable without moving actions or items.
 
@@ -67,7 +70,7 @@ The player XP row is a conditional composition within Large, not a new outer siz
 | Surface opacity | Units 0.56; chat/map label/meter 0.40; input 0.24; windows 0.84 |
 | Empty-slot surface | Neutral #272727 at 0.64 opacity; borderless, radius10; preserve owner search/disabled fading |
 
-Default corners are **10** on containers and icons. Health, resource and damage-meter fills remain square. The selected system is borderless, with no gold/silver outline toggle. Native rendering uses dark translucent surfaces with static low-contrast sheen and grain as a Frosted approximation; there is no supported arbitrary scene blur behind every frame.
+Default corners are **10** on containers and icons. Health, resource and damage-meter fills remain square. The selected system is borderless, with no gold/silver outline toggle; the newly accepted 1px selected-nameplate outline is an explicit exception. Native rendering uses dark translucent surfaces with static low-contrast sheen and grain as a Frosted approximation; there is no supported arbitrary scene blur behind every frame.
 
 Player combat uses a 2px danger edge at35% opacity; party/raid edges follow aggro instead. Native16px player/target PvP badges appear only when flagged and retain FFA/NPC warning semantics. Own hunter-pet names show happy/content/unhappy using hunter green/attention/danger; the separate happiness icon is hidden. Other players’ pets have no invented happiness state.
 
@@ -96,7 +99,7 @@ Artwork retains original saturation, 0.92 brightness and full opacity. A full-bu
 
 Semantic markers sit below the icon: height3, gap 2, side insets6, opaque, square ends. Harmful uses danger; dispellable uses information; priority uses attention. Normal buffs get no marker. No surrounding border or glow is substituted. Restricted cooldown/range values stay with native owner widgets instead of being inspected or inferred.
 
-For a valid hostile NPC threat context, tanks with secure aggro and DPS/healers without aggro use calm blue. The inverse uses danger; transitional states use attention. Friendly units, PvP opponents and unavailable threat data retain the owner's reaction/class rules. No threat inference is added.
+For a valid hostile NPC threat context, tanks with secure aggro and DPS/healers without aggro use calm blue. The inverse uses danger; transitional states use attention. Native reaction fallback uses the shared palette: idle hostile/friendly NPCs blue, neutral amber, hostile players red and tapped/disconnected gray. Threat Plates still decides the actual context; user custom rules are retained. No threat inference is added.
 
 ## Window controls and interior states
 
@@ -110,8 +113,10 @@ Original control sizes, positions, wrapping, scroll behavior and keyboard/click 
 
 Keep MRT for raid leading, SexyMap, What's Training, Baganator, Talents Forever, Prat, Forever Trinket Menu, Gargul and BattleGroundEnemiesFixed. Details provides damage meters and its bundled TinyThreat plugin provides the selected threat meter. ThreatClassic2 is no longer selected. Threat Plates remains the separate nameplate owner. vasagoio does not enable data collection or automatically switch Details displays. Spy and OneForAll are excluded. Chonky, EUI, ElvUI and DaylightUI are not additional presentation owners in this package. Skinner is the selected native skin foundation. The full 26-package functional selection, including TinyThreat within Details, is in dependencies.json.
 
-## Pending aura and quest work
+## Aura work and quest presentation
 
-The accepted aura target places long buffs at the top right, long debuffs below them, and short effects near the unit frames. Grouping uses an effect's full duration with a 60-second threshold, retaining the agreed Battle Shout exception. The themed RestedXP window belongs below the long-aura region, with automatic hiding in combat and a manual visibility toggle; the native quest tracker should be hidden. These changes are still pending implementation and native validation. Keeping the current separate guide/objective columns in alpha.7 is an implementation limitation, not acceptance of a fallback design.
+The accepted aura target places long buffs at the top right, long debuffs below them, and short effects near the unit frames. Grouping uses an effect's full duration with a 60-second threshold, retaining the agreed Battle Shout exception. The themed RestedXP window sits below the reserved long-aura region, 8px from the right edge, with automatic hiding in combat and manual Tools/reopen controls. Its native guide callbacks stay active while hidden. The entire native tracker, including quest-item and scenario controls, is hidden by explicit choice; separate RXP secure item/target controls remain available. These quest paths are implemented but need native validation. Exact production aura grouping remains unfinished.
 
 Alpha.7 includes a manually opened [aura experiment](AURA_TEST.md) to evaluate native duration grouping. All, Short and Long/permanent views compare buffs and debuffs without replacing the working aura display. The test does not establish compact packing, exact-60-second behavior, permanent-effect pool reuse or combat correctness. Production aura placement/grouping and spell-specific exceptions require the test results and further implementation.
+
+Death/release/resurrection confirmations, the return-to-graveyard control and death recap remain entirely native. The four shared StaticPopup slots and their descendants are excluded from both vasagoio skin traversal and the reviewed Skinner skins. A reload clears old hooks. The world-map replacement background preserves the original Skinner decoration layer; map content is not intentionally dimmed by the theme.

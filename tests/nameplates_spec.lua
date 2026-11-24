@@ -36,6 +36,10 @@ C_AddOns={GetAddOnMetadata=function()return "13.3.9"end}
 UnitNameUnmodified=function()return "Tester"end
 GetRealmName=function()return "Realm"end
 C_Timer={After=function(_,fn)fn()end}
+local media={files={}}
+function media:Register(kind,key,path) self.files[kind..key]=path end
+function media:Fetch(kind,key) return self.files[kind..key] end
+LibStub=function(name) if name=="LibSharedMedia-3.0" then return media end end
 local V={db={enabled=true,modules={}},reports={}}
 function V:RegisterModule(id,m)modules[id]=m end
 function V:RegisterProfileAdapter(id,a)adapters[id]=a end
@@ -68,10 +72,22 @@ assert(old.Healthbar.BackgroundOpacity==.8 and old.text.AbsorbsAmount,"Prepare m
 for _,c in ipairs(plan.changes)do c.table[c.key]=c.value end
 local p=ThreatPlatesDB.profiles[ThreatPlatesDB.profileKeys["Tester - Realm"]]
 assert(p.optionRoleDetectionAutomatic==false,"Explicit role intent was overwritten")
+assert(p.settings.healthbar.texture=="Vasagoio Flat" and media:Fetch("statusbar","Vasagoio Flat")=="Interface\\Buttons\\WHITE8X8",
+    "Missing optional Flat media silently restored glossy nameplates")
+assert(p.ColorByReaction.HostileNPC.b==V.Tokens.colors.informationFill[3],"Idle hostile NPC still looks like a danger state")
+assert(p.settings.dps.threatcolor.HIGH.r==V.Tokens.colors.dangerFill[1] and p.settings.tank.threatcolor.HIGH.b==V.Tokens.colors.informationFill[3],
+    "Calm reaction fallback changed native role-aware aggro meanings")
 assert(p.Healthbar.BackgroundOpacity==0 and p.Healthbar.BackgroundColor.r==11/255,"Opaque track used wrong transparency/color")
 assert(p.settings.castbar.BackgroundOpacity==0 and p.settings.castbar.y==-28)
 assert(not p.StatusText.HealthbarMode.SubtextColorUseHeadline and not p.StatusText.HealthbarMode.SubtextColorUseSpecific)
-assert(p.Name.HealthbarMode.Anchor=="LEFT" and p.Name.HealthbarMode.InsideAnchor and p.Name.HealthbarMode.Font.Width==88)
+assert(p.Name.HealthbarMode.Anchor=="LEFT" and p.Name.HealthbarMode.InsideAnchor and p.Name.HealthbarMode.Font.Width==120)
+assert(p.settings.healthbar.width==224 and p.settings.castbar.width==224)
+assert(p.targetWidget.ON and p.targetWidget.theme=="squarethin" and p.targetWidget.r==V.Tokens.colors.information[1],"Selected nameplate retained its thick white border")
+assert(p.settings.level.align=="RIGHT" and p.settings.level.show)
+local outerLeft=-p.settings.healthbar.width/2-V.Tokens.nameplate.selectionOutset
+assert(outerLeft-(p.settings.level.x+p.settings.level.width/2)==2,"Level lost its 2px gap beside the selected outline")
+assert(p.settings.eliteicon.show and p.settings.eliteicon.y==0 and p.settings.eliteicon.x-p.settings.eliteicon.scale/2== -outerLeft+2,
+    "Rare/elite indicator is not beside the right edge")
 assert(p.Name.HealthbarMode.FriendlyUnitMode=="CUSTOM" and p.Name.HealthbarMode.Font.Size==16)
 assert(p.StatusText.HealthbarMode.Font.Size==14 and p.text.amount and p.text.full and not p.text.truncate and not p.text.AbsorbsAmount)
 assert(p.Scale.PixelPerfectUI==false and p.Appearance.NameplateSize=="BIG" and p.nameplate.scale.Boss==1 and not p.nameplate.toggle.NonTargetA)
@@ -81,7 +97,7 @@ assert(p.AuraWidget.Debuffs.ModeIcon.Duration.Anchor=="BOTTOM" and p.AuraWidget.
 assert(p.AuraWidget.CrowdControl.ModeIcon.Duration.Font.Color.r==240/255 and p.AuraWidget.CrowdControl.ModeIcon.Duration.Font.flags=="")
 assert(p.AuraWidget.Buffs.ModeIcon.IconWidth==28 and not p.AuraWidget.FlashWhenExpiring)
 local ccLeft=p.settings.healthbar.width/2+p.AuraWidget.CrowdControl.HealthbarMode.HorizontalOffset
-assert(ccLeft>=p.settings.level.x+p.settings.level.width/2+8,"Crowd-control icons overlap the level/skull lane")
+assert(ccLeft>=p.settings.eliteicon.x+p.settings.eliteicon.scale/2+8,"Crowd-control icons overlap the rare/elite indicator")
 local aura={Icon=widget(),DispelBorder=widget()}
 aura.DispelBorder:Hide()
 local container={}

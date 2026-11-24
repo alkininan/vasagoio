@@ -52,11 +52,18 @@ CharacterFrame.NineSlice = {TopEdge = texture()}
 CharacterFrame.LeftPaneHost = {StoneBg = texture()}
 GameMenuFrame = frame()
 GameMenuFrame.IsForbidden = function() return true end
+StaticPopup1, GhostFrame = frame(),frame()
+local recoveryClick=function()end
+StaticPopup1.OnClick,GhostFrame.OnClick=recoveryClick,recoveryClick
 check(modules.nativeWindows.Apply(), "native fallback failed")
 check(CharacterFrame.Bg.alpha == 0 and CharacterFrame.NineSlice.TopEdge.alpha == 0, "native artwork not replaced")
 check(CharacterFrame.TitleText.size == 13, "native text geometry changed")
 check(CharacterFrame.ModelScene.sentinel == "native model" and CharacterFrame.EquipmentSlots.sentinel == "native equipment", "native structure changed")
 check(not V.surfaces[GameMenuFrame], "forbidden frame was modified")
+check(not V.surfaces[StaticPopup1] and not V.surfaces[GhostFrame] and StaticPopup1.hooks==0 and GhostFrame.hooks==0,
+    "Native recovery dialogs acquired fallback skins or script hooks")
+check(StaticPopup1.Bg.alpha==1 and StaticPopup1.OnClick==recoveryClick and GhostFrame.OnClick==recoveryClick,
+    "Native recovery appearance or callbacks changed")
 modules.nativeWindows.Apply()
 check(CharacterFrame.hooks == 1, "duplicate native OnShow hooks")
 local before = mutations
@@ -71,6 +78,7 @@ local profile = {
     FrameBorders = true, ClassClrBd = true, ClassClrBg = false, ClassClrGr = false,
     BgUseTex = false, DisableAllNPC = true, DisableAllP = true, DisableAllUI = true, DisableAllAS = false,
     ChatButtons = true, ChatFrames = true, ChatTabs = true, Gradient = {enable = true},
+    StaticPopups=true,GhostFrame=true,DeathRecap=true,
     CastingBar = {skin = true}, CompactFrames = {skin = true}, CharacterFrames = true,
     Backdrop = {r = 0, g = 0, b = 0, a = .9}, HeadText = {r = .8, g = .8, b = 0, a = 1},
 }
@@ -79,11 +87,16 @@ Skinner = {db = {profile = profile, GetCurrentProfile = function() return "Test"
 local plan = adapters.skinner.Prepare()
 check(plan and #plan.changes > 10, "reviewed Skinner plan missing")
 check(profile.FrameBorders == true and profile.Backdrop.a == .9, "Prepare mutated Skinner profile")
+local recoveryFlags={}
 for _, change in ipairs(plan.changes) do
     local target = _G
     for _, part in ipairs(change.path) do target = target[part] end
     check(target == change.table, "profile rollback path does not resolve to changed table")
+    if change.key=="StaticPopups" or change.key=="GhostFrame" or change.key=="DeathRecap" then recoveryFlags[change.key]=change.value end
 end
+check(recoveryFlags.StaticPopups==false and recoveryFlags.GhostFrame==false and recoveryFlags.DeathRecap==false,
+    "Reviewed Skinner preset retained recovery-dialog takeover")
+check(profile.StaticPopups and profile.GhostFrame and profile.DeathRecap,"Recovery skin review wrote settings before Apply")
 before = mutations
 modules.nativeWindows.Apply()
 check(mutations == before, "Skinner and fallback both own native windows")

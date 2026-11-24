@@ -3,7 +3,7 @@ local function rgb(hex)
     return {tonumber(hex:sub(1, 2), 16) / 255, tonumber(hex:sub(3, 4), 16) / 255, tonumber(hex:sub(5, 6), 16) / 255}
 end
 V.Tokens = {
-    revision = 11, reference = {width = 2560, height = 1440}, radius = 10,
+    revision = 12, reference = {width = 2560, height = 1440}, radius = 10,
     colors = {
         panel = rgb("0B0B0B"), raised = rgb("151515"), deep = rgb("060606"), track = rgb("030303"),
         healthHigh = rgb("151515"), healthLow = rgb("5B5B5B"), meter = rgb("272727"),
@@ -45,8 +45,10 @@ V.Tokens = {
     -- Duration class controls size; priority changes the signal, never the size.
     aura = {size = 28, shortSize = 28, longSize = 36, gap = 8, wrapGap = 16, healthGap = 8},
     hud = {height = 186, bottom = 8, chatWidth = 480, mapWidth = 216, meterWidth = 248, splitGap = 16, labelHeight = 32,
-        meterTitle = 24, padding = 8, rowHeight = 24, rowGap = 4},
-    nameplate = {width = 192, health = 24, cast = 16, castGap = 8, aura = 28, auraGap = 8, amountSize = 14},
+        meterTitle = 0, padding = 8, rowHeight = 24, rowGap = 4},
+    quest = {right = 8, top = 128},
+    nameplate = {width = 224, health = 24, cast = 16, castGap = 8, aura = 28, auraGap = 8, amountSize = 14,
+        levelWidth = 32, indicatorSize = 16, indicatorGap = 2, selectionStroke = 1, selectionOutset = 3},
 }
 -- Semantic aliases keep one source for each shared color.
 V.Tokens.colors.emptySlot = V.Tokens.colors.meter

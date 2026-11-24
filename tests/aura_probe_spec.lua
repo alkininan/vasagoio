@@ -20,6 +20,12 @@ local function fixture()
     env.C_CurveUtil = {CreateColorCurve=function()
         return {SetType=function() end, AddPoint=function() end}
     end}
+    env.C_DurationUtil={CreateDurationTextBinding=function()
+        local t={}
+        function t:SetZeroDurationText(value) self.zero=value end
+        function t:SetExpiredText(value) self.expired=value end
+        s.bindingTemplate=t;return t
+    end}
     env.C_AddOns = {
         IsAddOnLoaded=function(name) s.queries=s.queries+1; return s.loaded[name] == true end,
         LoadAddOn=function(name)
@@ -116,6 +122,8 @@ for i,c in ipairs(s.containers) do
         check(clip.point[2]==b.gate and clip.point[3]=="TOPRIGHT","Long clipping must follow native glyph")
         check(b.binding.textFormat.formatString=="{}" and b.binding.textFormat.components[1].property==4,
             "Gate must use full native duration binding")
+        check(b.binding.binding==s.bindingTemplate and b.binding.binding.zero=="" and b.binding.binding.expired=="",
+            "Long test omitted declarative empty zero/expired defaults")
     else check(not b.gate,"Reference/short unexpectedly use experimental clipping") end
 end
 check(s.formatter.points[2].threshold>60 and s.formatter.points[2].threshold-60==2^-47,"Wrong exact-60 test boundary")

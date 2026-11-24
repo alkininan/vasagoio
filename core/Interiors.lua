@@ -15,6 +15,10 @@ local function available(object)
         local ok, forbidden = pcall(object.IsForbidden, object)
         if not ok or V:IsSecret(forbidden) or forbidden then return false end
     end
+    -- Pooled confirmations can become death/recovery dialogs. The exclusion
+    -- must also hold when a generic walk enters from an unrelated ancestor.
+    local windows=V.WindowSkin
+    if windows and windows.NativeRecoveryDialog and windows:NativeRecoveryDialog(object) then return false end
     return true
 end
 I.Available = available
@@ -429,6 +433,21 @@ local function replaceSkinner(frame, owner, visited)
                 if key == "sb" and buttonText(frame) and not icon(frame) then
                     I:Control(frame,"button",owner)
                 elseif not existing or not existing.surface then I:Panel(frame,"panel",owner) end
+                -- Skinner deliberately puts some shells below their owner's
+                -- content (notably WorldMapFrame.BorderFrame at LOW strata).
+                -- Inheriting the owner's higher strata would darken the map
+                -- and its controls with a new foreground panel.
+                local record=I.records[frame]
+                local surface=record and record.surface
+                if surface and decoration.GetFrameStrata and decoration.GetFrameLevel then
+                    local read,layer,level=pcall(function() return decoration:GetFrameStrata(),decoration:GetFrameLevel() end)
+                    local layers={BACKGROUND=true,LOW=true,MEDIUM=true,HIGH=true,DIALOG=true,FULLSCREEN=true,FULLSCREEN_DIALOG=true,TOOLTIP=true}
+                    if read and not V:IsSecret(layer) and type(layer)=="string" and layers[layer]
+                        and V:SafeNumber(level) and level>=0 then
+                        if surface.SetFrameStrata then surface:SetFrameStrata(layer) end
+                        if surface.SetFrameLevel then surface:SetFrameLevel(level) end
+                    end
+                end
                 replaced = true
             end
         end

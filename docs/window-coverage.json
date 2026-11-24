@@ -3,7 +3,7 @@
   "count": 172,
   "source_build": "1.60.1.70938",
   "source_commit": "bebcb6bf309cf41b41bd74f8ca651e6a105b2676",
-  "note": "All 172 source catalog records retained. Native interior registration is distinct from per-control implementation and runtime visual acceptance. Eight front-end/Glue records, embedded HelpBrowser, dedicated HUD owners and media overlays are explicit boundaries. Normal addons cannot reskin Glue or the embedded support webpage.",
+  "note": "All 172 source catalog records retained. Native interior registration is distinct from runtime acceptance. Recovery dialogs remain native; front-end/Glue, embedded HelpBrowser, dedicated HUD owners and media overlays are explicit boundaries.",
   "surfaces": [
     {
       "id": "character-equipment-statistics",
@@ -2248,15 +2248,15 @@
       "states_to_capture": "Damage events leading to death",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
+      "adapter_status": "Native recovery boundary: no vasagoio traversal, hooks, surfaces or control changes",
       "runtime_status": "Not tested in game",
       "availability": "Source catalog candidate; current character/realm availability unverified",
       "host": "DeathRecapFrame",
-      "boundary": null,
+      "boundary": "native-recovery",
       "scan_only": false,
       "aliases": [],
       "functional_owner": "Blizzard native owner",
-      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
+      "interior_scope": "Entire pooled popup family and recovery descendants remain native; reviewed Skinner skins disabled; reload clears earlier hooks"
     },
     {
       "id": "damage-meter",
@@ -2438,11 +2438,11 @@
       "states_to_capture": "Delete; logout; abandon; resurrect; invites; trade and purchase confirmations",
       "open_trigger": "Trigger the corresponding normal game confirmation, hover tooltip, item link, or context menu",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
+      "adapter_status": "Native recovery boundary: no vasagoio traversal, hooks, surfaces or control changes",
       "runtime_status": "Not tested in game",
       "availability": "Source catalog candidate; current character/realm availability unverified",
       "host": "StaticPopup1",
-      "boundary": null,
+      "boundary": "native-recovery",
       "scan_only": false,
       "aliases": [
         "StaticPopup2",
@@ -2450,7 +2450,7 @@
         "StaticPopup4"
       ],
       "functional_owner": "Blizzard native owner",
-      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
+      "interior_scope": "Entire pooled popup family and recovery descendants remain native; reviewed Skinner skins disabled; reload clears earlier hooks"
     },
     {
       "id": "tooltip",
@@ -3209,15 +3209,15 @@
       "states_to_capture": "Spirit state and return action",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
+      "adapter_status": "Native recovery boundary: no vasagoio traversal, hooks, surfaces or control changes",
       "runtime_status": "Not tested in game",
       "availability": "Source catalog candidate; current character/realm availability unverified",
       "host": "GhostFrame",
-      "boundary": null,
+      "boundary": "native-recovery",
       "scan_only": false,
       "aliases": [],
       "functional_owner": "Blizzard native owner",
-      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
+      "interior_scope": "Entire pooled popup family and recovery descendants remain native; reviewed Skinner skins disabled; reload clears earlier hooks"
     },
     {
       "id": "instance-abandon",
@@ -3297,10 +3297,11 @@
     }
   ],
   "counts": {
-    "native-interior": 132,
+    "native-interior": 129,
     "dedicated-hud": 29,
     "media-overlay": 2,
     "front-end": 8,
-    "embedded-web": 1
+    "embedded-web": 1,
+    "native-recovery": 3
   }
 }

@@ -14,6 +14,8 @@ GetRealmName = function() return "Test Realm" end
 GetNormalizedRealmName = function() return "TestRealm" end
 RegionalUniqueNamesEnabled = function() return false end
 UnitHealth, UnitPower = function() return secret end, function() return secret end
+UnitIsDeadOrGhost, UnitIsGhost = function() return false end, function() return false end
+UnitIsConnected, UnitIsPlayer = function() return true end, function() return true end
 UIParent = {}
 local V = { db = { enabled = true, modules = {}, overrides={} } }
 VasagoioDB=V.db
@@ -51,6 +53,10 @@ ThreatPlatesDB = { profileKeys = { ["Example - Test Realm"] = "Default" }, profi
     Default = { uniqueSettings = { SpecialUnit = { custom = true } }, text = { AbsorbsAmount = true } },
 } }
 assert(loadfile("Tokens.lua"))("vasagoio", V)
+local media={files={}}
+function media:Register(kind,key,path)self.files[kind..key]=path end
+function media:Fetch(kind,key)return self.files[kind..key] end
+LibStub=function(name)if name=="LibSharedMedia-3.0"then return media end end
 assert(loadfile("modules/UnitFrames.lua"))("vasagoio", V)
 assert(loadfile("modules/Nameplates.lua"))("vasagoio", V)
 
@@ -135,7 +141,7 @@ applyPlan(namePlan)
 assert(same(before.profiles.Default, ThreatPlatesDB.profiles.Default), "live AceDB profile was replaced")
 profile = ThreatPlatesDB.profiles[ThreatPlatesDB.profileKeys["Example - Test Realm"]]
 assert(profile.uniqueSettings.SpecialUnit.custom and not profile.text.AbsorbsAmount)
-assert(profile.settings.healthbar.width == 192 and profile.settings.healthbar.height == 24)
+assert(profile.settings.healthbar.width == 224 and profile.settings.healthbar.height == 24)
 assert(profile.settings.castbar.height == 16 and profile.settings.castbar.y == -28)
 assert(profile.text.amount and profile.text.full and not profile.text.truncate and not profile.text.percent)
 assert(profile.settings.dps.threatcolor.LOW.b == 137 / 255)

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.0-alpha.10 — 2026-11-25
+
+- Keep 42px main/trinket/bag cells and 8px gaps; unify icon crop/brightness and remove extra Skinner backdrop without hiding its child hotkeys, proc or autocast indicators. Style the backpack's FreeSlots text. Accept harmless trinket layout rounding without repeated geometry writes.
+- Widen nameplates to 224px, register explicit flat media, and use the shared reaction/threat palette. Keep exact HP and inside names; move level left with a 2px gap, rare/elite indicators right, and use Threat Plates' native 1px blue selection outline.
+- Remove Prat's duplicate backgrounds, hide registered/audited addon minimap launchers and the extra coordinate strip, and correct map-label layering. Make Details a headerless 248×186 body while retaining its context menus.
+- Place RestedXP 8px from the right edge below the reserved long-aura region, with native downward layout, design surfaces and combat/manual presentation hiding. Guide progress continues. Tools and a small tag reopen it. Hide the entire native objective tracker, including its quest-item/scenario controls, as requested.
+- Preserve the world-map decoration's low draw layer so its replacement does not cover map art and controls. No RareScanner/OpenMap user setting is changed.
+- Exclude all pooled StaticPopup recovery dialogs, GhostFrame and DeathRecap from skinning and disable their reviewed Skinner skins. Reload clears earlier hooks. No release, resurrection or recovery action is invoked automatically; native prompt visibility still requires user verification.
+- Preserve FUF dead/ghost/offline colors and restore raid text/header anchors on disable. Unit dimensions, native clicks and secure unit behavior remain owner-controlled.
+- Strengthen the optional aura experiment with explicit empty zero/expired text defaults. Exact long/permanent routing, pooling, compact packing and combat behavior remain unverified; the production split is not delivered in this alpha.
+
+Design revision12 and preset marker5 require **Apply preset → Reload UI**. Keep SavedVariables when replacing the addon folder. Offline checks cover geometry, lifecycle, failure recovery and bounded refreshes; native visuals, recovery prompts, combat and FPS remain user-run acceptance checks.
+
 ## 0.2.0-alpha.9 — 2026-11-25
 
 - Open one window with `/vasagoio`: Setup first, plus Details, Report, Performance and Tools. Keep Apply preset and Reload UI on Setup; make Reload available outside combat throughout the window.

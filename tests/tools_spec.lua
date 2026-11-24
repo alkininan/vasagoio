@@ -37,6 +37,12 @@ function V:StyleText(fs,role,c)fs.role,fs.color=role,c end
 function V:Surface(frame,alpha,radius,c)frame.surface={alpha=alpha,radius=radius,color=c}end
 function V:Report(id,state,detail)self.reports[id]={state=state,detail=detail}end
 function V:AuraProbeCommand(command)table.insert(self.calls.aura,command)end
+function V:IsQuestGuideHidden()return self.guideHidden==true end
+function V:ToggleQuestGuide()
+    assert(not combat and not self.readOnly)
+    self.calls.guide=(self.calls.guide or 0)+1;self.guideHidden=not self:IsQuestGuideHidden()
+    return true,self.guideHidden and "Guide hidden." or "Guide restored."
+end
 function V:SetEnabled(value)
     assert(not self.readOnly and not combat)
     self.calls.styling[#self.calls.styling+1]=value
@@ -63,6 +69,8 @@ end
 click("auraShow");click("auraReset");click("auraHide")
 assert(table.concat(V.calls.aura,",")=="show,reset,hide","Aura buttons did not call the direct API")
 assert(view.message.text=="Aura test hide requested.")
+click("guide");assert(V.calls.guide==1 and V.guideHidden and view.buttons.guide.label.text=="Show guide")
+click("guide");assert(V.calls.guide==2 and not V.guideHidden and view.buttons.guide.label.text=="Hide guide")
 -- Confirmation is a separate, visible step and Cancel never mutates settings.
 click("restore")
 assert(V.calls.restore==0 and view.confirmSnapshot==V.db.profileBackups[1]and view.buttons.restore.label.text=="Confirm restore")
@@ -80,6 +88,7 @@ view.scripts.OnShow();click("restore");view:CancelConfirmation();assert(not view
 view:Refresh();click("restore");combat=true;click("restore")
 assert(V.calls.restore==1 and not view.confirmSnapshot)
 assert(not view.buttons.auraShow:IsEnabled()and not view.buttons.auraReset:IsEnabled()and not view.buttons.restore:IsEnabled())
+click("guide");assert(V.calls.guide==2 and not view.buttons.guide:IsEnabled(),"Guide toggle ignored combat guard")
 local auraCount=#V.calls.aura;click("auraHide")
 assert(#V.calls.aura==auraCount+1 and V.calls.aura[#V.calls.aura]=="hide","Hide was blocked in combat")
 combat=false;V.readOnly=true;view:Refresh()

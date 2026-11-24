@@ -169,6 +169,16 @@ local category=frame(SettingsPanel.CategoryList,"Button")
 category.Texture,category.Label=texture("Options_List_Active"),font()
 category.UpdateStateInternal=SettingsCategoryListButtonMixin.UpdateStateInternal
 BarberShopFrame = frame(UIParent)
+local recoveryFrames={}
+local nativeRecoveryClick=function()error("A skin must never invoke a native recovery action")end
+for _,name in ipairs({"StaticPopup1","StaticPopup2","StaticPopup3","StaticPopup4","GhostFrame","DeathRecapFrame"}) do
+    local recovery=frame(UIParent)
+    recovery.ButtonContainer=frame(recovery)
+    recovery.Button1=frame(recovery.ButtonContainer,"Button")
+    recovery.Button1.OnClick=nativeRecoveryClick
+    recovery.which={secret=true} -- Pool exclusion must not inspect dialog state.
+    _G[name]=recovery;recoveryFrames[#recoveryFrames+1]=recovery
+end
 QuestInfoDescriptionText = font({0,0,0})
 SendStationeryBackgroundLeft = texture()
 
@@ -177,6 +187,20 @@ assert(loadfile(root .. "/modules/WindowCatalog.lua"))("vasagoio",V)
 assert(loadfile(root .. "/modules/NativeWindows.lua"))("vasagoio",V)
 assert(loadfile(root .. "/modules/NativeInteriors.lua"))("vasagoio",V)
 assert(V.modules.nativeWindows.Apply())
+local function verifyRecoveryFrames()
+    for _,recovery in ipairs(recoveryFrames) do
+        assert(not calls[recovery] and not V.surfaces[recovery] and recovery.hooks==0,
+            "Native death/recovery pool gained traversal, surface or OnShow hooks")
+        assert(not calls[recovery.Button1] and recovery.Button1.hooks==0 and not recovery.Button1.controlKind,
+            "Native recovery button was restyled or observed")
+        assert(recovery.Bg.alpha==1 and recovery.Button1.OnClick==nativeRecoveryClick,
+            "Native recovery art or action callback changed")
+        assert(V.WindowSkin:Shell(recovery.Button1)==false,"Direct shell bypassed recovery ancestor exclusion")
+        V.WindowSkin:Hook(recovery.Button1,"nativeWindows")
+        assert(recovery.Button1.hooks==0,"Direct hook bypassed recovery ancestor exclusion")
+    end
+end
+verifyRecoveryFrames()
 assert(CharacterFrame.TitleText.styledColor==V.Tokens.colors.text, "Native shell text did not use shared color token")
 CharacterFrame.skipCount=1
 local applied, _, state=V.modules.nativeWindows.Apply()
@@ -250,6 +274,10 @@ assert(calls[CharacterFrame] and calls[PaperDollFrame], "Visible native root did
 local countBefore=applyCounts[CharacterFrame]
 for _=1,20 do tick() end
 assert(applyCounts[CharacterFrame]==countBefore, "Stationary visible window was rescanned every ticker pass")
+for _,dialog in ipairs({"DEATH","RESURRECT","RESURRECT_NO_SICKNESS","RECOVER_CORPSE","XP_LOSS","AREA_SPIRIT_HEAL"}) do
+    StaticPopup1.which=dialog;StaticPopup1.shown=true
+    tick();V.modules.nativeWindows.Apply();verifyRecoveryFrames()
+end
 local closed=frame(UIParent); closed.shown=false; _G.TradeFrame=closed
 tick()
 assert(not calls[closed] and closed.hooks==1, "Closed root traversed before user showed it")
@@ -269,4 +297,5 @@ CharacterFrame.shown=false
 V.db.modules.nativeWindows=true
 V.modules.nativeWindows.Apply()
 assert(V.InteriorSkin.watchClaims[CharacterFrame],"Reenabled closed native root lost its show observer ownership")
+verifyRecoveryFrames()
 print("native_interiors_spec: catalog scope, unchanged layouts, pooled rows, selected tabs/rows, semantic art, browser boundaries, lazy roots and combat cleanup passed")

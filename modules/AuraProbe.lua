@@ -20,7 +20,7 @@ local function Label(parent, text, x, y, size)
     label:SetText(text)
 end
 
-local function InitializeButton(button, experiment, formatter, transparent)
+local function InitializeButton(button, experiment, formatter, transparent, bindingTemplate)
     button:SetSize(ICON, ICON)
     button:EnableMouse(false)
     local clip = CreateFrame("Frame", nil, button, "DisableUntrustedLayoutScriptsTemplate")
@@ -59,6 +59,7 @@ local function InitializeButton(button, experiment, formatter, transparent)
     button:SetApplicationCount(count, {})
     if gate then
         button:SetDurationText(gate, {
+            binding = bindingTemplate,
             textFormat = { formatString = "{}", components = {
                 { property = Enum.DurationTextBindingProperty.TotalDuration, formatter = formatter },
             } },
@@ -67,7 +68,7 @@ local function InitializeButton(button, experiment, formatter, transparent)
     end
 end
 
-local function AddView(column, harmful, mode, formatter, transparent)
+local function AddView(column, harmful, mode, formatter, transparent, bindingTemplate)
     local x, y = 16 + (column - 1) * COLUMN, harmful and -264 or -96
     Label(panel, harmful and "Player debuffs" or "Player buffs", x, y + 20)
     local container = CreateFrame("AuraContainer", nil, panel, "CustomAuraContainerTemplate")
@@ -88,7 +89,7 @@ local function AddView(column, harmful, mode, formatter, transparent)
         layout = { elementWidth = ICON, elementHeight = ICON, elementSpacing = GAP, lineSpacing = GAP },
         initializeFrame = function(button)
             if buildError then return end
-            local ok, err = pcall(InitializeButton, button, mode == "long", formatter, transparent)
+            local ok, err = pcall(InitializeButton, button, mode == "long", formatter, transparent, bindingTemplate)
             if not ok then
                 buildError = tostring(err)
                 Say("Initializer rejected; stop this test: " .. buildError)
@@ -103,6 +104,12 @@ local function Build()
     assert(C_CurveUtil and C_CurveUtil.CreateColorCurve, "native color curve unavailable")
     assert(Enum and Enum.DurationTextBindingProperty and Enum.DurationTextBindingProperty.TotalDuration,
         "native TotalDuration binding unavailable")
+    assert(C_DurationUtil and C_DurationUtil.CreateDurationTextBinding, "native duration binding template unavailable")
+    local bindingTemplate=C_DurationUtil.CreateDurationTextBinding()
+    -- Public configuration only: the native owner copies this template and
+    -- retains its own binding. Reused permanent icons still need a native test.
+    bindingTemplate:SetZeroDurationText("")
+    bindingTemplate:SetExpiredText("")
     local formatter = C_StringUtil.CreateNumericRuleFormatter()
     formatter:SetBreakpoints({ { threshold = 0, format = "WWWW" }, { threshold = AFTER_SIXTY, format = "" } })
     local transparent = C_CurveUtil.CreateColorCurve()
@@ -120,8 +127,8 @@ local function Build()
     for column, mode in ipairs({ "all", "short", "long" }) do
         Label(panel, ({ "All — reference", "Short: full duration <= 60s", "Long/permanent — EXPERIMENT" })[column],
             16 + (column - 1) * COLUMN, -56)
-        AddView(column, false, mode, formatter, transparent)
-        AddView(column, true, mode, formatter, transparent)
+        AddView(column, false, mode, formatter, transparent, bindingTemplate)
+        AddView(column, true, mode, formatter, transparent, bindingTemplate)
     end
     assert(not buildError, buildError)
 end

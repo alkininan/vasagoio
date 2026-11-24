@@ -12,6 +12,25 @@ local ART = {"Bg", "Background", "TitleBg", "TitleBackground", "TopTileStreaks",
     "TopBorder", "BottomBorder", "LeftBorder", "RightBorder"}
 local originals = setmetatable({}, {__mode = "k"})
 
+-- Native recovery actions share pooled StaticPopup slots with ordinary
+-- confirmations. Keep the whole pool native: a slot styled for another dialog
+-- may be reused for death/release/resurrection while secure UI owns its state.
+-- Skinner's reviewed StaticPopups code also explicitly avoids OnShow hooks.
+local nativeRecoveryRoots={"StaticPopup1","StaticPopup2","StaticPopup3","StaticPopup4","GhostFrame","DeathRecapFrame"}
+function W:NativeRecoveryDialog(object)
+    for _=1,32 do
+        if V:IsSecret(object) or (type(object)~="table" and type(object)~="userdata") then return false end
+        for _,name in ipairs(nativeRecoveryRoots) do
+            if _G[name] and object==_G[name] then return true end
+        end
+        if type(object.GetParent)~="function" then return false end
+        local ok,parent=pcall(object.GetParent,object)
+        if not ok or V:IsSecret(parent) or parent==object then return false end
+        object=parent
+    end
+    return false
+end
+
 function W:Enabled(id)
     if V.IsModuleEnabled then return V:IsModuleEnabled(id) end
     return V.db and V.db.enabled and V.db.modules[id] ~= false
@@ -65,6 +84,7 @@ end
 
 function W:Shell(frame, extraArt, extraTitles, owner)
     if not self:Available(frame) or not frame.CreateTexture then return false end
+    if self:NativeRecoveryDialog(frame) then return false end
     if InCombatLockdown and InCombatLockdown() then return false end
     if V.InteriorSkin then
         -- Shell and interior mutations must share the same original snapshot.
@@ -104,6 +124,7 @@ function W:Shell(frame, extraArt, extraTitles, owner)
 end
 
 function W:Hook(frame, id)
+    if self:NativeRecoveryDialog(frame) then return false end
     if V.InteriorSkin then return V.InteriorSkin:Watch(frame,{owner=id}) end
     if not self:Available(frame) or not frame.HookScript or self.hooked[frame] then return end
     self.hooked[frame] = true
@@ -177,7 +198,7 @@ V:RegisterModule("nativeWindows", {
             if hasSkinner() and not skinnerPaletteConfigured() then
                 return false, detail .. " Review setup to configure Skinner's native palette, then reload.", "pending"
             end
-            return true, detail .. " Embedded Help web content and front-end screens stay outside addon control. Native validation is pending."
+            return true, detail .. " Death/recovery dialogs remain native; their functional validation is manual. Embedded Help web content and front-end screens stay outside addon control. Native validation is pending."
         end
         if hasSkinner() then
             if not skinnerPaletteConfigured() then
@@ -241,6 +262,7 @@ V:RegisterProfileAdapter("skinner", {
         -- Third-party windows/HUD stay with their owners; no global Skinner takeover.
         scalar("DisableAllAS", true)
         scalar("ChatButtons", false); scalar("ChatFrames", false); scalar("ChatTabs", false)
+        scalar("StaticPopups", false); scalar("GhostFrame", false); scalar("DeathRecap", false)
         nested("Gradient", "enable", false)
         for _, key in ipairs({"CastingBar", "CompactFrames", "MainMenuBar", "Minimap", "MinimapButtons", "ChatEditBox", "ChatBubbles", "ObjectiveTracker"}) do nested(key, "skin", false) end
         for _, key in ipairs({"CharacterFrames", "PlayerSpells", "MailFrame", "HelpFrame", "Settings", "MerchantFrame", "GossipFrame"}) do scalar(key, true) end

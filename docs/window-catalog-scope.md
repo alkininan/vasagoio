@@ -4,7 +4,8 @@ The source catalog contains **172 surface/state records**, not 172 independent l
 
 | Classification | Records | Handling |
 | --- | --- | --- |
-| Native interior candidates | 132 | 115 primary hosts, with child panels and 15 source-confirmed repeated frame aliases; apply the scoped interior renderer when present |
+| Native recovery boundaries | 3 | Shared confirmation pool, GhostFrame and DeathRecap remain entirely native |
+| Native interior candidates | 129 | 112 primary hosts, with child panels and 12 source-confirmed repeated frame aliases; apply the scoped interior renderer when present |
 | Dedicated HUD/functional owners | 29 | Keep unit, action, aura, minimap, meter and overlay ownership separate from window-control traversal |
 | Glue/front-end | 8 | Outside normal in-game addon execution; no styling attempted |
 | Embedded support webpage | 1 | HelpBrowser content is outside the addon renderer; HelpFrame remains a separate native candidate |

@@ -5,7 +5,7 @@ local chatPanel, mapPanel, mapLabel, meterReloadPending
 local function mapLeft() return T.reference.width - H.bottom - H.mapWidth end
 local function meterLeft() return mapLeft() - H.splitGap - H.meterWidth end
 local function mapCrop() return (H.mapWidth-H.height)/2 end
-local function meterHeader() return H.padding+H.meterTitle end
+local function meterHeader() return H.meterTitle>0 and H.padding+H.meterTitle or 0 end
 local function meterBody() return H.height-meterHeader() end
 local function supported(addon, wanted)
     local api = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
@@ -16,6 +16,48 @@ end
 
 local function append(plan, target, path, key, value, label)
     plan.changes[#plan.changes + 1] = { table = target, path = path, key = key, value = value, label = label }
+end
+
+-- LibDBIcon owns its registry; only its public enumeration/getter are used.
+local function addonMapButtons()
+    local result,seen={},{}
+    local function add(frame,key)
+        if frame and not V:IsSecret(frame) and not seen[frame] then
+            seen[frame]=true;result[#result+1]={frame=frame,key=key}
+        end
+    end
+    if LibStub then
+        local ok,lib=pcall(LibStub,"LibDBIcon-1.0",true)
+        if ok and lib and type(lib.GetButtonList)=="function" and type(lib.GetMinimapButton)=="function" then
+            local names=lib:GetButtonList()
+            if not V:IsSecret(names) and type(names)=="table" then
+                for i=1,math.min(#names,512) do
+                    local name=names[i]
+                    if not V:IsSecret(name) and type(name)=="string" then
+                        local frame=lib:GetMinimapButton(name)
+                        if frame and not V:IsSecret(frame) and type(frame.GetName)=="function" then
+                            local key=frame:GetName()
+                            if not V:IsSecret(key) and type(key)=="string" and key:match("^LibDBIcon") then add(frame,key) end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    -- These owners construct native launcher buttons without registering them
+    -- with LibDBIcon. No arbitrary minimap descendants or map pins are scanned.
+    for _,spec in ipairs({
+        {"ForeverUnitFrames","0.81.1","Forever Unit Frames"},
+        {"ForeverUnitFrames","0.81.1","Forever Unit Frames Raid"},
+        {"MRT","5335","LibDBIcon10_MethodRaidTools"},
+        {"OpenMap","v0.8.13","OpenMapMinimapButton"},
+        {"TalentsForeverBook","0.38.33.20261124","TalentsForeverBookMinimap"},
+        {"ForeverTrinketMenu","1.8.20","LibDBIcon10_TrinketMenu"},
+    }) do
+        if supported(spec[1],spec[2]) then add(_G[spec[3]],spec[3]) end
+    end
+    table.sort(result,function(a,b)return a.key<b.key end)
+    return result
 end
 
 V:RegisterProfileAdapter("hudLayout", {
@@ -102,7 +144,8 @@ V:RegisterProfileAdapter("sexymap", {
         if not supported("SexyMap", "v12.1.7") then return nil, "SexyMap version needs compatibility review (reviewed v12.1.7)" end
         local profile, name = sexyProfile()
         if not profile or type(profile.core) ~= "table" or type(profile.borders) ~= "table" or
-            type(profile.borders.backdrop) ~= "table" or type(profile.zonetext) ~= "table" or type(profile.clock) ~= "table" then
+            type(profile.borders.backdrop) ~= "table" or type(profile.zonetext) ~= "table" or type(profile.clock) ~= "table" or
+            type(profile.buttons)~="table" or type(profile.buttons.visibilitySettings)~="table" or type(profile.coordinates)~="table" then
             return nil, "SexyMap's core, border, zone and clock schemas are not ready"
         end
         local plan = { changes = {}, detail = "216x186 map artwork: square 216 projection cropped 15 at top/bottom, with a 32px bottom label overlay. Native pins/clicks require user verification. Reload required." }
@@ -123,6 +166,13 @@ V:RegisterProfileAdapter("sexymap", {
         append(plan, profile.borders, path, "applyPreset", nil, "Do not reapply rune preset")
         append(plan, profile.borders, path, "hideBlizzard", true, "Remove original map rim")
         append(plan, profile.borders.backdrop, { "SexyMap2DB", name, "borders", "backdrop" }, "show", false, "No secondary map backdrop")
+        append(plan,profile.buttons,{"SexyMap2DB",name,"buttons"},"controlVisibility",true,"Let SexyMap own button visibility")
+        local visibilityPath={"SexyMap2DB",name,"buttons","visibilitySettings"}
+        for _,entry in ipairs(addonMapButtons()) do
+            append(plan,profile.buttons.visibilitySettings,visibilityPath,entry.key,"never","Hide addon minimap button: "..entry.key)
+        end
+        append(plan,profile.buttons.visibilitySettings,visibilityPath,"AddonCompartmentFrame","never","Hide addon compartment")
+        append(plan,profile.coordinates,{"SexyMap2DB",name,"coordinates"},"enabled",false,"Keep the map strip to zone and time")
         for _, module in ipairs({ "zonetext", "clock" }) do
             local config = profile[module]
             path = { "SexyMap2DB", name, module }
@@ -168,7 +218,7 @@ V:RegisterProfileAdapter("details", {
             type(instance.posicao) ~= "table" or type(instance.posicao.normal) ~= "table" or
             type(instance.libwindow) ~= "table" or type(instance.row_info) ~= "table" or
             type(instance.row_info.space) ~= "table" or type(instance.row_info.row_offsets) ~= "table" or
-            type(instance.attribute_text) ~= "table" or type(instance.row_info.texts) ~= "table" or
+            type(instance.attribute_text) ~= "table" or type(instance.row_info.texts) ~= "table" or type(instance.menu_icons)~="table" or
             type(instance.bg_alpha) ~= "number" then
             return nil, "Details window 1 must already be loaded with the supported instance schema"
         end
@@ -185,7 +235,7 @@ V:RegisterProfileAdapter("details", {
         if type(details.class_colors)~="table" or details.class_colors==_G.RAID_CLASS_COLORS or
             details.class_colors==_G.CUSTOM_CLASS_COLORS then return nil,"Details profile class palette is not ready" end
         local path = { "Details", "tabela_instancias", 1 }
-        local plan = { changes = {}, detail = "Window 1 total 248x186: 32px title region (8 padding + 24 line), 154px row body, 8px row inset, 24px rows/4px gaps. Neutral fills/class-colored names. The nine class colors update Details' shared profile palette; special threat/arena colors are unchanged. Reload required." }
+        local plan = { changes = {}, detail = "Window 1 total 248x186 with no title/toolbar, 8px row inset and 24px rows/4px gaps. Native right-click menus remain available. Neutral fills/class-colored names; shared profile class palette updates preserve special threat/arena colors. Reload required." }
         for class,color in pairs(T.class) do
             local current=details.class_colors[class]
             if type(current)~="table" or not V:SafeNumber(current[1]) or not V:SafeNumber(current[2]) or not V:SafeNumber(current[3]) then
@@ -201,13 +251,17 @@ V:RegisterProfileAdapter("details", {
         append(plan, instance, path, "fullborder_shown", false, "Meter outer stroke off")
         append(plan, instance, path, "rowareaborder_shown", false, "Meter row-area stroke off")
         append(plan, instance, path, "rounded_corner_enabled", false, "Keep meter fill geometry square")
-        append(plan, instance, path, "titlebar_shown", true, "Title included in the outer envelope")
+        append(plan, instance, path, "titlebar_shown", H.meterTitle>0, "No separate meter title region")
         append(plan, instance, path, "titlebar_height", V:Pixel(meterHeader()), "Title region including top padding")
         append(plan, instance, path, "titlebar_texture_color", {0,0,0,0}, "No duplicate title backing")
         append(plan, instance, path, "toolbar_side", 1, "Toolbar above row body")
         append(plan, instance, path, "show_statusbar", false, "No footer outside the envelope")
         append(plan, instance, path, "show_sidebars", false, "No decorative sidebars")
         append(plan, instance, path, "bars_grow_direction", 1, "Rows descend below title")
+        if H.meterTitle==0 then
+            append(plan,instance,path,"hide_icon",true,"Hide decorative meter title icon")
+            for i=1,6 do append(plan,instance.menu_icons,{"Details","tabela_instancias",1,"menu_icons"},i,false,"Hide toolbar button "..i) end
+        end
         if type(instance.wallpaper)=="table" then
             append(plan,instance.wallpaper,{"Details","tabela_instancias",1,"wallpaper"},"enabled",false,"No secondary wallpaper")
         end
@@ -246,7 +300,7 @@ V:RegisterProfileAdapter("details", {
             append(plan,instance.row_info.row_offsets,rowPath,key,value,"Row bounds: "..key)
         end
         local titlePath={"Details","tabela_instancias",1,"attribute_text"}
-        for key,value in pairs({enabled=true,text_face="Friz Quadrata TT",text_size=V:Pixel(16),text_color={unpack(T.colors.text)},shadow=true,side=1}) do
+        for key,value in pairs({enabled=H.meterTitle>0,text_face="Friz Quadrata TT",text_size=V:Pixel(16),text_color={unpack(T.colors.text)},shadow=true,side=1}) do
             append(plan,instance.attribute_text,titlePath,key,value,"Meter title: "..key)
         end
         if type(instance.row_info.texts) == "table" then
@@ -303,6 +357,10 @@ local function remember(object, owner, field)
     if field=="spacing" and object.GetSpacing then r.spacing=object:GetSpacing() end
     if field=="alpha" and object.GetAlpha then r.alpha=object:GetAlpha() end
     if field=="hit" and object.GetHitRectInsets then r.hit={object:GetHitRectInsets()} end
+    if field=="backdrop" then
+        if object.GetBackdropColor then r.backdrop={object:GetBackdropColor()} end
+        if object.GetBackdropBorderColor then r.border={object:GetBackdropBorderColor()} end
+    end
     if field=="bounds" then
         if object.GetWordWrap then r.wrap=object:GetWordWrap() end
         if object.GetMaxLines then r.lines=object:GetMaxLines() end
@@ -328,6 +386,13 @@ local function restore(owner)
             if r.spacing then object:SetSpacing(r.spacing) end
             if r.alpha then object:SetAlpha(r.alpha) end
             if r.hit then object:SetHitRectInsets(unpack(r.hit)) end
+            if r.backdrop then object:SetBackdropColor(unpack(r.backdrop)) end
+            if r.border then object:SetBackdropBorderColor(unpack(r.border)) end
+            if r.visibility then
+                local control=r.visibility.module
+                local config=control.db and control.db.visibilitySettings
+                control:ChangeFrameVisibility(object,type(config)=="table" and config[r.visibility.key] or "hover")
+            end
             if r.wrap~=nil then object:SetWordWrap(r.wrap) end
             if r.lines~=nil then object:SetMaxLines(r.lines) end
         end)
@@ -340,6 +405,12 @@ local function hide(object, owner)
     if not object or not object.SetAlpha then return end
     remember(object,owner,"alpha")
     if V.InteriorSkin then V.InteriorSkin:Hide(object,owner) else object:SetAlpha(0) end
+end
+local function clearBackdrop(frame,owner)
+    if not frame or not frame.GetBackdropColor or not frame.SetBackdropColor then return end
+    remember(frame,owner,"backdrop")
+    frame:SetBackdropColor(0,0,0,0)
+    if frame.SetBackdropBorderColor then frame:SetBackdropBorderColor(0,0,0,0) end
 end
 local function font(text, role, owner, scale, preserveColor)
     if not text or not text.SetFont then return end
@@ -377,20 +448,33 @@ local function chatControls()
     for i=1,10 do
         local prefix="ChatFrame"..i
         local chat,tab,edit=_G[prefix],_G[prefix.."Tab"],_G[prefix.."EditBox"]
-        if chat then for _,suffix in ipairs(chatArt) do hide(_G[prefix..suffix],"hud") end end
+        if chat then
+            for _,suffix in ipairs(chatArt) do hide(_G[prefix..suffix],"hud") end
+            -- Prat Frames replaces those native textures with unnamed copies.
+            -- Neither the message widget nor notification/scroll icons are art.
+            if supported("Prat-3.0","3.9.117") and type(chat.PratTextures)=="table" then
+                for j=1,math.min(#chat.PratTextures,32) do hide(chat.PratTextures[j],"hud") end
+            end
+            hide(chat.sf,"hud") -- Skinner's optional extra frame background.
+        end
         if tab and I then
             I:Control(tab,"tab","hud")
             for _,key in ipairs({"Left","Middle","Right","ActiveLeft","ActiveMiddle","ActiveRight"}) do
                 hide(tab[key] or _G[prefix.."Tab"..key],"hud")
             end
             I:SetSelected(tab,chat==_G.SELECTED_DOCK_FRAME)
+            hide(tab.sf,"hud")
         end
         if edit then
-            if I then I:Control(edit,"editbox","hud") end
+            if I then I:Control(edit,"editbox","hud") else clearBackdrop(edit,"hud") end
             for _,key in ipairs({"Left","Mid","Right","FocusLeft","FocusMid","FocusRight"}) do
                 hide(edit[key] or _G[prefix.."EditBox"..key],"hud")
             end
             font(edit,"chat","hud",nil,true)
+            hide(edit.sf,"hud")
+            -- Prat's decorative BackdropTemplate child is separate from its
+            -- native EditBox. Hide that child, not text/caret/input handling.
+            if supported("Prat-3.0","3.9.117") then hide(edit.pratFrame,"hud") end
         end
         local buttons=_G[prefix.."ButtonFrame"]
         if buttons and I then
@@ -401,12 +485,37 @@ local function chatControls()
             end
         end
     end
+    local prat=_G.Prat and Prat.Addon
+    if supported("Prat-3.0","3.9.117") and prat and type(prat.GetModule)=="function" then
+        for _,name in ipairs({"Frames","Editbox"}) do
+            local ok,module=pcall(prat.GetModule,prat,name,true)
+            if ok and module then
+                for _,method in ipairs({"RestorePratTextures","RecreateBackgroundTextures","FCF_SetWindowAlpha","SetBackdrop"}) do observe(module,method,"hud") end
+            end
+        end
+    end
     if _G.FCF_SelectDockFrame and not hooks.chatDock and hooksecurefunc then
         hooks.chatDock=true
         hooksecurefunc("FCF_SelectDockFrame",function()
             if active("hud") and not painting.hud then V:Refresh("chat tab selection","hud") end
         end)
     end
+end
+local function mapButtonPresentation(profile)
+    local control=SexyMap.buttons
+    if not control or control.db~=profile.buttons or type(control.ChangeFrameVisibility)~="function" then return end
+    local buttons=addonMapButtons()
+    if _G.AddonCompartmentFrame then buttons[#buttons+1]={frame=AddonCompartmentFrame,key="AddonCompartmentFrame"} end
+    for _,entry in ipairs(buttons) do
+        local r=remember(entry.frame,"hudMap","visibility")
+        if r then
+            r.visibility=r.visibility or {module=control,key=entry.key}
+            -- SexyMap's own hidden parent prevents hover/Show from reviving an
+            -- icon. Newly registered buttons are covered without DB writes.
+            control:ChangeFrameVisibility(entry.frame,"never")
+        end
+    end
+    observe(control,"NewFrame","hud")
 end
 local function mapPresentation()
     if not _G.SexyMap or not supported("SexyMap","v12.1.7") then return false end
@@ -419,7 +528,9 @@ local function mapPresentation()
     mapLabel=mapLabel or CreateFrame("Frame","VasagoioMapLabel",mapPanel)
     mapLabel:ClearAllPoints(); mapLabel:SetPoint("BOTTOMLEFT",mapPanel,"BOTTOMLEFT",0,0)
     mapLabel:SetSize(V:Pixel(H.mapWidth),V:Pixel(H.labelHeight))
-    if mapLabel.SetFrameLevel and minimap.GetFrameLevel then mapLabel:SetFrameLevel(minimap:GetFrameLevel()+1) end
+    -- Surface draws one frame level below its host: +2 keeps the glass above
+    -- native map artwork while zone/clock text stays in the owner's higher tier.
+    if mapLabel.SetFrameLevel and minimap.GetFrameLevel then mapLabel:SetFrameLevel(minimap:GetFrameLevel()+2) end
     V:Surface(mapLabel,T.alpha.hud,T.radius); mapLabel:Show()
     -- Native map remains under SexyMap's parent/scale ownership. Only its
     -- documented hit rectangle is cropped; native blips and the owner's
@@ -435,6 +546,7 @@ local function mapPresentation()
         remember(zone,"hudMap")
         zone:ClearAllPoints(); zone:SetPoint("BOTTOMLEFT",mapPanel,"BOTTOMLEFT",V:Pixel(8)/scale,0)
         zone:SetSize(V:Pixel(136)/scale,V:Pixel(H.labelHeight)/scale)
+        clearBackdrop(zone,"hudMap")
         if zone.GetRegions then
             for _,region in ipairs({zone:GetRegions()}) do
                 if region.GetObjectType and region:GetObjectType()=="FontString" then
@@ -450,10 +562,14 @@ local function mapPresentation()
         local scale=scaleOf(clock)
         remember(clock,"hudMap")
         clock:SetSize(V:Pixel(56)/scale,V:Pixel(H.labelHeight)/scale)
+        clearBackdrop(clock,"hudMap")
         -- SexyMap's public profile positions this button. Its parent lock and
         -- SetPoint hook remain untouched.
         font(_G.TimeManagerClockTicker,"compact","hudMap",scale,false)
     end
+    mapButtonPresentation(profile)
+    observe(SexyMap.zonetext,"UpdateLayout","hud")
+    observe(SexyMap.clock,"UpdateLayout","hud")
     observe(_G.SexyMap,"ExitHUD","hud")
     return true
 end
@@ -538,7 +654,7 @@ V:RegisterModule("hud", {
 
 V:RegisterModule("meter", {
     label="Details cosmetic surface",defaultEnabled=true,
-    description="One surface around the complete meter title and row body.",
+    description="One headerless meter surface; native right-click menus remain available.",
     Apply=function() return protectedApply("meter",function()
         if InCombatLockdown() then return false,"Leave combat before refreshing meter styling" end
         if meterReloadPending or V.profileReloadPending then return false,"Reload to activate the reviewed Details settings" end
@@ -548,7 +664,8 @@ V:RegisterModule("meter", {
         local instance=details and details.GetInstance and details:GetInstance(1)
         local base=instance and instance.baseframe
         if not base or not base.fullWindowFrame then return false,"Details window 1 is not ready" end
-        if instance.bg_alpha~=0 or instance.titlebar_height~=V:Pixel(meterHeader()) then
+        if instance.bg_alpha~=0 or instance.titlebar_height~=V:Pixel(meterHeader()) or
+            (H.meterTitle==0 and instance.titlebar_shown~=false) then
             local ok,reason=cleanupMeter(); if not ok then return false,reason end
             return true,"Details is available; review setup and reload to apply the complete envelope."
         end
@@ -557,13 +674,23 @@ V:RegisterModule("meter", {
         end
         meterInstance=instance
         running.meter=true; painting.meter=true
+        if H.meterTitle==0 then
+            -- Native fullWindowFrame still anchors to titleBar even when that
+            -- title is hidden. Its retained height must not extend our surface.
+            remember(base.fullWindowFrame,"meter")
+            base.fullWindowFrame:ClearAllPoints()
+            base.fullWindowFrame:SetPoint("TOPLEFT",base,"TOPLEFT",0,0)
+            base.fullWindowFrame:SetPoint("BOTTOMRIGHT",base,"BOTTOMRIGHT",0,0)
+        end
+        hide(base.sf,"meter") -- Skinner otherwise adds an extended second shell.
+        clearBackdrop(base,"meter"); clearBackdrop(base.fullWindowFrame,"meter")
         meterSurface=V:Surface(base.fullWindowFrame,T.alpha.hud,T.radius)
         for _,part in ipairs({base.cabecalho,base.rodape}) do
             for _,key in ipairs({"ball","ball_r","emenda","top_bg","esquerdo","direita"}) do hide(part[key],"meter") end
         end
         local title=instance.GetTitleBarFontString and instance:GetTitleBarFontString()
         title=title and (title.widget or title)
-        if title then
+        if title and H.meterTitle>0 then
             remember(title,"meter"); font(title,"name","meter",nil,false)
             title:ClearAllPoints(); title:SetPoint("TOPLEFT",base.fullWindowFrame,"TOPLEFT",V:Pixel(8),-V:Pixel(8))
             bounded(title,V:Pixel(128),"meter")
@@ -572,7 +699,7 @@ V:RegisterModule("meter", {
         -- Move the existing six buttons as a group without changing their
         -- handlers, visibility choices or plugin/data behavior.
         local header=base.cabecalho
-        if header then
+        if header and H.meterTitle>0 then
             local x=8
             for _,key in ipairs({"fechar","reset","report","atributo","segmento","modo_selecao"}) do
                 local button=header[key]
@@ -589,7 +716,7 @@ V:RegisterModule("meter", {
         end
         for _,method in ipairs({"RefreshTitleBar","ToolbarMenuButtons","AttributeMenu"}) do observe(instance,method,"meter") end
         painting.meter=false
-        return true,"Complete 248x186 meter envelope styled; native controls, rows and data retained."
+        return true,"Headerless 248x186 meter envelope styled; native right-click menus, rows and data retained."
     end) end,
     Disable=cleanupMeter,
 })

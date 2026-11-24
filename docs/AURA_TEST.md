@@ -1,17 +1,17 @@
 # Optional native aura test
 
-Alpha.7 includes this experiment inside vasagoio. **No separate addon is needed.** The test is closed by default, does not replace the working aura display, and is not the finished player-aura layout. Native rendering and combat behavior have not been established by offline tests.
+This experiment is included inside vasagoio. **No separate addon is needed.** The test is closed by default, does not replace the working aura display, and is not the finished player-aura layout. Native rendering and combat behavior have not been established by offline tests.
 
 If the earlier standalone `VasagoioAuraProbe` addon is installed, disable it and reload before opening this integrated test. The integrated version blocks opening while the standalone probe is loaded to avoid duplicate test panels and aura processing.
 
 ## Open and close
 
 1. Update vasagoio with WoW closed, keeping SavedVariables, then enter the game and reload yourself.
-2. Out of combat, enter `/vasagoio auratest show`. Bare `/vasagoio auratest` also opens it.
+2. Out of combat, open `/vasagoio` → Tools → Aura test → Show.
 3. Compare the three columns during normal play, first outside combat and then in combat when naturally available.
-4. Enter `/vasagoio auratest hide` when finished. This closes the panel and stops its native aura processing.
+4. Select Tools → Aura test → Hide when finished. This closes the panel and stops its native aura processing.
 
-The test can run without reapplying the preset, which helps isolate the experiment. Alpha.7's empty action grid and compact XP changes separately require `/vasagoio setup` → **Apply preset** → **Reload UI**. The normal setup screen still has those two main actions; aura testing is an optional command.
+The test can run without reapplying the preset. Setup retains Apply preset and Reload UI; the optional experiment lives in Tools. It does not replace the normal HUD.
 
 The upper row shows player buffs and the lower row shows player debuffs. Each has three native-rendered views:
 
@@ -46,11 +46,11 @@ Check both buffs and debuffs, including a new long debuff received during ordina
 
 - Each view is capped at 40 candidates. More than 40 matching effects are outside the test. Six containers can render up to 240 icons; hide the test when finished.
 - Long uses the reference view's native slot layout. Hidden short effects can leave gaps. This does not demonstrate compact packing or production sorting.
-- Permanent-effect behavior after native button reuse is unresolved. Native code stops duration binding for zero-duration effects; the experiment depends on the transparent binding leaving the clipping gate in its correct empty state.
+- Permanent-effect behavior after native button reuse is unresolved. Alpha.10 explicitly configures empty zero-duration and expired text through the public binding template. Native code still disables zero-duration binding; whether it clears a recycled glyph requires testing.
 - Exactly 60 seconds is an explicit boundary test. The formatter's inclusive breakpoint uses the next binary64 value above 60 (`60 + 2^-47`); whether the client preserves that precision is unverified.
 - Spell-specific exceptions, including the agreed Battle Shout exception, are not part of this generic duration experiment.
 - Hidden icons remain in native slots. The test does not establish click, cancellation or tooltip behavior for a finished aura display.
-- Source and offline checks do not establish protected-frame acceptance, rendering correctness or performance in combat. The test does not replace the requested RestedXP/aura work or establish an accepted fallback.
+- Source and offline checks do not establish protected-frame acceptance, rendering correctness or performance in combat. The test does not complete production aura work or establish an accepted fallback.
 
 The test adds no aura polling, aura-data reads or native-child hooks. Its experimental transparent `TotalDuration` text binding moves a fixed clipping rectangle; Lua does not read the bound text, duration, icon identity or resulting geometry. It does not collect or upload aura data, and its open state is not saved across reloads.
 

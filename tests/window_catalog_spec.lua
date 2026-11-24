@@ -27,4 +27,7 @@ assert(byID["damage-meter"].boundary == "dedicated-hud")
 assert(not byID["gamepad-bar-editor"].boundary, "The action bar editor is a configuration window")
 assert(#byID["separate-bags"].aliases == 6)
 assert(#byID["confirmation-dialogs"].aliases == 3)
+assert(boundaries["native-recovery"]==3 and byID["confirmation-dialogs"].boundary=="native-recovery"
+    and byID["ghost-return-to-graveyard"].boundary=="native-recovery" and byID["death-recap"].boundary=="native-recovery",
+    "Death and pooled recovery dialogs became generic skin targets")
 print("window_catalog_spec:172 records, parent hosts, repeated dialogs and non-window boundaries preserved")

@@ -4,6 +4,18 @@ local addonName, V = ...
 -- and colors; the owner's restriction-aware widgets supply health and threat.
 local OWNER, VERSION = "TidyPlates_ThreatPlates", "13.3.9"
 local T = V.Tokens
+local function flatMediaReady()
+    local media=LibStub and LibStub("LibSharedMedia-3.0",true)
+    if not media or type(media.Register)~="function" or type(media.Fetch)~="function" then return false end
+    local texture="Interface\\Buttons\\WHITE8X8"
+    local ok,value=pcall(function()
+        media:Register("statusbar","Vasagoio Flat",texture)
+        return media:Fetch("statusbar","Vasagoio Flat",true)
+    end)
+    return ok and not V:IsSecret(value) and value==texture
+end
+-- Threat Plates listens for shared-media registration and rebuilds its theme.
+flatMediaReady()
 local function copy(value)
     if type(value) ~= "table" then return value end
     local result = {}
@@ -54,15 +66,25 @@ local function configure(profile)
     local health = ensure(settings, "healthbar")
     health.width, health.widthFriend = px(T.nameplate.width), px(T.nameplate.width)
     health.height, health.heightFriend = px(T.nameplate.health), px(T.nameplate.health)
-    health.texture, health.backdrop = "Blizzard", "Blizzard"
     local media = LibStub and LibStub("LibSharedMedia-3.0", true)
-    if media and media:Fetch("statusbar", "Flat", true) then health.texture, health.backdrop = "Flat", "Flat" end
+    -- "Flat" is not shipped by every dependency. Register an explicit native
+    -- white texture so the design never silently falls back to a glossy bar.
+    health.texture, health.backdrop = "Vasagoio Flat", "Vasagoio Flat"
     for _, key in ipairs({"healthborder","elitehealthborder","threatborder","castborder"}) do ensure(settings,key).show=false end
     local background = ensure(profile,"Healthbar")
     background.FriendlyUnitMode, background.EnemyUnitMode = "REACTION", "REACTION"
     -- Threat Plates stores transparency under the misleading Opacity name.
     background.BackgroundUseForegroundColor, background.BackgroundOpacity = false, 0
     background.BackgroundColor, background.UseRaidMarkColoring = color(T.colors.panel), false
+    -- Reaction is the owner's fallback when an NPC has no threat table. Leaving
+    -- its stock HostileNPC color red made an idle, safe DPS target look like an
+    -- aggro warning even though the combat-threat colors were configured.
+    local reaction=ensure(profile,"ColorByReaction")
+    for key,value in pairs({FriendlyPlayer=T.colors.informationFill,FriendlyNPC=T.colors.informationFill,
+        FriendlyPlayerPvPOn=T.colors.informationFill,HostileNPC=T.colors.informationFill,
+        HostilePlayer=T.colors.dangerFill,NeutralUnit=T.colors.attentionFill,
+        HostilePlayerPvPOnSelfPvPOff=T.colors.attentionFill,UnfriendlyFaction=T.colors.attentionFill,
+        TappedUnit=T.colors.healthLow,DisconnectedUnit=T.colors.healthLow}) do reaction[key]=color(value) end
     local cast = ensure(settings,"castbar")
     cast.width, cast.height, cast.x, cast.y, cast.show = px(T.nameplate.width), px(T.nameplate.cast), 0,
         -px(T.nameplate.health/2 + T.nameplate.castGap + T.nameplate.cast/2), true
@@ -89,9 +111,15 @@ local function configure(profile)
     -- Move native status icons out of the two text lanes; never remove markers.
     local level=ensure(settings,"level")
     level.typeface,level.size,level.flags,level.shadow="Friz Quadrata TT",px(T.typography.compact.size),"",true
-    level.x,level.y,level.width,level.height=px(120),0,px(32),px(16)
-    for key,xy in pairs({raidicon={-112,0},eliteicon={112,16},skullicon={112,0},spellicon={-112,-28}}) do
-        local icon=ensure(settings,key);icon.x,icon.y,icon.scale=px(xy[1]),px(xy[2]),px(16)
+    -- Leave two pixels from the selected outline, rather than overlapping it.
+    local side=T.nameplate.width/2+T.nameplate.selectionOutset+T.nameplate.indicatorGap
+    level.x,level.y,level.width,level.height=-px(side+T.nameplate.levelWidth/2),0,px(T.nameplate.levelWidth),px(16)
+    level.align,level.vertical,level.show="RIGHT","MIDDLE",true
+    for key,xy in pairs({raidicon={-side-T.nameplate.levelWidth-8-T.nameplate.indicatorSize/2,0},
+        eliteicon={side+T.nameplate.indicatorSize/2,0},skullicon={-side-T.nameplate.indicatorSize/2,0},
+        spellicon={-T.nameplate.width/2-8-T.nameplate.indicatorSize/2,-28}}) do
+        local icon=ensure(settings,key);icon.x,icon.y,icon.scale=px(xy[1]),px(xy[2]),px(T.nameplate.indicatorSize)
+        icon.show=true
     end
     local classes=ensure(ensure(profile,"Colors"),"Classes")
     for class,hex in pairs(T.class) do
@@ -128,10 +156,14 @@ local function configure(profile)
     title.UseRaidMarkColoring=false
     font(ensure(title,"Font"),T.typography.name.size,T.nameplate.width-104)
     title.Font.Height,title.Font.HorizontalAlignment,title.Font.VerticalAlignment=px(T.nameplate.health),"LEFT","MIDDLE"
-    -- Selection is carried by the owner's marker, not by recoloring the name/fill.
+    -- Threat Plates' squarethin theme supplies its native 1px outline. Keep
+    -- selection separate from the native role-aware health/threat fill.
     for _,key in ipairs({"targetWidget","FocusWidget"}) do
         local widget=ensure(profile,key);widget.ModeNames,widget.ModeHPBar=false,false
     end
+    local selection=ensure(profile,"targetWidget")
+    selection.ON,selection.theme=true,"squarethin"
+    selection.r,selection.g,selection.b,selection.a=T.colors.information[1],T.colors.information[2],T.colors.information[3],.85
     local aura=ensure(profile,"AuraWidget")
     aura.ShowCooldownSpiral,aura.ShowDuration,aura.ShowStackCount=true,true,true
     aura.ShowOmniCC,aura.FlashWhenExpiring,aura.SwitchAreaByReaction=false,false,false
@@ -175,6 +207,7 @@ V:RegisterProfileAdapter("nameplates", {
     AfterApply = function() reloadPending = true end,
     Prepare = function()
         if not versionOK() then return nil, "Requires audited Threat Plates 13.3.9; newer schemas need review." end
+        if not flatMediaReady() then return nil,"Nameplate flat texture is unavailable in shared media; reload before setup." end
         local target, oldName, char = currentProfile()
         if not target then return nil, "Threat Plates profile is not initialized; enable it and reload before setup." end
         local profile = copy(target)
@@ -202,7 +235,7 @@ V:RegisterProfileAdapter("nameplates", {
                 end
             end
         end
-        return { changes = changes, detail = "192×24 health, 16px cast with 8px gap, exact HP, 28px auras, and native role-aware blue/amber/red. Reload required; custom nameplate overrides remain owner-controlled." }
+        return { changes = changes, detail = "224×24 flat health, 1px blue target outline, level left / rare-elite icon right, exact HP, 16px cast with 8px gap and native role-aware blue/amber/red. Reload required; custom nameplate overrides remain owner-controlled." }
     end,
 })
 local active, selectedName, selectedKey, selectedProfile, cleanupPending
@@ -438,6 +471,7 @@ V:RegisterModule("nameplates", {
     Apply=function()
         deactivate()
         if not versionOK() then return false,"Audited Threat Plates 13.3.9 is required." end
+        if not flatMediaReady() then return false,"Nameplate flat texture is unavailable; reload before setup.","pending" end
         if reloadPending then return false,"Reload to activate the newly selected nameplate profile.","pending" end
         local profile,name,key=currentProfile()
         if not profile then return false,"Initialize Threat Plates, then run setup." end

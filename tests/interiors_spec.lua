@@ -11,7 +11,9 @@ local function widget(objectType, original, parent)
     function w:GetRegions() return unpack(self.regions) end
     function w:GetWidth() return self.width end
     function w:GetHeight() return self.height end
-    function w:GetFrameLevel() return 4 end
+    function w:GetFrameLevel() return self.level or 4 end
+    function w:GetFrameStrata() return self.strata or "HIGH" end
+    function w:SetFrameStrata(value) assert(not self.original,"Original frame strata changed");self.strata=value end
     function w:GetEffectiveScale() return 1 end
     function w:SetSize(x,y) assert(not self.original,"Original control resized"); self.width,self.height=x,y end
     function w:SetWidth(x) assert(not self.original,"Original control resized"); self.width=x end
@@ -76,12 +78,16 @@ local V={db={enabled=true,modules={},fonts={}},modules={nativeWindows={},addonWi
 function V:IsSecret(value) return type(value)=="table" and value.secret==true end
 function V:SafeNumber(value) if not self:IsSecret(value) and type(value)=="number" then return value end end
 function V:IsModuleEnabled(id) return self.db.enabled and self.db.modules[id]~=false end
+function V:RegisterModule(id,spec) self.modules[id]=spec end
+function V:RegisterProfileAdapter() end
+function V:On() end
 function V:Pixel(value) return value end
 function V:Report() end
 function V:Refresh() refreshes=refreshes+1 end
 assert(loadfile(root.."/Tokens.lua"))("vasagoio",V)
 assert(loadfile(root.."/core/Media.lua"))("vasagoio",V)
 assert(loadfile(root.."/core/Interiors.lua"))("vasagoio",V)
+assert(loadfile(root.."/modules/NativeWindows.lua"))("vasagoio",V)
 local I=V.InteriorSkin
 local window=widget("Frame",true)
 local title=widget("FontString",true,window); title.textColor={0,0,0,1}
@@ -155,11 +161,17 @@ wrapped.sb=widget("Button",true,window) -- reverse-parent wrapper must survive
 local populated=widget("Frame",true,window)
 populated.sf=widget("Frame",true,populated)
 widget("Button",true,populated.sf)
+local mapBorder=widget("Frame",true,window)
+mapBorder.sf=widget("Frame",true,mapBorder)
+mapBorder.sf.strata,mapBorder.sf.level="LOW",2
 I:Apply(window,{owner="nativeWindows",skinner=true})
 assert(skinned.sb.alpha==0 and I.records[skinned].surface,"Skinner standard button decoration remains")
 assert(not I.watched[skinned.sb],"Hidden Skinner decoration entered traversal")
 assert(wrapped.sb.alpha==1 and populated.sf.alpha==1,"Content-bearing Skinner wrapper hidden")
 assert(currency.normal.alpha==1,"Currency artwork lost after Skinner replacement pass")
+assert(I.records[mapBorder].surface.strata=="LOW" and I.records[mapBorder].surface.level==2,
+    "Replacement map chrome moved above the map canvas")
+assert(mapBorder.sf.alpha==0 and mapBorder:GetFrameStrata()=="HIGH","Map owner layer changed instead of its decoration")
 
 -- A rem-based addon wrapper must not receive a filename as a rem value.
 local custom=widget("FontString",true)
@@ -181,6 +193,28 @@ forbidden.IsForbidden=function() return true end
 forbidden.GetChildren=function() error("Forbidden tree traversed") end
 assert(I:Apply(forbidden,{owner="nativeWindows"}).skipped==1)
 assert(I:SetSelected(button,{secret=true})==false,"Secret selection was branched on")
+-- A generic ancestor walk must not bypass the native recovery boundary.
+-- Exercise the real WindowSkin helper and real InteriorSkin traversal together.
+local ancestor=widget("Frame",true)
+for _,name in ipairs({"StaticPopup1","StaticPopup2","StaticPopup3","StaticPopup4","GhostFrame","DeathRecapFrame"}) do
+    local popup=widget("Frame",true,ancestor);_G[name]=popup
+    local recoveryButton=widget("Button",true,popup)
+    recoveryButton.Text=widget("FontString",true,recoveryButton)
+    recoveryButton.normal=widget("Texture",true,recoveryButton)
+    recoveryButton.normal.texture="Interface\\Buttons\\UI-Panel-Button-Up"
+    local action=function()error("Native recovery action invoked by cosmetic code")end
+    recoveryButton.nativeAction=action
+    I:Apply(ancestor,{owner="nativeWindows"})
+    assert(not I.watched[popup] and not I.watched[recoveryButton] and not I.records[recoveryButton],
+        "Ancestor traversal hooked or styled native recovery controls")
+    assert(not I:Watch(recoveryButton,{owner="nativeWindows"}) and not I:Control(recoveryButton,"button","nativeWindows"),
+        "Direct primitive bypassed recovery descendant boundary")
+    assert(not I:Hide(recoveryButton.normal,"nativeWindows") and not I:Text(recoveryButton.Text,"body",false,"nativeWindows"),
+        "Recovery texture or text was styled through a direct primitive")
+    assert(next(popup.hooks)==nil and next(recoveryButton.hooks)==nil and recoveryButton.normal.alpha==1
+        and recoveryButton.Text.font[1]=="Original.ttf" and recoveryButton.nativeAction==action,
+        "Native recovery hook, art, text or callback changed")
+end
 V.profileReloadPending=true
 assert(I:Apply(window,{owner="nativeWindows"}).deferred==1)
 V.profileReloadPending=nil

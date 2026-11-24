@@ -57,6 +57,18 @@ assert(first.styled and second.styled and refreshes==0,"Layout recursively inval
 local before=writes
 for _=1,100 do assert(V.modules.utilityBars.Apply())end
 assert(writes==before,"Unchanged utilities repeatedly wrote geometry")
+-- Lua saved-number formatting and native float geometry need not round identically.
+-- A correctly applied preset must not fall back to the owner's 4px inset/gap.
+local savedScale,savedX=TrinketMenuDB.scale,TrinketMenuDB.windowPosition.x
+TrinketMenuDB.scale=savedScale+4e-8
+TrinketMenuDB.windowPosition.x=savedX+2e-5
+bar.scale=bar.scale+3e-8
+bar.width=bar.width+2e-6;bar.height=bar.height-3e-6
+first.points[1][4]=2e-6;second.points[1][5]=second.points[1][5]+3e-6
+for _=1,100 do assert(V.modules.utilityBars.Apply(),"Native rounding rejected an aligned utility preset") end
+assert(writes==before,"Native rounding caused repeated geometry writes")
+TrinketMenuDB.scale=savedScale;TrinketMenuDB.windowPosition.x=savedX
+bar.scale=savedScale
 -- 1.8.20 retains the same appearance/layout contract. Updating this owner must
 -- accept a fresh review without changing unrelated mount/rotation settings.
 version="1.8.20"
@@ -73,6 +85,11 @@ combat=true;assert(not V.modules.utilityBars.Apply() and writes==before)
 combat=false;V.modules.utilityBars.Disable()
 assert(bar.width==44 and bar.height==84 and first.points[1][4]==4 and second.points[1][5]==-44)
 assert(not first.styled and not second.styled)
+assert(V.modules.utilityBars.Apply())
+local acceptedScale=TrinketMenuDB.scale
+TrinketMenuDB.scale=acceptedScale+.01
+assert(not V.modules.utilityBars.Apply() and bar.width==44,"A real user scale override was accepted as rounding")
+TrinketMenuDB.scale=acceptedScale
 assert(V.modules.utilityBars.Apply())
 bar:SetPoint("BOTTOM",UIParent,"BOTTOM",0,20)
 V.modules.utilityBars.Disable()

@@ -245,6 +245,7 @@ V:RegisterProfileAdapter("unitframes", adapter)
 local hooked = setmetatable({}, { __mode = "k" })
 local partyPetDecor = setmetatable({}, { __mode = "k" })
 local unitSurfaces = setmetatable({}, { __mode = "k" })
+local raidGeometry = setmetatable({}, { __mode = "k" })
 local tintCurve, publicHooks, activeProfile, activeName
 local release
 local powerColors = { [0] = rgb(design.resources.Mana), [1] = rgb(design.resources.Rage),
@@ -272,6 +273,103 @@ local function samePoints(a,b)
     if not a or not b or #a~=#b then return false end
     for i,point in ipairs(a) do for j=1,5 do if point[j]~=b[i][j] then return false end end end
     return true
+end
+local function capturePoints(widget)
+    if not widget.GetNumPoints or not widget.GetPoint then return end
+    local ok,count=pcall(widget.GetNumPoints,widget)
+    count=ok and V:SafeNumber(count)
+    if not count or count<0 or count>4 then return end
+    local points={}
+    for i=1,count do
+        local got,a,r,b,x,y=pcall(widget.GetPoint,widget,i)
+        if not got or V:IsSecret(a) or V:IsSecret(r) or V:IsSecret(b) or type(a)~="string" or type(b)~="string"
+            or not V:SafeNumber(x) or not V:SafeNumber(y) then return end
+        points[i]={a,r,b,x,y}
+    end
+    return points
+end
+local function raidSnapshot(widget,text)
+    local points=capturePoints(widget)
+    if not points then return end
+    local snapshot={points=points}
+    if text then
+        if not widget.GetWidth or not widget.GetJustifyH then return end
+        local ok,width=pcall(widget.GetWidth,widget)
+        local got,justify=pcall(widget.GetJustifyH,widget)
+        if not ok or not V:SafeNumber(width) or not got or V:IsSecret(justify) or type(justify)~="string" then return end
+        snapshot.width,snapshot.justify=width,justify
+    end
+    return snapshot
+end
+local function restoreRaid(widget,state)
+    if not state.applied then return end
+    -- Group headers are secure; defer all restoration, including their
+    -- child text layout, until the same out-of-combat boundary as Apply.
+    if InCombatLockdown and InCombatLockdown() then state.pending=true;return end
+    local now=raidSnapshot(widget,state.text)
+    if not now then state.pending=true;return end
+    state.busy=true
+    local ok=pcall(function()
+        if state.rollback or samePoints(now.points,state.applied.points) then
+            widget:ClearAllPoints()
+            for _,point in ipairs(state.original.points) do widget:SetPoint(unpack(point)) end
+        end
+        if state.text then
+            if state.rollback or (state.applied.width and now.width==state.applied.width) then widget:SetWidth(state.original.width) end
+            if state.rollback or (state.applied.justify and now.justify==state.applied.justify) then widget:SetJustifyH(state.original.justify) end
+        end
+    end)
+    state.busy=false
+    if not ok then state.pending,state.rollback=true,true;return end
+    state.applied,state.original,state.pending,state.rollback=nil,nil,nil,nil
+end
+local function layoutRaid(widget,text,layout)
+    local now=raidSnapshot(widget,text)
+    if not now or not hooksecurefunc then return end
+    local state=raidGeometry[widget]
+    if state and state.pending then
+        restoreRaid(widget,state)
+        if state.pending then return end
+        now=raidSnapshot(widget,text)
+        if not now then return end
+    end
+    if not state then
+        state={text=text}
+        raidGeometry[widget]=state
+        -- Observe owner writes without recursively laying out a secure
+        -- header midway through FUF's ClearAllPoints/SetPoint sequence.
+        local function changed(field)
+            if state.busy or not state.original then return end
+            local current=raidSnapshot(widget,state.text)
+            if current then state.original[field]=current[field] end
+            if state.applied then state.applied[field]=nil end
+        end
+        for _,method in ipairs({"ClearAllPoints","SetPoint"}) do
+            hooksecurefunc(widget,method,function()changed("points")end)
+        end
+        if text then
+            hooksecurefunc(widget,"SetWidth",function()changed("width")end)
+            if widget.SetSize then hooksecurefunc(widget,"SetSize",function()changed("width")end) end
+            hooksecurefunc(widget,"SetJustifyH",function()changed("justify")end)
+        end
+    end
+    if not state.applied then state.original=now end
+    -- Keep a restoration record before the first setter: a partial native
+    -- failure may leave an empty anchor list after ClearAllPoints succeeds.
+    state.applied=state.applied or now
+    state.busy=true
+    local ok=pcall(layout)
+    local applied=raidSnapshot(widget,text)
+    state.busy=false
+    if applied then state.applied=applied end
+    if not ok or not applied then
+        -- Owner writes remain observed while recovery waits; replaying the
+        -- latest baseline therefore never discards a later native layout.
+        state.pending,state.rollback=true,true
+        restoreRaid(widget,state)
+        return
+    end
+    state.pending,state.rollback=nil,nil
 end
 local function restorePet(frame,decor)
     decor.portrait:Hide();decor.resource:Hide()
@@ -395,12 +493,30 @@ end
 local function updatePartyPets(portraitChanged)
     for frame in pairs(partyPetDecor) do petData(frame, portraitChanged) end
 end
+local function statusBoolean(fn,unit)
+    if type(fn)~="function" then return end
+    local ok,value=pcall(fn,unit)
+    if ok and not V:IsSecret(value) and type(value)=="boolean" then return value end
+end
+local function nativeStatus(frame,unit)
+    -- Health renders before Texts/UnitStatus update their cached fields.
+    -- Read the same public booleans as FUF's UnitStatus.Of instead of using
+    -- textWord (which still describes the previous state at that point).
+    if V:IsSecret(frame.statusSample) then return nil end
+    if frame.statusSample~=nil then return frame.statusSample~=false end
+    local dead,ghost=statusBoolean(UnitIsDeadOrGhost,unit),statusBoolean(UnitIsGhost,unit)
+    local connected,player=statusBoolean(UnitIsConnected,unit),statusBoolean(UnitIsPlayer,unit)
+    if dead==true or ghost==true or (connected==false and player==true) then return true end
+    if dead==nil or ghost==nil or connected==nil or player==nil then return nil end
+    return false
+end
 local function tint(frame)
     if hooked[frame].painting then return end
     if not running() then if activeProfile then release() end;return end
     if not tintCurve then return end
     local unit = ordinaryUnit(frame)
     if not unit then return end
+    if nativeStatus(frame,unit)~=false then return end
     -- The native color curve evaluates restricted HP. Lua neither reads nor
     -- compares its components: the result goes directly to the StatusBar.
     local ok, color = pcall(UnitHealthPercent, unit, true, tintCurve)
@@ -427,6 +543,8 @@ local function tintPower(frame)
     if not running() then if activeProfile then release() end;return end
     local color=state.powerColor
     local unit = ordinaryUnit(frame)
+    -- Keep native death/ghost/offline greys on both bars, including raids.
+    if not unit or nativeStatus(frame,unit)~=false then return end
     if (frame.key=="raid" or frame.key=="raidpet") and unit and UnitPowerType
         and not V:IsSecret(frame.textWord) and not frame.textWord then
         local kind = V:SafeNumber(UnitPowerType(unit))
@@ -448,10 +566,14 @@ local function style(frame)
         -- those same FontStrings; status rendering and click areas stay owned.
         local name, amount = frame.texts.healthLeft, frame.texts.healthRight
         if name and amount then
-            name:ClearAllPoints(); name:SetPoint("LEFT", frame.health, "LEFT", V:Pixel(8), 0)
-            name:SetWidth(V:Pixel(68)); name:SetJustifyH("LEFT")
-            amount:ClearAllPoints(); amount:SetPoint("RIGHT", frame.health, "RIGHT", -V:Pixel(8), 0)
-            amount:SetWidth(V:Pixel(40)); amount:SetJustifyH("RIGHT")
+            layoutRaid(name,true,function()
+                name:ClearAllPoints(); name:SetPoint("LEFT", frame.health, "LEFT", V:Pixel(8), 0)
+                name:SetWidth(V:Pixel(68)); name:SetJustifyH("LEFT")
+            end)
+            layoutRaid(amount,true,function()
+                amount:ClearAllPoints(); amount:SetPoint("RIGHT", frame.health, "RIGHT", -V:Pixel(8), 0)
+                amount:SetWidth(V:Pixel(40)); amount:SetJustifyH("RIGHT")
+            end)
         end
     end
     if not hooksecurefunc then return end
@@ -494,6 +616,7 @@ release=function()
         state.painting,state.paintingPower=false,false
     end
     for frame,decor in pairs(partyPetDecor) do restorePet(frame,decor) end
+    for widget,state in pairs(raidGeometry) do restoreRaid(widget,state) end
     for _,surface in pairs(unitSurfaces) do surface:Hide() end
 end
 local function walk(frame, depth)
@@ -549,9 +672,11 @@ V:RegisterModule("unitframes", {
             if block then
                 -- Existing secure group headers, out of combat. FUF still
                 -- creates, filters, sorts and shows its own member buttons.
-                block:ClearAllPoints()
-                block:SetPoint("TOPLEFT", UIParent, "CENTER", V:Pixel(8 + ((i - 1) % 2) * (design.XS.width + 12) - 1280),
-                    V:Pixel(720 - 8 - math.floor((i - 1) / 2) * (5 * design.XS.height + 4 * 6 + 16)))
+                layoutRaid(block,false,function()
+                    block:ClearAllPoints()
+                    block:SetPoint("TOPLEFT", UIParent, "CENTER", V:Pixel(8 + ((i - 1) % 2) * (design.XS.width + 12) - 1280),
+                        V:Pixel(720 - 8 - math.floor((i - 1) / 2) * (5 * design.XS.height + 4 * 6 + 16)))
+                end)
                 walk(block, 0)
             end
         end
@@ -562,6 +687,7 @@ V:RegisterModule("unitframes", {
 })
 V:On("PLAYER_REGEN_ENABLED",function()
     for frame,decor in pairs(partyPetDecor) do if decor.restorePending then restorePet(frame,decor) end end
+    for widget,state in pairs(raidGeometry) do if state.pending then restoreRaid(widget,state) end end
 end)
 V:On("GROUP_ROSTER_UPDATE", function() V:Refresh("unit roster changed", "unitframes") end)
 for _, event in ipairs({ "UNIT_POWER_FREQUENT", "UNIT_MAXPOWER", "UNIT_DISPLAYPOWER" }) do

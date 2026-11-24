@@ -234,7 +234,7 @@ local function records()
     local result, byFrame, boundaries = {}, {}, {}
     local function add(name, shell)
         local frame = get(name)
-        if not frame or not frame.CreateTexture then return end
+        if not frame or not frame.CreateTexture or W:NativeRecoveryDialog(frame) then return end
         if byFrame[frame] then
             if shell == false then byFrame[frame].shell = false end
             return

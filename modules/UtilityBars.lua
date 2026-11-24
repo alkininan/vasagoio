@@ -6,6 +6,11 @@ local VERSIONS = {["1.8.19"]=true,["1.8.20"]=true}
 local records, hooked = setmetatable({}, {__mode="k"}), setmetatable({}, {__mode="k"})
 local applying, pending
 
+local function near(a, b, tolerance)
+    a, b = V:SafeNumber(a), V:SafeNumber(b)
+    return a and b and math.abs(a-b) <= (tolerance or .001)
+end
+
 local function reviewed()
     local get = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
     local version = get and get("ForeverTrinketMenu", "Version")
@@ -40,9 +45,12 @@ local function active()
     if not scale or type(db) ~= "table" or type(db.windowPosition) ~= "table" then return false end
     if db.horizontal ~= false or db.locked ~= true or db.showSlot13 ~= true or db.showSlot14 ~= true
         or db.skin ~= "flat" or db.hideFrameBorder ~= true or db.gearBar ~= false
-        or db.layoutVersion ~= 3 or V:SafeNumber(db.scale) ~= scale then return false end
+        or db.layoutVersion ~= 3 or not near(db.scale, scale, .00001) then return false end
     for key, value in pairs(anchor) do
-        if V:IsSecret(db.windowPosition[key]) or db.windowPosition[key] ~= value then return false end
+        if V:IsSecret(db.windowPosition[key]) then return false end
+        if type(value) == "number" then
+            if not near(db.windowPosition[key], value) then return false end
+        elseif db.windowPosition[key] ~= value then return false end
     end
     return true
 end
@@ -59,9 +67,10 @@ local function capture(frame)
     return value
 end
 local function equal(a,b)
-    if not a or not b or a.width~=b.width or a.height~=b.height or #a.points~=#b.points then return false end
+    if not a or not b or not near(a.width,b.width) or not near(a.height,b.height) or #a.points~=#b.points then return false end
     for i, point in ipairs(a.points) do
-        for j=1,5 do if point[j]~=b.points[i][j] then return false end end
+        for j=1,3 do if point[j]~=b.points[i][j] then return false end end
+        if not near(point[4],b.points[i][4]) or not near(point[5],b.points[i][5]) then return false end
     end
     return true
 end
@@ -194,7 +203,6 @@ V:RegisterModule(MODULE, {
                 local applied=V:StyleActionButton(button,{owner=MODULE,icon=button.icon,cooldown=button.cooldown,
                     timer=button.timeText,hotkey=button.hotkey,compact=false})
                 if not applied then complete=false end
-                if button.flatBorder then V:HideArtwork(button.flatBorder) end
                 if button.rankText then V:StyleText(button.rankText,"count",T.colors.attention) end
             end
         end

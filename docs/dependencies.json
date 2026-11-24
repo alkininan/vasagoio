@@ -31,11 +31,14 @@
     },
     {
       "name": "Details",
-      "folder": "Details"
-    },
-    {
-      "name": "ThreatClassic2",
-      "folder": "ThreatClassic2"
+      "folder": "Details",
+      "bundled_plugins": [
+        {
+          "name": "TinyThreat",
+          "folder": "Details_TinyThreat",
+          "purpose": "Selected threat meter; enable and select it through Details"
+        }
+      ]
     },
     {
       "name": "SexyMap",

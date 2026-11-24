@@ -19,7 +19,7 @@ The full accepted target is in [DESIGN.md](DESIGN.md). The following table separ
 | Native windows | Shared interior controls, source-backed decorative maps, narrative typography, native selection bindings and pooled stat rows; 132 native candidates registered across 115 primary hosts | Source availability and runtime rendering remain unverified. Unknown content textures are preserved; see [native interiors](native-interiors.md) and [catalog boundaries](window-catalog-scope.md) |
 | Selected addon windows | All 19 Baganator skin-region types, Talents Forever interiors, MRT tools/popups, Auctionator panes, Gargul audited registries and OpenMap native shell | Audited versions/APIs only; owner-created custom content/state art is preserved. Other selected addons retain their owner interfaces unless covered by a separate adapter. See [addon interiors](addon-interiors.md) |
 | Help/tickets | Native surrounding panels and controls styled; original functionality retained | Embedded support webpage is outside addon skin control; login/character-select frontends do not load normal in-game addons |
-| Functional addon selection | Full 27-package manifest, installed independently | vasagoio does not bundle, enable, update or test all packages |
+| Functional addon selection | Full 26-package manifest, including Details' bundled TinyThreat component, installed independently | vasagoio does not bundle, enable, update or test all packages |
 | Distribution | Standalone addon ZIP, deterministic package, hash manifest, CI | Native acceptance needed before a stable release |
 
 ## Native acceptance gate

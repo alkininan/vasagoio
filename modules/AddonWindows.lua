@@ -129,6 +129,6 @@ V.AddonWindowCoverage = {
     mrt = "Reviewed GMRT options root, lazy tool pages and child dialogs; controls and typography themed, raid-leading behavior retained",
     auctionator = "Reviewed shopping/selling/cancelling/config panes, buy/scan/status dialogs and nine config pages; prices and item semantics retained",
     openMap = "Native WorldMap adapter; canvas, markers and OpenMap behavior retained",
-    gargul = "8.1.0 reviewed Interface.set/createWindow and UI.components contracts; owner window controls and text, including lazy loot/roll/GDKP/settings dialogs",
+    gargul = "8.1.0 and 8.1.1 reviewed Interface.set/createWindow and UI.components contracts; owner window controls and text, including lazy loot/roll/GDKP/settings dialogs",
     otherAddons = "Only reviewed owner roots and public registries are traversed; no global frame sweep",
 }

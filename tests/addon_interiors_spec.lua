@@ -150,6 +150,7 @@ check(not A:Reviewed("TalentsForeverBook") and not future.shell and not futureOr
 versions.TalentsForeverBook="0.38.33.20261123"; tf.orderDrawer=order
 
 -- Gargul's real Interface API returns AceGUI wrappers or native named frames.
+check(A:Reviewed("Gargul"),"previous audited Gargul release rejected")
 local award=frame()
 Gargul={Interface={set=function() end,createWindow=function() end,Award={Award={InterfaceItems={Frame={Window={frame=award}}}}}},UI={components={},createFrame=function() end}}
 A:Discover(); check(award.applied,"Gargul published window registry ignored")
@@ -159,8 +160,25 @@ A:Discover(); check(late.applied,"lazy Gargul window missed")
 local named=frame(); _G["Gargul.TestWindow"]=named
 hooked[Gargul.Interface].createWindow(Gargul.Interface,{name="Gargul.TestWindow"})
 A:Discover(); check(named.applied,"Gargul named createWindow callback missed")
-local rejected=frame(); versions.Gargul="unreviewed"; Gargul.Interface.Award.Award.InterfaceItems.Frame.Window={frame=rejected}
+
+-- 8.1.1 keeps registries and lazy constructors through its timer/init refactor.
+versions.Gargul="8.1.1"
+check(A:Reviewed("Gargul"),"current audited Gargul release rejected")
+local currentAward,registeredButton,currentNamed=frame(),frame(),frame()
+Gargul.Interface.Award.Award.InterfaceItems.Frame.Window={frame=currentAward}
+Gargul.UI.components.CurrentSettingsButton=registeredButton
+_G["Gargul.Interface.GDKP.MultiAuction.Client.Window"]=currentNamed
+A:Discover()
+check(currentAward.applied and currentNamed.applied and calls[registeredButton].kind=="button",
+    "current Gargul owner registries were missed")
+local currentLazy=frame(); local beforeLazy=refreshes
+hooked[Gargul.Interface].set(Gargul.Interface,scope,"Window",{frame=currentLazy})
+check(refreshes==beforeLazy+1 and not currentLazy.applied,"Gargul hook painted inside owner creation")
+A:Discover(); check(currentLazy.applied,"current Gargul lazy window missed")
+local rejected=frame(); versions.Gargul="8.1.2"; Gargul.Interface.Award.Award.InterfaceItems.Frame.Window={frame=rejected}
+check(not A:Reviewed("Gargul"),"future Gargul release accepted by version prefix")
 A:Discover(); check(not rejected.applied,"unreviewed Gargul release accepted")
+versions.Gargul="8.1.1"
 
 local before=writes; combat=true
 A:Apply(tree,"TalentsForeverBook"); A:Bag({region=item,regionType="ItemButton"}); A:Discover()
@@ -175,4 +193,4 @@ A:Bag({region=item,regionType="ItemButton"}); A:Discover(); hooked[button].SetSe
 check(writes==before,"pending reload allowed cosmetic mutation")
 A:Disable(); check(restores==1 and button.plate.body.alpha==1 and tree.edge[1].alpha==1,"disable did not restore decorative state")
 check(order.top.alpha==1 and order.topEdge[1].alpha==1 and card.solid.color[1]==1,"new Talents decorative state not restored")
-print("addon_interiors_spec: 19 API regions, owner registries, exact Talents versions, lazy drawers, semantic states, combat and disable passed")
+print("addon_interiors_spec: 19 API regions, owner registries, exact Talents/Gargul versions, lazy drawers, semantic states, combat and disable passed")

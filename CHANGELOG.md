@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0-alpha.3
+
+- Added source-reviewed Gargul 8.1.1 compatibility while retaining 8.1.0. Its existing and lazily created windows use the reviewed interior adapter; future unreviewed versions still skip it.
+- Selected Details' bundled TinyThreat as the threat meter and removed ThreatClassic2 from the install plan. The selection is now 26 packages, with TinyThreat recorded under Details.
+- Documented TinyThreat selection and first-run checks. The existing Details window-1 preset supplies its typography, dimensions and surface; additional windows and TinyThreat's native threat colors remain owner-managed.
+
+This is an offline-validated alpha candidate. Native visuals, combat behavior and alpha acceptance still require user-run checks; CurseForge publication remains pending.
+
 ## 0.2.0-alpha.2
 
 Adds reviewed compatibility for Talents Forever Book 0.38.33.20261123 so a fresh installation can use its current release. The earlier 0.38.28.20261116 contract remains supported; unreviewed future releases still retain their owner appearance. New drawer and plan-state handling preserves native layout and meaningful state indicators.

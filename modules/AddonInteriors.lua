@@ -4,7 +4,7 @@ V.AddonInteriors = A
 local OWNER = "addonWindows"
 local roots, hooks, originals = setmetatable({}, {__mode = "k"}), setmetatable({}, {__mode = "k"}), setmetatable({}, {__mode = "k"})
 local gargulWidgets = setmetatable({}, {__mode = "k"})
-local reviewed = {MRT = "5335", Auctionator = "352", Gargul = "8.1.0",
+local reviewed = {MRT = "5335", Auctionator = "352", Gargul = { ["8.1.0"] = true, ["8.1.1"] = true },
     TalentsForeverBook = { ["0.38.28.20261116"] = true, ["0.38.33.20261123"] = true }}
 local function color(role, alpha)
     local c = V.Tokens.colors[role]
@@ -302,7 +302,7 @@ function A:Bag(details)
     return true
 end
 
--- Explicit owner namespace paths, from Gargul v8.1.0's Interface modules.
+-- Explicit owner namespace paths, reviewed in Gargul v8.1.0 and v8.1.1.
 -- Only their published InterfaceItems.Frame.Window handle is read.
 local GARGUL_SCOPES = {
     "Changelog", "MasterLooterDialog", "ShortcutKeysLegend", "PlayerSelector", "ReminderToAssignLootUsingGargul",

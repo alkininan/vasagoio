@@ -16,13 +16,15 @@
 | --- | --- |
 | HUD | Forever Unit Frames; Threat Plates; Bartender4; Prat 3.0; SexyMap; OpenMap |
 | Encounters | DBM Core; DBM Forever and Vanilla; DBM Dungeons; Capping |
-| Meters and leading | Details; ThreatClassic2; Method Raid Tools; Gargul |
+| Meters and leading | Details with its bundled TinyThreat plugin; Method Raid Tools; Gargul |
 | PvP and utility | BattleGroundEnemiesFixed; Forever Trinket Menu; AutoPotion |
 | Inventory/economy | Baganator; Syndicator; Auctionator |
 | Progression | RestedXP; Attune; What's Training; Talents Forever |
 | Skin and diagnostics | Skinner; BugGrabber; BugSack |
 
-These are selected dependencies, not embedded downloads. Use each publisher's supported release. vasagoio does not require paid RestedXP content and does not distribute it. Whether to enable Details/ThreatClassic2 collection in your game context stays with you and their native options.
+These 26 packages are selected dependencies, not embedded downloads. TinyThreat is bundled with Details and is not a separate package to download. Keep **Details!: Tiny Threat (plugin)** (`Details_TinyThreat`) enabled in the game's AddOns list. In Details window 1, use the orange cogwheel's **Plugin menu → Tiny Threat** to select its threat view. ThreatClassic2 is not needed. Use each publisher's supported release. vasagoio does not require paid RestedXP content and does not distribute it. Collection settings and display selection remain under Details' native controls.
+
+TinyThreat inherits the hosting Details window's row fonts and dimensions. vasagoio styles window 1 only; a second simultaneous damage/threat window is not positioned or styled by this preset. TinyThreat retains its own threat logic and signal colors, while Threat Plates independently handles the agreed nameplate threat colors. For the alpha pass, inspect TinyThreat in window 1 during manually played grouped combat, switch back to damage, and check appearance and selection after reloading.
 
 ## Disable and recover
 

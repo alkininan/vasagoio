@@ -64,6 +64,10 @@ check(row(model,"windows").state=="skipped" and row(model,"quests").state=="skip
 failures.prat="Prat profile is no longer initialized"
 check(not V:ApplySetup(review),"Owner becoming unavailable after review was accepted")
 unchanged();failures.prat=nil
+failures.prat="Prat Font module is disabled"
+model=V:BuildSetupStatus(V:PrepareSetup())
+check(row(model,"chat").detail=="Enable Font in Prat, then reload.","Disabled Prat Font lacks an actionable status")
+failures.prat=nil
 review=V:PrepareSetup()
 check(V:ApplySetup(review),"Complete core with optional extras skipped did not apply")
 model=V:BuildSetupStatus(nil,"Reload before reviewing again")

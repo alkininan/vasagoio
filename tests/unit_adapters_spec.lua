@@ -88,6 +88,29 @@ assert(ForeverUnitFramesDB.raid["Example-TestRealm"].r40.blocksPerLine == 2)
 assert(ForeverUnitFramesDB.raid["Example-TestRealm"].r40.blockTitles == false)
 assert(adapters.unitframes:Prepare().changes[1].key == "vasagoio 2")
 
+-- 0.81 adds party wrapping and per-size raid resource colors. Preserve the
+-- agreed single column even when upgrading a profile using the new grid, and
+-- configure colors through the newer owner fields without writing on review.
+versions.ForeverUnitFrames = "0.81.0"
+ForeverUnitFramesDB.profiles.vasagoio.party.partyPerLine = 2
+ForeverUnitFramesDB.raid["Example-TestRealm"].r40.healthMissingCustom = true
+ForeverUnitFramesDB.raid["Example-TestRealm"].r40.powerColorMode = "CLASS"
+before = clone(ForeverUnitFramesDB)
+local updatedPlan = assert(adapters.unitframes:Prepare())
+assert(same(before, ForeverUnitFramesDB), "reviewing updated FUF changed live settings")
+assert(updatedPlan.changes[1].value.party.partyPerLine == 5, "updated party grid wrapped the agreed layout")
+assert(updatedPlan.changes[1].value.party.partyPetLayout == "BESIDE")
+for _, change in ipairs(updatedPlan.changes) do
+    if change.key == "r10" or change.key == "r20" or change.key == "r40" then
+        assert(change.value.healthMissingCustom == false and change.value.powerColorMode == "TYPE")
+        for resource, color in pairs(V.UnitDesign.resources) do
+            assert(same(change.value["powerColor" .. resource], { color[1], color[2], color[3], color[4] or 1 }),
+                "new raid profile lost the shared resource palette")
+        end
+    end
+end
+versions.ForeverUnitFrames = "0.79.1"
+
 before = clone(ThreatPlatesDB)
 local namePlan = assert(adapters.nameplates:Prepare())
 assert(same(before, ThreatPlatesDB), "preparing nameplates wrote to owner data")
@@ -155,9 +178,14 @@ C_CurveUtil = { CreateColorCurve = function() return { AddPoint = function() end
 UnitHealthPercent = function()
     return { GetRGBA = function() return secret, secret, secret, secret end }
 end
+versions.ForeverUnitFrames = "0.81.0"
 assert(modules.unitframes:Apply())
 assert(frame.surfaceApplied and frame.health.colors[1] == secret)
 assert(frame.texts.healthRight.value == secret and frame.texts.healthRight.format == "%d")
+versions.ForeverUnitFrames = "future"
+assert(modules.unitframes:Apply() == false, "unreviewed FUF runtime was styled")
+versions.ForeverUnitFrames = "0.79.1"
+assert(modules.unitframes:Apply(), "previously reviewed FUF runtime lost support")
 frame.textWord = "Offline"
 frame.texts.healthRight.value = nil
 frame.texts.healthRight:SetText("Offline")

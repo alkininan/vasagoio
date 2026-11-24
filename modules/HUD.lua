@@ -25,20 +25,38 @@ V:RegisterProfileAdapter("prat", {
     label = "Prat: native Arial Narrow chat", addon = "Prat-3.0",
     Prepare = function()
         local prat = _G.Prat
-        local font = prat and prat.GetModule and prat:GetModule("Font")
+        local addon = prat and prat.Addon
+        -- Prat's wrapper dereferences a missing module. AceAddon's silent
+        -- lookup lets an unloaded Font module produce an actionable status.
+        local ok, font
+        if addon and type(addon.GetModule) == "function" then ok, font = pcall(addon.GetModule, addon, "Font", true) end
+        if not ok or not font then return nil, "Prat's Font module is not initialized; reload once" end
+        if type(font.IsEnabled) ~= "function" then return nil, "Prat Font module schema needs compatibility review" end
+        local enabledOK, enabled = pcall(font.IsEnabled, font)
+        if not enabledOK or V:IsSecret(enabled) or enabled ~= true then return nil, "Prat Font module is disabled" end
         local name = prat and prat.db and prat.db.keys and prat.db.keys.profile
-        if not font or not font.db or type(font.db.profile) ~= "table" or
-            type(font.db.profile.size) ~= "table" or V:IsSecret(name) or type(name) ~= "string" then
-            return nil, "Prat's Font namespace is not loaded"
+        if not font.db or type(font.db.profile) ~= "table" or type(font.db.profile.size) ~= "table" or
+            V:IsSecret(name) or type(name) ~= "string" then
+            return nil, "Prat's Font profile is not initialized; reload once"
         end
-        local path = { "Prat3DB", "namespaces", "Font", "profiles", name }
+        -- Prat registers module namespaces with the AceAddon full name, e.g.
+        -- Prat_Font, rather than the short GetModule("Font") lookup name.
+        local namespaces = type(_G.Prat3DB) == "table" and rawget(_G.Prat3DB, "namespaces")
+        local namespace = type(namespaces) == "table" and rawget(namespaces, "Prat_Font")
+        local profiles = type(namespace) == "table" and rawget(namespace, "profiles")
         local profile = font.db.profile
+        if type(profiles) ~= "table" or rawget(profiles, name) ~= profile or font.db.sv ~= namespace or
+            not font.db.keys or V:IsSecret(font.db.keys.profile) or font.db.keys.profile ~= name then
+            return nil, "Prat Font profile schema needs compatibility review"
+        end
+        if profile.on == false then return nil, "Prat Font module is disabled" end
+        local path = { "Prat3DB", "namespaces", "Prat_Font", "profiles", name }
         local plan = { changes = {}, detail = "Native Arial Narrow Regular, 16px at design scale, no outline. Channel colors and chat content are preserved." }
         append(plan, profile, path, "fontface", "Arial Narrow", "Chat font")
         append(plan, profile, path, "outlinemode", "", "Chat outline off")
         append(plan, profile, path, "monochrome", false, "Chat antialiasing")
         append(plan, profile, path, "slug", false, "Native font rendering")
-        local sizePath = { "Prat3DB", "namespaces", "Font", "profiles", name, "size" }
+        local sizePath = { "Prat3DB", "namespaces", "Prat_Font", "profiles", name, "size" }
         local keys = { "WhisperTabs", "PetBattleTab" }
         local frameCount = V:SafeNumber(_G.NUM_CHAT_WINDOWS) or 10
         for i = 1, math.min(frameCount, 50) do keys[#keys+1] = "ChatFrame" .. i end

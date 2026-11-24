@@ -1,6 +1,6 @@
 # Unit and nameplate implementation coverage
 
-This is source-audited implementation, not an in-game verification claim. The supported schemas are **Forever Unit Frames 0.79.1** and **Threat Plates 13.3.9**. New versions refuse profile setup until reviewed. WoW has not been launched or controlled to test this release.
+This is source-audited implementation, not an in-game verification claim. The supported schemas are **Forever Unit Frames 0.79.1 and 0.81.0** and **Threat Plates 13.3.9**. Other versions refuse profile setup until reviewed. WoW has not been launched or controlled to test this release.
 
 All dimensions below are the 2560×1440 design reference. Setup converts them through the shared uniform scale; FUF snaps its dimensions to whole UI units. Setup checks resulting sizes against the owner's actual schema bounds and identifies the failing field if scaling would clamp it. Effective scales0.50,1.00 and1.50 were checked; a larger monitor/UI scale can exceed the owner's limits and requires a smaller layout scale. Layouts must be checked at the user's actual resolution and UI scale.
 
@@ -43,5 +43,7 @@ The adapters were matched to FUF `Core/Settings.lua`, `Core/UnitProfiles.lua`, `
 `tests/unit_adapters_spec.lua` checks read-only preparation, rollback paths, exact reference row math, preserved user settings, fresh owner profile names, ordinary/regional TP identities and spec bindings, version/scale refusal, native opaque-value pass-through, owner offline text, party-pet dimensions/gaps/absent units/combat deferral and disabled hooks. Run it from the repository root with `lua tests/unit_adapters_spec.lua`. The proposed FUF unit and raid profiles were also checked against the installed owner's real schema sanitizer, with zero differences at effective scales0.50,1.00 and1.50.
 
 ## Idle rows and scoped updates
+
+Alpha.6 reviews FUF 0.81.0 storage, unit hooks and aura pools. Its new `partyPerLine` option is set to five to retain the agreed single party column; attached pets remain beside their owners. New raid resource-color fields use the shared palette, and the missing-health track retains the neutral background. A read-only check against the installed owner's schema accepted all 690 proposed values without normalization. Earlier 0.79.1 remains supported without writing these newer fields.
 
 Alpha.4 explicitly disables inherited always-visible idle cast rows and the player's extra threat row in the reviewed FUF profile. Actual enabled cast bars remain available during casts; TinyThreat remains the selected threat meter. Unit creation and roster callbacks request only the unit-frame module, so they do not trigger unrelated window styling. Applying this profile correction requires setup and reload.

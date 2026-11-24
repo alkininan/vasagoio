@@ -43,6 +43,8 @@ With WoW closed, replace only the `vasagoio` addon folder with the 0.2 release f
 
 ## Alpha acceptance
 
+Alpha.6 fixes the Prat compatibility blocker seen in alpha.5 and adds reviewed FUF 0.81.0 unit/aura support. Prat 3.9.117 does not need replacing: the incorrect saved namespace was in vasagoio. Keep Prat's Font module enabled; if disabled, the status now says to enable it and reload. Replace only vasagoio with the game closed, keep SavedVariables, then Apply preset and Reload UI. The preset compatibility marker advances so older applications request the current settings once.
+
 The first alpha.3 user test confirmed an FPS drop from roughly 90–120 to 30 with vasagoio enabled, plus leftover action-bar artwork and overlapping quest panels. Alpha.4 contains a performance and layout correction; native acceptance has **not** passed.
 
 To update, close WoW and replace only the `vasagoio` folder, keeping SavedVariables and functional-addon profiles. Enable it in the AddOns list. If previously disabled using `/vasagoio off`, use `/vasagoio on` and reload. Open `/vasagoio setup`, review the bar cleanup, FUF idle-row correction and RestedXP guide-column changes, apply and reload. The performance fixes load automatically with the code; the profile layout corrections require this explicit setup. Hidden extra bars retain their slots and binding configuration; test the bindings you use, including stance, vehicle and special actions.

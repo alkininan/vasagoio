@@ -2,11 +2,11 @@
 
 A personal World of Warcraft Forever UI built around the Bael design system: neutral black surfaces, restrained blue status colors, native typography, custom HUD geometry, and preserved native window layouts.
 
-**0.2.0-alpha.5 — simplified preset and status screen.** `/vasagoio` now shows component checks and two main actions: **Apply preset** and **Reload UI**. Missing core HUD components block setup; optional extras can be skipped. The alpha.4 performance corrections remain included. Offline checks pass; native visuals, FPS and combat acceptance remain user-run work. See [coverage](docs/COVERAGE.md).
+**0.2.0-alpha.6 — Prat setup fix and FUF 0.81.0 support.** Corrects the Prat font-settings path that blocked Apply and supports the updated FUF unit/aura schemas. The simple **Apply preset** / **Reload UI** screen and earlier performance corrections remain included. Reapply setup and reload after updating. Offline checks pass; native visuals, FPS and combat acceptance remain user-run work. See [coverage](docs/COVERAGE.md).
 
 ## Install
 
-1. Download the **vasagoio-0.2.0-alpha.5.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
+1. Download the **vasagoio-0.2.0-alpha.6.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
 2. With WoW closed, extract the `vasagoio` folder into `World of Warcraft/_forever_/Interface/AddOns/`. The result must be `AddOns/vasagoio/vasagoio.toc`.
 3. Install the desired functional addons separately using CurseForge or their official distribution. The [dependency list](docs/dependencies.json) records the complete selected setup. They are not bundled.
 4. Enable vasagoio and those addons in the game's AddOns menu. Log in yourself, let their profiles initialize, and reload once.

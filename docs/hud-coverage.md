@@ -33,10 +33,10 @@ Prepare functions return plans without applying settings. Core validates target 
 These paths refer to each dependency's own public source package; no source was copied into vasagoio.
 
 - Bartender4: `Bartender4.lua`, `ActionBars.lua`, `ActionBar.lua`, `Bar.lua`, `ButtonBar.lua`, `PetBar.lua`, `PetButton.lua`; bundled LibWindow position storage and LibActionButton widget/range/cooldown contracts. `CONFIG_VERSION=3` is required.
-- Prat-3.0: `addon/addon.lua`, `addon/modules.lua`, `modules/Font.lua`; AceDB namespace and `size[ChatFrameN]`/font settings.
+- Prat-3.0 3.9.117: `addon/addon.lua`, `addon/modules.lua`, `modules/Font.lua`, bundled AceAddon/AceDB; Font is the short module lookup name, while `Prat_Font` is the saved namespace. Alpha.6 verifies that namespace and active profile identities before proposing `size[ChatFrameN]`/font changes. Disabled Font is reported separately. The profile-engine regression covers read-only review, stale profile/module state, apply and restore.
 - SexyMap: `SexyMap.lua`, `Borders.lua`, `Shapes_Classic.lua`, `ZoneText.lua`, `Clock.lua`; character/global profile selection and owner scale, mask, position and zone-color behavior.
 - Details: `API UI.txt`, `classes/include_instance.lua`, `classes/class_instance.lua`, `core/windows.lua`, `functions/profiles.lua`, `functions/rowtexts.lua`; live instance schema, documented `GetInstance` / `ChangeSkin(nil)`, background and LibWindow fields.
-- ForeverUnitFrames 0.79.1: `Elements/Auras.lua`, `Elements/AuraContainers.lua`, `Elements/AuraButton.lua`, `Core/Settings.lua`; owner pool references, actual group filters, secure-container restrictions and native countdown widget. No private owner function is replaced or called.
+- ForeverUnitFrames 0.79.1 and 0.81.0: `Elements/Auras.lua`, `Elements/AuraContainers.lua`, `Elements/AuraButton.lua`, `Core/Settings.lua`; owner pool references, actual group filters, secure-container restrictions and native countdown widget. No private owner function is replaced or called.
 
 ## Verification
 

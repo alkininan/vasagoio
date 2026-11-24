@@ -1,5 +1,7 @@
 local addonName, V = ...
-local OWNER, VERSION = "ForeverUnitFrames", "0.79.1"
+local OWNER = "ForeverUnitFrames"
+-- Both reviewed versions keep the same plain and native-container pools.
+local VERSIONS = { ["0.79.1"] = true, ["0.81.0"] = true }
 local seen = setmetatable({}, { __mode = "k" })
 local queued, ticker, ready = false, nil, false
 local groups = { "buffs", "debuffs", "dispels" }
@@ -16,7 +18,8 @@ end
 
 local function versionOK()
     local get = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
-    return get and get(OWNER, "Version") == VERSION
+    local version = get and get(OWNER, "Version")
+    return not V:IsSecret(version) and type(version) == "string" and VERSIONS[version] == true
 end
 
 profileReady = function()
@@ -158,7 +161,7 @@ V:RegisterModule("auras", {
         if InCombatLockdown() then return false, "Aura presentation waits until combat ends" end
         if not versionOK() or not _G.ForeverUnitFrames or not V.StyleAura then
             ready = false
-            return false, "Audited FUF 0.79.1 and the shared aura presentation service are required"
+            return false, "Audited FUF 0.79.1 or 0.81.0 and the shared aura presentation service are required"
         end
         if not V:IsModuleEnabled("unitframes") or not profileReady() then
             ready = false

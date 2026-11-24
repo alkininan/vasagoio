@@ -23,7 +23,7 @@ local owners = {
 V.SetupSections = sections
 -- Increment when functional preset targets change. Cosmetic/UI-only releases
 -- keep this value; unmarked legacy snapshots require one reviewed application.
-V.setupPresetVersion = 1
+V.setupPresetVersion = 2
 
 local function indexReview(review)
     local available, unavailable = {}, {}
@@ -56,7 +56,9 @@ local function friendlyReason(id, reason)
         end
     end
     local text = type(reason) == "string" and reason:lower() or ""
-    if text:find("reported an error",1,true) then
+    if id == "prat" and text:find("font module is disabled",1,true) then
+        return "Enable Font in Prat, then reload."
+    elseif text:find("reported an error",1,true) then
         return "Styling reported an error. Reload and check again."
     elseif text:find("version",1,true) or text:find("audited",1,true) or text:find("reviewed",1,true) then
         return "This " .. owner[1] .. " version needs compatibility review."

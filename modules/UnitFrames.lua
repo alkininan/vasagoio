@@ -1,8 +1,9 @@
 local addonName, V = ...
 
--- Audited against ForeverUnitFrames 0.79.1. Configuration is applied only
+-- Audited against ForeverUnitFrames 0.79.1 and 0.81.0. Configuration is applied only
 -- through the setup transaction; this file never owns secure unit buttons.
-local OWNER, VERSION = "ForeverUnitFrames", "0.79.1"
+local OWNER = "ForeverUnitFrames"
+local VERSIONS = { ["0.79.1"] = true, ["0.81.0"] = true }
 local T = V.Tokens
 local function rgb(hex, alpha)
     if type(hex) == "table" then return { hex[1], hex[2], hex[3], alpha or hex[4] or 1 } end
@@ -16,9 +17,13 @@ local design = {
 }
 V.UnitDesign = design
 
-local function versionOK()
+local function ownerVersion()
     local get = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
-    return get and get(OWNER, "Version") == VERSION
+    local version = get and get(OWNER, "Version")
+    if not V:IsSecret(version) and type(version) == "string" then return version end
+end
+local function versionOK()
+    return VERSIONS[ownerVersion()] == true
 end
 local function copy(value)
     if type(value) ~= "table" then return value end
@@ -85,7 +90,7 @@ local adapter = {
     label = "Forever Unit Frames — vasagoio layout", addon = OWNER,
     AfterApply = function() reloadPending = true end,
     Prepare = function()
-        if not versionOK() then return nil, "Requires audited Forever Unit Frames 0.79.1; newer schemas need review." end
+        if not versionOK() then return nil, "Requires audited Forever Unit Frames 0.79.1 or 0.81.0; other schemas need review." end
         -- The owner clamps integer settings during load. Validate the actual
         -- resulting dimensions, not an arbitrary monitor/UI-scale ratio.
         local scale = V:SafeNumber(V:Pixel(1))
@@ -153,6 +158,9 @@ local adapter = {
             partyPetWidth = px(design.S.width), partyPetHeight = px(design.S.height), partyPetGap = px(12),
             partyPetsX = 0, partyPetsY = -px((design.M.height - design.S.height) / 2), partyPetTextLeft = "NAME", partyPetTextCenter = "NONE",
             partyPetTextRight = "CURRENT", castbarEnabled = false })
+        -- Newer party grids also wrap attached pets/targets. The agreed layout
+        -- remains one column of five members, with each pet beside its owner.
+        if ownerVersion() == "0.81.0" then profile.party.partyPerLine = 5 end
         profile.party.dispelsSize, profile.party.dispelsSpacing, profile.party.dispelsRowGap = px(T.aura.prioritySize), px(T.aura.gap), px(T.aura.wrapGap - T.aura.gap)
         profile.player.valueFontSize, profile.target.valueFontSize = px(T.typography.amount.size), px(T.typography.amount.size)
         profile.player.buffsEnabled, profile.player.hideBlizzardAuras, profile.player.cancelBuffs = true, true, true
@@ -183,6 +191,12 @@ local adapter = {
                 fillReverse = false, powerStrip = "ALL", powerStripHeight = math.ceil(100 * px(design.XS.power) / px(design.XS.height)), nameClassColor = true,
                 nameFontSize = px(T.typography.name.size), secondFontSize = px(T.typography.compact.size), fontFace = "Friz Quadrata", fontOutline = "NONE",
                 fontShadow = true, secondLine = "PERCENT", secondLineColor = rgb(T.colors.text) })
+            if ownerVersion() == "0.81.0" then
+                -- 0.81 exposes these colors per raid profile. Configure the
+                -- owner directly as well as retaining the older runtime hook.
+                r.healthMissingCustom, r.powerColorMode = false, "TYPE"
+                for resource, color in pairs(design.resources) do r["powerColor" .. resource] = rgb(color) end
+            end
             changes[#changes + 1] = { table = raid, path = { "ForeverUnitFramesDB", "raid", char }, key = key, value = r, label = "Two-column XS raid layout " .. key }
         end
         return { changes = changes, detail = "Creates a new FUF profile; reload required. The adapter decorates existing party pet buttons with portrait/resources and supplies 12×16 raid block spacing." }
@@ -355,7 +369,7 @@ V:RegisterModule("unitframes", {
     Apply = function()
         if InCombatLockdown and InCombatLockdown() then return false, "Unit styling waits until combat ends." end
         if reloadPending then return false, "Reload to activate the newly selected FUF profile." end
-        if not versionOK() or not ForeverUnitFrames then return false, "Audited FUF 0.79.1 is required." end
+        if not versionOK() or not ForeverUnitFrames then return false, "Audited FUF 0.79.1 or 0.81.0 is required." end
         local db, char = ForeverUnitFramesDB, characterKey()
         local active = db and db.active and char and db.active[char]
         if type(active) ~= "string" or not active:match("^vasagoio") then

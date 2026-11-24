@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0-alpha.6
+
+- Fixed Prat setup resolving the short module name `Font` instead of its actual `Prat_Font` SavedVariables namespace. The adapter verifies the active runtime profile and saved namespace refer to the same data before proposing changes.
+- Added safe missing-module lookup and an actionable message when Prat's Font module is disabled. Profile changes or disabling Font after review reject Apply without writes.
+- Added source-reviewed FUF 0.81.0 unit-frame and aura support, retaining 0.79.1. The new wrapping option keeps the agreed party column, and new raid resource-color fields use the shared palette.
+- Advanced preset compatibility to include these functional changes; previous snapshots show Ready until setup is explicitly applied and reloaded.
+- Added a regression suite exercising Prat review, application and restoration through the actual profile engine, plus updated FUF unit/aura and status fixtures.
+
+Replace only the vasagoio folder with WoW closed, keeping SavedVariables. Run `/vasagoio setup`, Apply preset, then Reload UI. Earlier performance fixes remain included; native FPS/visual acceptance is still pending.
+
 ## 0.2.0-alpha.5
 
 - Replaced the technical setup report and management controls with a compact preset/status screen: Apply preset, Reload UI, component rows and inline results. Problems are shown first.

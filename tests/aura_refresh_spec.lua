@@ -21,13 +21,14 @@ function V:SafeNumber(v) if not self:IsSecret(v) and type(v)=="number" then retu
 function V:IsModuleEnabled() return enabled end
 function V:RegisterModule(id,spec) modules[id]=spec end
 function V:On(event,fn) events[event]=fn end
-function V:StyleAura(b) paints=paints+1; b.paints=b.paints+1 end
+function V:StyleAura(b,style) paints=paints+1; b.paints=b.paints+1; b.signal=style.signal end
 function V:HideArtwork() end
 function V:Report() end
 UnitFullName=function() return "Example","Realm" end
 ForeverUnitFramesDB={active={["Example-Realm"]="vasagoio"}}
 ForeverUnitFrames={}
-C_AddOns={GetAddOnMetadata=function() return "0.79.1" end}
+local version="0.81.0"
+C_AddOns={GetAddOnMetadata=function() return version end}
 InCombatLockdown=function() return combat end
 C_Timer={After=function(_,fn) timers[#timers+1]=fn end,NewTicker=function(_,fn)
     poolTick=fn;return {Cancel=function() poolTick=nil end}
@@ -83,6 +84,16 @@ events.UNIT_AURA("UNIT_AURA","partypet1",{})
 check(#timers==1,"Different dirty units were not coalesced")
 flush();check(newPlayer.paints==1 and newPet.paints==1,"A coalesced unit was lost")
 
+-- The reviewed 0.81 native-container records and detached own-aura pools keep
+-- their existing shapes. Presentation reads button references, not aura data.
+local nativeDebuff,detachedBuff=button(),button()
+ForeverUnitFrames_target.auraContainers={debuffs={buttons={{button=nativeDebuff,aura={secret=true}}}}}
+ForeverUnitFrames_player.auras.buffs.free={buttons={detachedBuff}}
+events.UNIT_AURA("UNIT_AURA","target",{})
+events.UNIT_AURA("UNIT_AURA","player",{});flush()
+check(nativeDebuff.paints==1 and nativeDebuff.signal=="danger" and detachedBuff.paints==1 and detachedBuff.signal==nil,
+    "Reviewed native or detached aura pool lost its correct presentation")
+
 -- Show + unit event can coincide; each dirty button is painted only once.
 before=paints
 member1.hooks.OnShow();events.UNIT_AURA("UNIT_AURA","party1",{});flush()
@@ -102,4 +113,11 @@ V.profileReloadPending=nil
 modules.auras.Disable();enabled=false
 events.UNIT_AURA("UNIT_AURA","player",{});member1.hooks.OnShow()
 check(poolTick==nil and #timers==0 and paints==before,"Disabled module left aura work active")
+enabled=true;version="0.79.1"
+check(modules.auras.Apply(),"Previous reviewed FUF aura version lost support")
+before=paints;version="future"
+check(modules.auras.Apply()==false and paints==before,"Unreviewed FUF aura version was styled")
+events.UNIT_AURA("UNIT_AURA","player",{});poolTick()
+check(#timers==0 and paints==before,"Rejected FUF version left aura styling active")
+modules.auras.Disable()
 print("aura_refresh_spec: scoped units, incremental pools, one-button show, batch coalescing and combat/reload guards passed")

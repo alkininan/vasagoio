@@ -163,10 +163,12 @@ actionProfiles[6].enabled=false
 validate(adapters.bartender.Prepare())
 actionProfiles[6].enabled=true; actionProfiles[6].visibility=savedVisibility
 
-Prat = {db={keys={profile="Test"}}}
-local font = {db={profile={size={ChatFrame1=12},fontface="Original"}}}
-function Prat:GetModule(name) if name=="Font" then return font end end
-Prat3DB = {namespaces={Font={profiles={Test=font.db.profile}}}}
+Prat = {db={keys={profile="Test"}},Addon={}}
+local font = {db={keys={profile="Test"},profile={size={ChatFrame1=12},fontface="Original"}}}
+function font:IsEnabled() return true end
+function Prat.Addon:GetModule(name, silent) check(silent,"Prat lookup must allow missing modules"); if name=="Font" then return font end end
+Prat3DB = {namespaces={Prat_Font={profiles={Test=font.db.profile}}}}
+font.db.sv=Prat3DB.namespaces.Prat_Font
 local pratPlan = adapters.prat.Prepare(); validate(pratPlan)
 check(font.db.profile.fontface=="Original", "Prat review changed font")
 commit(pratPlan)

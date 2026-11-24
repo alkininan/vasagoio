@@ -1,9 +1,9 @@
 local addonName, V = ...
 
--- Audited against ForeverUnitFrames 0.79.1 and 0.81.0. Configuration is applied only
+-- Audited against ForeverUnitFrames 0.79.1, 0.81.0 and 0.81.1. Configuration is applied only
 -- through the setup transaction; this file never owns secure unit buttons.
 local OWNER = "ForeverUnitFrames"
-local VERSIONS = { ["0.79.1"] = true, ["0.81.0"] = true }
+local VERSIONS = { ["0.79.1"] = true, ["0.81.0"] = true, ["0.81.1"] = true }
 local T = V.Tokens
 local function rgb(hex, alpha)
     if type(hex) == "table" then return { hex[1], hex[2], hex[3], alpha or hex[4] or 1 } end
@@ -24,6 +24,10 @@ local function ownerVersion()
 end
 local function versionOK()
     return VERSIONS[ownerVersion()] == true
+end
+local function has081Settings()
+    local version = ownerVersion()
+    return version == "0.81.0" or version == "0.81.1"
 end
 local function copy(value)
     if type(value) ~= "table" then return value end
@@ -114,7 +118,7 @@ local adapter = {
     label = "Forever Unit Frames — vasagoio layout", addon = OWNER,
     AfterApply = function() reloadPending = true end,
     Prepare = function()
-        if not versionOK() then return nil, "Requires audited Forever Unit Frames 0.79.1 or 0.81.0; other schemas need review." end
+        if not versionOK() then return nil, "Requires audited Forever Unit Frames 0.79.1, 0.81.0 or 0.81.1; other schemas need review." end
         -- The owner clamps integer settings during load. Validate the actual
         -- resulting dimensions, not an arbitrary monitor/UI-scale ratio.
         local scale = V:SafeNumber(V:Pixel(1))
@@ -187,7 +191,7 @@ local adapter = {
             partyPetTextRight = "CURRENT", partyPetAuraSize = px(T.aura.shortSize), castbarEnabled = false })
         -- Newer party grids also wrap attached pets/targets. The agreed layout
         -- remains one column of five members, with each pet beside its owner.
-        if ownerVersion() == "0.81.0" then profile.party.partyPerLine = 5 end
+        if has081Settings() then profile.party.partyPerLine = 5 end
         profile.party.dispelsSize, profile.party.dispelsSpacing, profile.party.dispelsRowGap = px(T.aura.shortSize), px(T.aura.gap), px(T.aura.wrapGap - T.aura.gap)
         profile.player.valueFontSize, profile.target.valueFontSize = px(T.typography.amount.size), px(T.typography.amount.size)
         profile.player.buffsEnabled, profile.player.hideBlizzardAuras, profile.player.cancelBuffs = true, true, true
@@ -222,7 +226,7 @@ local adapter = {
                 fillReverse = false, powerStrip = "ALL", powerStripHeight = math.ceil(100 * px(design.XS.power) / px(design.XS.height)), nameClassColor = true,
                 nameFontSize = px(T.typography.name.size), secondFontSize = px(T.typography.compact.size), fontFace = "Friz Quadrata", fontOutline = "NONE",
                 fontShadow = true, secondLine = "PERCENT", secondLineColor = rgb(T.colors.text), aggroBorder = true })
-            if ownerVersion() == "0.81.0" then
+            if has081Settings() then
                 -- 0.81 exposes these colors per raid profile. Configure the
                 -- owner directly as well as retaining the older runtime hook.
                 r.healthMissingCustom, r.powerColorMode = false, "TYPE"
@@ -510,7 +514,7 @@ V:RegisterModule("unitframes", {
         end
         if not versionOK() or not ForeverUnitFrames then
             release()
-            return false, "Audited FUF 0.79.1 or 0.81.0 is required."
+            return false, "Audited FUF 0.79.1, 0.81.0 or 0.81.1 is required."
         end
         local profile,name=V:GetReviewedUnitProfile()
         if not profile then

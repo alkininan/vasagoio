@@ -57,7 +57,21 @@ local function friendlyReason(id, reason)
             return owner[1] .. " is not loaded. Enable it and reload."
         end
     end
-    local text = type(reason) == "string" and reason:lower() or ""
+    -- Bartender's reviewed adapter already names the affected bar and the
+    -- actionable geometry problem. Do not replace that with a guessed version
+    -- error or generic compatibility message. The transaction engine replaces
+    -- thrown errors and validation failures with these fixed reason codes.
+    if id=="bartender" then
+        if V:IsSecret(reason) or type(reason)~="string" or reason=="" then
+            return "Bartender4 could not be checked. Reopen setup."
+        elseif reason=="Profile adapter API error." then
+            return "Bartender4's setup check failed in vasagoio. No settings were changed."
+        elseif reason=="Profile snapshot failed validation." then
+            return "Bartender4's preset changes could not be verified. No settings were changed."
+        end
+        return reason
+    end
+    local text = not V:IsSecret(reason) and type(reason) == "string" and reason:lower() or ""
     if id == "prat" and text:find("font module is disabled",1,true) then
         return "Enable Font in Prat, then reload."
     elseif text:find("reported an error",1,true) then
@@ -292,6 +306,13 @@ function V:BuildSetupStatus(review, reason)
         model.title,model.description="Styling is off","Use /vasagoio on, then reload to check the preset."
     elseif not review then
         model.title,model.description="Needs attention",type(reason)=="string" and reason or "Reopen setup to run its checks."
+    elseif #model.blockers>0 then
+        local blockedBy="Apply is blocked by " .. model.blockers[1].label .. "."
+        if ready>0 then
+            model.title,model.description="Preset not applied","The full preset has not been applied. " .. blockedBy
+        else
+            model.title,model.description="Needs attention",blockedBy .. " No changes were made by this check."
+        end
     elseif attention>0 then
         model.title,model.description="Needs attention",attention .. (attention==1 and " component needs a check." or " components need a check.") .. " Optional extras may be skipped."
     elseif ready>0 then

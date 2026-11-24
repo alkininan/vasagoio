@@ -27,7 +27,7 @@ function V:Report() end
 UnitFullName=function() return "Example","Realm" end
 ForeverUnitFramesDB={active={["Example-Realm"]="vasagoio"}}
 ForeverUnitFrames={}
-local version="0.81.0"
+local version="0.81.1"
 C_AddOns={GetAddOnMetadata=function() return version end}
 InCombatLockdown=function() return combat end
 C_Timer={After=function(_,fn) timers[#timers+1]=fn end,NewTicker=function(_,fn)
@@ -84,7 +84,7 @@ events.UNIT_AURA("UNIT_AURA","partypet1",{})
 check(#timers==1,"Different dirty units were not coalesced")
 flush();check(newPlayer.paints==1 and newPet.paints==1,"A coalesced unit was lost")
 
--- The reviewed 0.81 native-container records and detached own-aura pools keep
+-- The reviewed 0.81.1 native-container records and detached own-aura pools keep
 -- their existing shapes. Presentation reads button references, not aura data.
 local nativeDebuff,detachedBuff=button(),button()
 ForeverUnitFrames_target.auraContainers={debuffs={buttons={{button=nativeDebuff,aura={secret=true}}}}}
@@ -113,8 +113,11 @@ V.profileReloadPending=nil
 modules.auras.Disable();enabled=false
 events.UNIT_AURA("UNIT_AURA","player",{});member1.hooks.OnShow()
 check(poolTick==nil and #timers==0 and paints==before,"Disabled module left aura work active")
-enabled=true;version="0.79.1"
-check(modules.auras.Apply(),"Previous reviewed FUF aura version lost support")
+enabled=true
+for _,reviewed in ipairs({"0.79.1","0.81.0"})do
+    version=reviewed
+    check(modules.auras.Apply(),"Previous reviewed FUF aura version lost support")
+end
 before=paints;version="future"
 check(modules.auras.Apply()==false and paints==before,"Unreviewed FUF aura version was styled")
 events.UNIT_AURA("UNIT_AURA","player",{});poolTick()

@@ -30,15 +30,43 @@ local function change(plan, target, key, value, label)
     plan.changes[#plan.changes + 1] = { table = target, path = plan.targetPaths[target], key = key, value = value, label = label }
 end
 
+local function geometryValue(value)
+    if V:IsSecret(value) then return "restricted" end
+    if type(value) ~= "number" then return "unavailable" end
+    if value ~= value or value == math.huge or value == -math.huge then return "non-finite" end
+    return string.format("%.6f", value):gsub("0+$", ""):gsub("%.$", "")
+end
+
+local function backpackGeometry()
+    local button = _G.MainMenuBarBackpackButton
+    if V:IsSecret(button) then return nil, "Backpack: the client restricted access to the native button. Reload and try setup again." end
+    if (type(button) ~= "table" and type(button) ~= "userdata") or not button.GetWidth or not button.GetHeight then
+        return nil, "Backpack: native size getters are unavailable. Reload Bartender4 and try setup again."
+    end
+    if button.IsForbidden then
+        local ok, forbidden = pcall(button.IsForbidden, button)
+        if not ok or V:IsSecret(forbidden) or forbidden then
+            return nil, "Backpack: the client refused native size access. Leave combat, reload and try setup again."
+        end
+    end
+    local ok, width, height = pcall(function() return button:GetWidth(), button:GetHeight() end)
+    if not ok then return nil, "Backpack: native size measurement failed. Reload Bartender4 and try setup again." end
+    return {button_width=width, button_height=height, button_margin=0}
+end
+
 local function layoutBar(plan, profile, runtime, x, y, size, rows, label)
     if type(profile) ~= "table" or type(profile.position) ~= "table" then
         return false, label .. ": unsupported position schema"
     end
-    local width = runtime and V:SafeNumber(runtime.button_width)
-    local height = runtime and V:SafeNumber(runtime.button_height)
-    local margin = runtime and V:SafeNumber(runtime.button_margin)
-    if not width or not height or width <= 0 or width ~= height or margin ~= 0 then
-        return false, label .. ": native square button geometry must be available"
+    if V:IsSecret(runtime) then return false, label .. ": native button geometry is restricted. Reload and try setup again." end
+    local rawWidth, rawHeight, rawMargin = runtime and runtime.button_width, runtime and runtime.button_height, runtime and runtime.button_margin
+    local width, height, margin = V:SafeNumber(rawWidth), V:SafeNumber(rawHeight), V:SafeNumber(rawMargin)
+    -- Native width/height getters can differ by floating-point rounding.
+    -- One thousandth of a UI unit is imperceptible; a real rectangle is not.
+    if not width or not height or width <= 0 or height <= 0 or math.abs(width-height) > .001 or margin ~= 0 then
+        return false, label .. ": native square button geometry is unavailable (width=" .. geometryValue(rawWidth)
+            .. ", height=" .. geometryValue(rawHeight) .. ", margin=" .. geometryValue(rawMargin)
+            .. "). Reload Bartender4 and try setup again; if it persists, include these measurements in the report."
     end
     local scale = V:Pixel(size) / width
     change(plan, profile, "enabled", true, label .. " enabled")
@@ -101,12 +129,9 @@ V:RegisterProfileAdapter("bartender", {
         if bags and bags.db and type(bags.db.profile) == "table" then
             -- BagBar measures its cells from CharacterBag0Slot, but the actual
             -- backpack can be larger. One-bag geometry must use the backpack.
-            local button = _G.MainMenuBarBackpackButton
-            local width = button and button.GetWidth and V:SafeNumber(button:GetWidth())
-            local height = button and button.GetHeight and V:SafeNumber(button:GetHeight())
-            if not width or not height then return nil, "Native backpack dimensions are unavailable; reload before setup" end
+            local geometry, unavailable = backpackGeometry()
+            if not geometry then return nil, unavailable end
             plan.targetPaths[bags.db.profile] = { "Bartender4DB", "namespaces", "BagBar", "profiles", profileName }
-            local geometry = {button_width=width, button_height=height, button_margin=0}
             ok, reason = layoutBar(plan, bags.db.profile, geometry, A.utilityX, A.bagY, A.size, 1, "Backpack")
             if not ok then return nil, reason end
             change(plan, bags.db.profile, "onebag", true, "One backpack button")

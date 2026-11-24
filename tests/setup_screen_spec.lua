@@ -29,7 +29,7 @@ function methods:HookScript(event,fn)
     self.scripts[event]=function(...) if original then original(...) end;fn(...) end
 end
 function methods:Show() self.shown=true end
-function methods:Hide() self.shown=false end
+function methods:Hide() self.shown=false; if self.scripts.OnHide then self.scripts.OnHide(self) end end
 function methods:SetShown(v) self.shown=v end
 function methods:IsShown() return self.shown end
 function methods:IsVisible() return self.shown and (not self.parent or self.parent:IsVisible()) end
@@ -42,6 +42,12 @@ function methods:GetName() return self.name end
 function methods:GetEffectiveScale() return 1 end
 function methods:SetText(value) self.text=value or "" end
 function methods:GetText() return self.text end
+function methods:SetAutoFocus(value) self.autoFocus=value end
+function methods:SetMultiLine(value) self.multiline=value end
+function methods:SetMaxLetters(value) self.maxLetters=value end
+function methods:SetFocus() self.focused=true end
+function methods:ClearFocus() self.focused=false end
+function methods:HighlightText() self.highlighted=self.text end
 function methods:SetFont(path,size,flags) self.font,self.fontSize,self.fontFlags=path,size,flags end
 function methods:GetFont() return self.font or "native.ttf",self.fontSize,self.fontFlags or "" end
 function methods:SetTextColor(...) self.color={...} end
@@ -112,6 +118,11 @@ function V:Surface(frame,alpha,radius,color) frame.surface={alpha=alpha,radius=r
 function V:Print(message) messages[#messages+1]=message end
 function V:On(event,fn) callbacks[event]=callbacks[event] or {};table.insert(callbacks[event],fn) end
 function V:Refresh() error("Setup view started runtime styling") end
+function V:CreateToolsView(parent)
+    local view=widget("Frame",nil,parent)
+    function view:Refresh() self.refreshes=(self.refreshes or 0)+1 end
+    return view
+end
 local blocked, applySucceeds, lastApplied = false, false, nil
 local longDetail=string.rep("A readable explanation of an optional component. ",14)
 function V:PrepareSetup()
@@ -150,7 +161,8 @@ local function click(button)
     callback(button)
 end
 V:OpenOptions("setup")
-local screen=V.options
+local window=V.options
+local screen=window.setup
 check(screen and screen:IsShown() and preparations==1,"Opening setup did not prepare one visible review")
 check(screen.apply.label:GetText()=="Apply preset" and screen.reload.label:GetText()=="Reload UI","Main actions were not simplified")
 local important=0
@@ -160,12 +172,13 @@ for _, child in ipairs(screen.children) do
         if label~="" and label~="×" and label~="X" and label~="Close" then important=important+1 end
     end
 end
-check(important==2,"Main screen still contains management actions")
+check(important==1 and window.reload.label:GetText()=="Reload UI","Setup contains actions beyond Apply and the shared Reload")
 for _, object in ipairs(widgets) do
     check(not object.template or not object.template:find("UIPanel"),"Setup imported native gold panel/button chrome")
 end
-check(screen.surface and screen.surface.radius==10,"Setup does not use the shared rounded material")
-check(screen.apply:IsEnabled() and not screen.reload:IsEnabled(),"Ready state button availability is incorrect")
+check(window.surface and window.surface.radius==10,"Setup does not use the shared rounded material")
+check(screen.apply:IsEnabled() and screen.reload:IsEnabled(),"Ready state buttons do not allow apply or a manual reload")
+check(screen.rows[1].status:GetText()=="Ready to apply","Unapplied component was presented as already applied")
 check(screen.summary:GetText():find("Ready",1,true),"Overall readiness was not rendered")
 check(screen.rows[3].detail:GetText()==longDetail,"Long actionable explanation was discarded")
 check(screen.rows[3]:GetHeight()>=screen.rows[3].detail:GetStringHeight()+24,"Long detail overlaps the next row")
@@ -192,6 +205,7 @@ check(screen.description:GetText():find("Bartender changed",1,true),"Apply failu
 check(reloads==0,"Apply failure reloaded the game")
 blocked=true;V:OpenOptions("status")
 check(not screen.apply:IsEnabled(),"Missing required HUD still permits Apply")
+check(screen.reload:IsEnabled(),"Blocked setup cannot reload to recover an uninitialized owner")
 local previousApplications=applications
 click(screen.apply)
 check(applications==previousApplications,"Disabled Apply handler bypassed readiness gate")
@@ -221,7 +235,7 @@ for _, object in ipairs(widgets) do check(not object.scripts.OnUpdate,"Setup int
 local queue, missingBartender={},false
 C_Timer={After=function(_,fn) queue[#queue+1]=fn end}
 local Live={}
-for _, file in ipairs({"Core.lua","Tokens.lua","core/Database.lua","core/Profiles.lua","core/SetupStatus.lua","core/Options.lua"}) do
+for _, file in ipairs({"Core.lua","Tokens.lua","core/Database.lua","core/Profiles.lua","core/SetupStatus.lua","core/Tools.lua","core/Options.lua"}) do
     assert(loadfile(root.."/"..file))("vasagoio",Live)
 end
 Live.Surface,Live.StyleText,Live.Font=V.Surface,V.StyleText,V.Font
@@ -244,7 +258,8 @@ for _, section in ipairs(Live.SetupSections) do
     end
 end
 Live:ApplyModules();Live:OpenOptions("setup")
-local liveScreen=Live.options
+local liveWindow=Live.options
+local liveScreen=liveWindow.setup
 check(liveScreen.apply:IsEnabled() and liveScreen.summary:GetText()=="Ready to apply","Real model did not allow complete core with optional integrations skipped")
 click(liveScreen.apply)
 check(Live.profileReloadPending and liveScreen.reload:IsEnabled() and not liveScreen.apply:IsEnabled(),"Real Apply did not transition the screen to reload state")
@@ -257,4 +272,59 @@ check(liveScreen.summary:GetText()=="Needs attention" and not liveScreen.apply:I
 local count=#Live.db.profileBackups
 click(liveScreen.apply)
 check(#Live.db.profileBackups==count,"Blocked real screen wrote another snapshot")
-print("setup_screen_spec: two actions, layout bounds, cached status, exact review, combat and real setup/reload policy integration passed")
+
+-- Copy is a native text selection, not a clipboard API or profile mutation.
+local originalReview=Live.setupReview
+Live:OpenDiagnostics("details")
+local diagnostic=liveWindow.diagnostics
+check(Live.options==liveWindow and liveWindow.activeTab=="details","Details opened a separate top-level window")
+check(diagnostic.copy and diagnostic.copy.label:GetText()=="Copy report","Diagnostics lack a copy entry point")
+check(not diagnostic.copyText:IsShown() and not diagnostic.copyText.focused,"Diagnostics captured keyboard focus before copy")
+click(diagnostic.copy)
+check(diagnostic.copyText:IsShown() and not diagnostic.content:IsShown(),"Copy did not open selectable report text")
+check(diagnostic.copyText.multiline and diagnostic.copyText.autoFocus==false,"Copy text does not use a multiline native edit box")
+check(diagnostic.copyText.focused and diagnostic.copyText.highlighted==diagnostic.copyText:GetText(),"Copy did not select the full report")
+check(diagnostic.copyText:GetText():find("Unavailable: bartender",1,true),"Copy omitted the actual setup blocker")
+check(diagnostic.note:GetText():find("Cmd+C",1,true) and not diagnostic.note:GetText():find("Copied",1,true),"Copy falsely claimed clipboard access")
+check(Live.setupReview==originalReview and #Live.db.profileBackups==count,"Copy invalidated the reviewed transaction or wrote settings")
+diagnostic.copyText.scripts.OnEscapePressed()
+check(not liveWindow:IsShown() and not diagnostic.copyText.focused,"Closing copy report retained keyboard focus")
+Live:OpenDiagnostics("report")
+check(not diagnostic.copyText:IsShown() and diagnostic.content:IsShown(),"Reopening diagnostics retained editable mode")
+check(liveWindow.activeTab=="report","Report alias did not select its tab")
+local beforeTab=Live.setupReview
+click(liveWindow.tabs.perf)
+check(liveWindow.activeTab=="perf" and diagnostic.content:GetText():find("not FPS",1,true),"Performance tab omitted timing limitations")
+check(Live.setupReview==beforeTab,"Reading Performance invalidated the reviewed Apply transaction")
+click(liveWindow.tabs.tools)
+check(liveWindow.tools:IsShown() and not diagnostic:IsShown() and not liveScreen:IsShown(),"Tools tab left another pane visible")
+click(liveWindow.tools.buttons.restore)
+check(liveWindow.tools.confirmSnapshot and #Live.db.profileBackups==count,"First restore click changed settings instead of requesting confirmation")
+Live:OpenOptions()
+check(not liveWindow.tools.confirmSnapshot,"Leaving Tools retained a restore confirmation")
+check(liveWindow.activeTab=="setup" and liveScreen:IsShown() and not liveWindow.tools:IsShown(),"Bare command did not default to Setup")
+for _,id in ipairs({"setup","details","report","perf","tools"}) do
+    check(liveWindow.tabs[id]~=nil,"Missing navigation tab "..id)
+    local tab=liveWindow.tabs[id]
+    check(anchor(tab,"TOPLEFT")[4]+tab:GetWidth()<=liveWindow:GetWidth()-Live:Pixel(24)+.001,"Tabs exceed the window edge")
+    check(tab.primary==(id=="setup"),"Selected tab marker does not track the visible pane")
+end
+check(not Live.diagnostics,"Separate diagnostics window was retained")
+click(liveScreen.reload)
+check(reloads==2,"Blocked setup's explicit Reload action did not invoke ReloadUI")
+
+-- A review shown in Details must remain the transaction used by Apply.
+missingBartender=false;SetupScreenOwnerFixture.unitframes.value=0
+Live:OpenOptions()
+local inspected=Live.setupReview
+check(liveScreen.apply:IsEnabled(),"Modified fixture did not offer reviewed setup")
+click(liveWindow.tabs.details)
+SetupScreenOwnerFixture.unitframes.value=9
+click(liveWindow.tabs.setup)
+check(Live.setupReview==inspected and liveScreen.review==inspected,"Returning from Details silently replaced the inspected review")
+local snapshots=#Live.db.profileBackups
+click(liveScreen.apply)
+check(#Live.db.profileBackups==snapshots and SetupScreenOwnerFixture.unitframes.value==9,"Apply accepted an intervening owner change after tab navigation")
+check(liveScreen.messageFailed and liveScreen.description:GetText():find("changed since review",1,true),"Stale review failure was hidden")
+for _,object in ipairs(widgets) do check(not object.scripts.OnUpdate,"Diagnostics introduced polling") end
+print("setup_screen_spec: two actions, cached status, combat guards, real setup policy and selectable diagnostics passed")

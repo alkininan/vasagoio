@@ -183,6 +183,14 @@ function W:Hide(t) if t then t:SetAlpha(0) end end
 TalentsForeverBookFrame=tree
 assert(loadfile(root.."/modules/AddonWindows.lua"))("vasagoio",V)
 check(V.modules.addonWindows.Apply() and tree.shell,"current Talents shell skipped")
+versions.TalentsForeverBook="0.38.33.20261124"
+local updatedShell=frame(); TalentsForeverBookFrame=updatedShell
+check(A:Reviewed("TalentsForeverBook"),"updated Talents interior contract rejected")
+V.modules.addonWindows.Apply()
+check(updatedShell.shell and updatedShell.applied,"updated Talents shell/interior gates disagree")
+check(doneRow.check.shown and not nextRow.check.shown and node.slot.alpha==1,
+    "Updated talent styling changed completed/next-point or node state art")
+
 versions.TalentsForeverBook="0.38.28.20261116"
 check(A:Reviewed("TalentsForeverBook"),"previous audited Talents release rejected")
 local oldShell=frame(); TalentsForeverBookFrame=oldShell
@@ -193,6 +201,26 @@ TalentsForeverBookFrame,tf.orderDrawer=future,futureOrder
 V.modules.addonWindows.Apply()
 check(not A:Reviewed("TalentsForeverBook") and not future.shell and not futureOrder.applied,"unreviewed future Talents release accepted")
 versions.TalentsForeverBook="0.38.33.20261123"; tf.orderDrawer=order
+
+-- Auctionator 353 keeps its named native roots and lazy configuration callback.
+versions.Auctionator="353"
+Auctionator={Config={InternalInitializeFrames=function()end}}
+local config=frame(); AuctionatorConfigAdvancedFrame=config
+V.modules.addonWindows.Apply()
+check(A:Reviewed("Auctionator") and config.shell and config.applied,"updated Auctionator shell/interior gates disagree")
+check(hooked[Auctionator.Config] and hooked[Auctionator.Config].InternalInitializeFrames,"updated configuration callback not observed")
+local priorRefreshes=refreshes
+hooked[Auctionator.Config].InternalInitializeFrames()
+check(refreshes==priorRefreshes+1,"lazy Auctionator settings did not request a scoped refresh")
+versions.Auctionator="352"
+check(A:Reviewed("Auctionator"),"previous reviewed Auctionator rejected")
+for _,unsupported in ipairs({"354",{secret=true}})do
+    versions.Auctionator=unsupported
+    local untouched=frame();AuctionatorConfigAdvancedFrame=untouched
+    V.modules.addonWindows.Apply()
+    check(not A:Reviewed("Auctionator") and not untouched.shell and not untouched.applied,"unknown Auctionator version styled")
+end
+versions.Auctionator="353"; AuctionatorConfigAdvancedFrame=config
 
 -- Gargul's real Interface API returns AceGUI wrappers or native named frames.
 check(A:Reviewed("Gargul"),"previous audited Gargul release rejected")

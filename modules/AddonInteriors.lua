@@ -5,8 +5,8 @@ local OWNER = "addonWindows"
 local roots, hooks, originals = setmetatable({}, {__mode = "k"}), setmetatable({}, {__mode = "k"}), setmetatable({}, {__mode = "k"})
 local gargulWidgets = setmetatable({}, {__mode = "k"})
 local bagSlots = setmetatable({}, {__mode = "k"})
-local reviewed = {Baganator = "868", MRT = "5335", Auctionator = "352", Gargul = { ["8.1.0"] = true, ["8.1.1"] = true },
-    TalentsForeverBook = { ["0.38.28.20261116"] = true, ["0.38.33.20261123"] = true }}
+local reviewed = {Baganator = "868", MRT = "5335", Auctionator = {["352"]=true,["353"]=true}, Gargul = { ["8.1.0"] = true, ["8.1.1"] = true },
+    TalentsForeverBook = { ["0.38.28.20261116"] = true, ["0.38.33.20261123"] = true, ["0.38.33.20261124"] = true }}
 local function color(role, alpha)
     local c = V.Tokens.colors[role]
     return {c[1], c[2], c[3], alpha or 1}

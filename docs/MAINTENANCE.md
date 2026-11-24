@@ -25,6 +25,8 @@ The packager has an explicit allowlist and creates deterministic archives with a
 
 ## Bug reports
 
+Open `/vasagoio`, then Report → Copy report. Press Cmd+C on Mac or Ctrl+C to copy the selected compact report. It includes structured compatibility reasons, addon versions/load states and module states without profile values, account names, chat messages or raw exceptions. Copying from the Performance tab also includes styling timings. Details preserves the full current review separately; switching diagnostic tabs does not invalidate an existing Apply transaction.
+
 Include the vasagoio version, game build, relevant addon versions, a short reproduction and the first Lua error. Screenshots should omit chat/identity information you do not want public. Do not upload complete WTF, SavedVariables, paid guides, authentication tokens or account folders to issues.
 
 ## Technical boundaries

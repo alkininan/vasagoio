@@ -57,6 +57,18 @@ assert(first.styled and second.styled and refreshes==0,"Layout recursively inval
 local before=writes
 for _=1,100 do assert(V.modules.utilityBars.Apply())end
 assert(writes==before,"Unchanged utilities repeatedly wrote geometry")
+-- 1.8.20 retains the same appearance/layout contract. Updating this owner must
+-- accept a fresh review without changing unrelated mount/rotation settings.
+version="1.8.20"
+TrinketMenuDB.autoQueueEnabled,TrinketMenuDB.charClick=true,true
+local reviewed=assert(V.adapters.trinkets.Prepare())
+assert(writes==before,"Updated-owner review mutated native widgets")
+for _,change in ipairs(reviewed.changes)do
+    assert(change.key~="autoQueueEnabled" and change.key~="charClick","Cosmetic update changed owner features")
+end
+assert(V.modules.utilityBars.Apply() and writes==before,"Updated owner failed or rewrote unchanged geometry")
+assert(TrinketMenuDB.autoQueueEnabled and TrinketMenuDB.charClick,"Updated owner feature settings were overwritten")
+
 combat=true;assert(not V.modules.utilityBars.Apply() and writes==before)
 combat=false;V.modules.utilityBars.Disable()
 assert(bar.width==44 and bar.height==84 and first.points[1][4]==4 and second.points[1][5]==-44)

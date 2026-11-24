@@ -48,12 +48,49 @@ loaded.Bartender4=false
 local review=V:PrepareSetup()
 local model=V:BuildSetupStatus(review)
 check(not model.canApply and row(model,"actions").state=="attention","Missing core was marked ready")
+check(model.title=="Preset not applied" and model.description=="The full preset has not been applied. Apply is blocked by Action bars.",
+    "Required failure hid the unapplied full preset")
+check(row(model,"units").state=="ready","A blocked peer was falsely reported as applied")
 check(row(model,"actions").detail=="Bartender4 is not loaded. Enable it and reload.","Missing owner explanation is technical")
 check(model.rows[1].id=="actions","Problem row did not appear first")
 review.blockers={}
 check(not V:ApplySetup(review),"UI blockers could be bypassed for a partial HUD")
 unchanged()
 failures.bartender=nil;loaded.Bartender4=true
+
+-- Adapter-authored geometry reasons keep the precise bar and ordinary
+-- dimensions; no generic keyword mapping should erase their remedy.
+for _,reason in ipairs({
+    "Pet bar: unsupported button geometry (36 x 36, margin 2). Update vasagoio before applying this layout.",
+    "Backpack: native size getters are unavailable. Reload Bartender4 and try setup again.",
+}) do
+    failures.bartender=reason
+    review=V:PrepareSetup();model=V:BuildSetupStatus(review)
+    check(row(model,"actions").detail==reason,"Bartender geometry reason was replaced")
+    check(not model.canApply and not V:ApplySetup(review),"Detailed Bartender failure bypassed the required gate")
+    unchanged()
+end
+failures.bartender=nil
+
+-- Thrown adapter errors and invalid proposals are converted by PrepareSetup;
+-- neither a raw exception nor implementation validation text enters the row.
+local bartenderPrepare=V.adapters.bartender.Prepare
+V.adapters.bartender.Prepare=function()error("private-error-sentinel")end
+review=V:PrepareSetup();model=V:BuildSetupStatus(review)
+check(row(model,"actions").detail=="Bartender4's setup check failed in vasagoio. No settings were changed.",
+    "Bartender API failure lost its useful fixed explanation")
+check(not row(model,"actions").detail:find("private-error-sentinel",1,true),"Adapter exception leaked into setup")
+check(not V:ApplySetup(review),"Throwing adapter bypassed the required gate")
+unchanged()
+V.adapters.bartender.Prepare=function()
+    return {changes={{table={},path={"SetupHealthFixture","profiles","A","bartender"},key="configuration",value={width=320}}}}
+end
+review=V:PrepareSetup();model=V:BuildSetupStatus(review)
+check(row(model,"actions").detail=="Bartender4's preset changes could not be verified. No settings were changed.",
+    "Bartender validation failure was reduced to a generic compatibility error")
+check(not V:ApplySetup(review),"Invalid Bartender proposal bypassed the required gate")
+unchanged()
+V.adapters.bartender.Prepare=bartenderPrepare
 
 -- Optional missing skins/guide placement do not prevent a complete HUD.
 failures.skinner="Skinner version is unavailable";failures.restedxp="RestedXP version is unavailable"
@@ -81,6 +118,20 @@ for _,id in ipairs({"units","nameplates","actions","chat","minimap","meters"}) d
     check(row(model,id).state=="applied","Current matching component wasn't applied: "..id)
 end
 check(V.db.profileBackups[1].presetVersion==V.setupPresetVersion,"Preset compatibility version was not recorded")
+check(V.setupPresetVersion==4,"Status-only changes altered the preset version")
+failures.bartender="Main bar 1: native button geometry is unavailable. Reload UI and check again."
+review=V:PrepareSetup();model=V:BuildSetupStatus(review)
+check(model.title=="Needs attention" and model.description=="Apply is blocked by Action bars. No changes were made by this check.",
+    "A new blocker falsely claimed the already-applied preset was reset")
+check(row(model,"units").state=="applied" and not model.canApply,"A new blocker invalidated healthy peer snapshots")
+local previousBackupCount=#V.db.profileBackups
+check(not V:ApplySetup(review) and #V.db.profileBackups==previousBackupCount,"Blocked check changed saved preset state")
+V.db.profileBackups[1].presetVersion=V.setupPresetVersion-1
+model=V:BuildSetupStatus(V:PrepareSetup())
+check(model.title=="Preset not applied" and row(model,"units").state=="ready" and not model.canApply,
+    "New installed preset with an older snapshot was confused with an applied preset")
+V.db.profileBackups[1].presetVersion=V.setupPresetVersion
+failures.bartender=nil
 V.db.profileBackups[1].presetVersion=nil
 model=V:BuildSetupStatus(V:PrepareSetup())
 check(row(model,"units").state=="ready" and model.canApply,"Legacy snapshot hid newer preset corrections")

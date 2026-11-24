@@ -24,6 +24,25 @@ assert(text:find("3 fields: height, width", 1, true), "Table keys not summarized
 assert(not text:find("PrivateCharacterRealm", 1, true), "Private table key exposed")
 assert(not text:find("do not render", 1, true), "Nested profile content exposed")
 
+V.adapters={bartender={addon="Bartender4"}}
+V.setupReview={changes={{before="PrivateCharacterRealm",after="private profile contents"}},adapters={},
+    unavailable={{id="bartender",reason="Backpack: width=45, height=44.999996"}}}
+V.status={actionBars={state="pending",detail="private raw exception"}}
+C_AddOns={GetAddOnMetadata=function(name)
+    if name=="Bartender4" then return "4.19.2" end
+    error("metadata not available")
+end,IsAddOnLoaded=function(name) return name=="Bartender4" end}
+local report=V:DiagnosticReport()
+assert(report:find("Unavailable: bartender — Backpack: width=45, height=44.999996",1,true),"Compact report discarded exact measurements")
+assert(report:find("Bartender4: 4.19.2 (loaded)",1,true),"Compact report omitted owner version/load state")
+assert(report:find("Auctionator: unavailable (not loaded)",1,true),"Missing metadata was not handled safely")
+for _,private in ipairs({"PrivateCharacterRealm","private profile contents","private raw exception"}) do
+    assert(not report:find(private,1,true),"Compact report exposed "..private)
+end
+V.setupReview=nil
+assert(V:DiagnosticReport():find("Open /vasagoio setup",1,true),"Missing review was presented as a completed check")
+V.adapters={};V.status={};C_AddOns=nil
+
 V:InitializeDatabase()
 V.ready = true
 local applications, cleanups = 0, 0

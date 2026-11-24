@@ -109,6 +109,11 @@ TalentsForeverBookFrame = frame()
 local currentTalents = TalentsForeverBookFrame
 modules.addonWindows.Apply()
 check(V.surfaces[currentTalents], "current reviewed Talents shell was skipped")
+versions.TalentsForeverBook = "0.38.33.20261124"
+TalentsForeverBookFrame = frame()
+modules.addonWindows.Apply()
+check(V.surfaces[TalentsForeverBookFrame], "updated reviewed Talents shell was skipped")
+
 for _, unreviewed in ipairs({"0.38.34.20261124", {secret=true}}) do
     versions.TalentsForeverBook = unreviewed
     TalentsForeverBookFrame = frame()

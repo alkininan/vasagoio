@@ -1,6 +1,6 @@
 # Unit and nameplate implementation coverage
 
-This is source-audited implementation, not an in-game verification claim. The supported schemas are **Forever Unit Frames 0.79.1 and 0.81.0** and **Threat Plates 13.3.9**. Other versions refuse profile setup until reviewed. WoW has not been launched or controlled to test this release.
+This is source-audited implementation, not an in-game verification claim. The supported schemas are **Forever Unit Frames 0.79.1, 0.81.0 and 0.81.1** and **Threat Plates 13.3.9**. Other versions refuse profile setup until reviewed. WoW has not been launched or controlled to test this release.
 
 All dimensions below are the 2560×1440 design reference. Setup converts them through the shared uniform scale; FUF snaps its dimensions to whole UI units. Setup checks resulting sizes against the owner's actual schema bounds and identifies the failing field if scaling would clamp it. Each field is checked before writing. The16px resting/status badge has a native minimum10 UI units, and the28px attached-party-pet aura has a native maximum40 UI units. Larger scales are refused with a named field rather than silently clamped. Layouts must be checked at the user's actual resolution and UI scale.
 
@@ -53,3 +53,5 @@ The adapters were matched to FUF `Core/Settings.lua`, `Core/UnitProfiles.lua`, `
 Alpha.6 reviews FUF 0.81.0 storage, unit hooks and aura pools. Its new `partyPerLine` option is set to five to retain the agreed single party column; attached pets remain beside their owners. New raid resource-color fields use the shared palette, and the missing-health track retains the neutral background. A read-only check against the installed owner's schema accepted all 690 proposed values without normalization. Earlier 0.79.1 remains supported without writing these newer fields.
 
 Alpha.4 explicitly disables inherited always-visible idle cast rows and the player's extra threat row in the reviewed FUF profile. Actual enabled cast bars remain available during casts; TinyThreat remains the selected threat meter. Unit creation and roster callbacks request only the unit-frame module, so they do not trigger unrelated window styling. Applying this profile correction requires setup and reload.
+
+Alpha.9 directly audits FUF 0.81.1's profile storage, exported hooks, frame members, aura pools and settings registries. All 730 proposed values pass at effective scales 0.625, 1.00 and 1.40; 0.50 and 1.50 are refused before writing. Reproduce the source-only audit with `lua tests/fuf_schema_audit.lua <FUF-source-directory>` from the repository root. The newer party wrapping and raid color fields remain applied. This is source/registry evidence, not a binary comparison with 0.81.0 or native combat/rendering proof.

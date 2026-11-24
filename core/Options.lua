@@ -148,17 +148,66 @@ function V:StatusText()
     return table.concat(lines, "\n")
 end
 
-local stateLabels={ready="Ready",applied="Applied",reload="Reload needed",attention="Needs attention",skipped="Skipped",off="Off"}
+-- This report deliberately excludes profile values, character/account names,
+-- chat messages and raw exception strings. It is built only on user request.
+local function reportValue(value)
+    if V:IsSecret(value) or type(value)~="string" then return "unavailable" end
+    return value:gsub("%c"," "):gsub("|",""):sub(1,512)
+end
+function V:DiagnosticReport()
+    local lines={"vasagoio "..self.version.." diagnostic report", "Native visual/combat validation: pending"}
+    local review=self.setupReview
+    if self.BuildSetupStatus then
+        local model=self:BuildSetupStatus(review)
+        lines[#lines+1]="Setup: "..reportValue(model.title)
+        for _,row in ipairs(model.rows) do
+            lines[#lines+1]=reportValue(row.label)..": "..reportValue(row.state).." — "..reportValue(row.detail)
+        end
+    end
+    lines[#lines+1]=""
+    if review then
+        for _,entry in ipairs(review.unavailable or {}) do
+            lines[#lines+1]="Unavailable: "..reportValue(entry.id).." — "..reportValue(entry.reason)
+        end
+    else lines[#lines+1]="No current setup review. Open /vasagoio setup before reporting a compatibility issue." end
+    lines[#lines+1]=""; lines[#lines+1]="Addon versions:"
+    local names={}
+    for _,name in ipairs({"ForeverUnitFrames","ForeverTrinketMenu","TalentsForeverBook","Auctionator",
+        "Baganator","MRT","Gargul","Skinner","RXPGuides","Details_TinyThreat"}) do names[name]=true end
+    for _,adapter in pairs(self.adapters or {}) do if type(adapter.addon)=="string" then names[adapter.addon]=true end end
+    local ordered={}; for name in pairs(names) do ordered[#ordered+1]=name end; table.sort(ordered)
+    local metadata=C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+    local loaded=C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
+    for _,name in ipairs(ordered) do
+        local version,active="unavailable","load state unavailable"
+        if type(metadata)=="function" then
+            local ok,value=pcall(metadata,name,"Version")
+            if ok then version=reportValue(value) end
+        end
+        if type(loaded)=="function" then
+            local ok,value=pcall(loaded,name)
+            if ok and not self:IsSecret(value) and type(value)=="boolean" then active=value and "loaded" or "not loaded" end
+        end
+        lines[#lines+1]=name..": "..version.." ("..active..")"
+    end
+    lines[#lines+1]=""; lines[#lines+1]="Styling checks:"
+    local keys={}; for key in pairs(self.status or {}) do keys[#keys+1]=key end; table.sort(keys)
+    for _,key in ipairs(keys) do lines[#lines+1]=reportValue(key)..": "..reportValue(self.status[key].state) end
+    lines[#lines+1]=""; lines[#lines+1]="No profile values, account names or chat messages are included."
+    return table.concat(lines,"\n")
+end
+
+local stateLabels={ready="Ready to apply",applied="Applied",reload="Reload needed",attention="Needs attention",skipped="Skipped",off="Off"}
 local stateColors={ready="information",applied="information",reload="information",attention="attention",skipped="muted",off="muted"}
 
 function V:RenderSetup()
-    local frame=self.options
+    local frame=self.options and self.options.setup
     if not frame then return end
     local model=self:BuildSetupStatus(frame.review,frame.reason)
     frame.model=model
     frame.summary:SetText(safeText(frame.messageTitle or model.title))
     frame.description:SetText(safeText(frame.message or model.description))
-    colorText(frame.summary,(frame.messageFailed or model.title=="Needs attention") and "attention" or "information")
+    colorText(frame.summary,(frame.messageFailed or model.title=="Needs attention" or model.title=="Preset not applied") and "attention" or "information")
     local rows,order={},{}
     for i,row in ipairs(model.rows) do rows[i]=row; order[row]=i end
     table.sort(rows,function(a,b)
@@ -187,73 +236,135 @@ function V:RenderSetup()
         y=y+height+px(8)
     end
     for i=#rows+1,#frame.rows do frame.rows[i]:Hide() end
-    fitScroll(frame,math.max(0,y-px(8)),px(368))
+    fitScroll(frame,math.max(0,y-px(8)),px(416))
     local combat=InCombatLockdown()
     frame.apply:SetEnabled(model.canApply and not combat)
-    frame.reload:SetEnabled(model.needsReload and not combat)
+    frame.reload:SetEnabled(not combat)
     frame.apply.primary=model.canApply and not model.needsReload
     frame.reload.primary=model.needsReload
     paintButton(frame.apply); paintButton(frame.reload)
     if combat then frame.description:SetText("Leave combat to apply the preset or reload.") end
 end
 
-function V:OpenDiagnostics(mode)
-    if InCombatLockdown() then self:Print("Leave combat before opening diagnostics."); return end
-    if not self.diagnostics then
-        local f=CreateFrame("Frame","VasagoioDiagnostics",UIParent)
-        f:SetSize(px(720),px(608)); f:SetPoint("CENTER"); f:SetFrameStrata("DIALOG"); f:SetClampedToScreen(true); f:EnableMouse(true)
-        f.close=closeButton(f); makeScroll(f,64,24)
+local function diagnosticsView(parent)
+        local f=CreateFrame("Frame",nil,parent); f:SetAllPoints(parent)
+        makeScroll(f,144,96)
+        f.title=plainText(f,"heading"); f.title:SetPoint("TOPLEFT",px(24),-px(112))
         f.content=plainText(f.body,"compact"); f.content:SetPoint("TOPLEFT"); f.content:SetWidth(px(568))
-        self.diagnostics=f
-        UISpecialFrames=UISpecialFrames or {}; table.insert(UISpecialFrames,"VasagoioDiagnostics")
-    end
-    local f=self.diagnostics
-    local content=mode=="perf" and self:PerformanceText() or mode=="details" and self:ReviewText(self.setupReview) or self:StatusText()
-    f.content:SetText(content); fitScroll(f,f.content:GetStringHeight()+px(16),px(520))
-    V:Surface(f,.97,10); f:Show()
+        f.copyText=CreateFrame("EditBox",nil,f.body)
+        f.copyText:SetMultiLine(true); f.copyText:SetAutoFocus(false); f.copyText:SetMaxLetters(0)
+        f.copyText:SetPoint("TOPLEFT"); f.copyText:SetWidth(px(568)); f.copyText:SetJustifyH("LEFT"); f.copyText:SetJustifyV("TOP")
+        V:StyleText(f.copyText,"compact")
+        f.copyText:SetScript("OnEscapePressed",function() parent:Hide() end)
+        f:SetScript("OnHide",function() f.copyText:ClearFocus() end)
+        f.note=plainText(f,"compact"); f.note:SetPoint("BOTTOMLEFT",px(24),px(72)); f.note:SetWidth(px(592)); colorText(f.note,"muted")
+        f.copy=actionButton(f,"Copy report",24,function()
+            -- WoW cannot put addon text on the OS clipboard. Select a native
+            -- edit box so the user's normal copy shortcut works.
+            local report=f.report
+            f.content:SetText(report)
+            local height=f.content:GetStringHeight()+px(16)
+            f.content:Hide(); f.copyText:SetText(report); f.copyText:SetHeight(height); f.copyText:Show()
+            fitScroll(f,height,px(464)); f.slider:SetValue(0)
+            f.title:SetText("Copy report"); f.note:SetText("Text selected. Press Cmd+C (Mac) or Ctrl+C to copy.")
+            f.copyText:SetFocus(); f.copyText:HighlightText()
+        end)
+        paintButton(f.copy)
+        return f
 end
 
-function V:OpenOptions(mode)
-    if mode=="perf" or mode=="details" or mode=="report" then return self:OpenDiagnostics(mode) end
-    if InCombatLockdown() then self:Print("Leave combat before opening setup."); return end
+local function setupView(parent)
+        local frame=CreateFrame("Frame",nil,parent); frame:SetAllPoints(parent)
+        frame.summary=plainText(frame,"heading"); frame.summary:SetPoint("TOPLEFT",px(24),-px(112)); frame.summary:SetWidth(px(592))
+        frame.description=plainText(frame,"compact"); frame.description:SetPoint("TOPLEFT",px(24),-px(144)); frame.description:SetWidth(px(592)); frame.description:SetHeight(px(40))
+        makeScroll(frame,192,96); frame.rows={}
+        frame.note=plainText(frame,"compact"); frame.note:SetPoint("BOTTOMLEFT",px(24),px(72)); frame.note:SetWidth(px(592)); frame.note:SetText("Checks cover addons, settings and reported errors."); colorText(frame.note,"muted")
+        frame.apply=actionButton(frame,"Apply preset",24,function()
+            if InCombatLockdown() then V:RenderSetup(); return end
+            local ok,message=V:ApplySetup(frame.review)
+            frame.messageTitle=ok and "Reload needed" or "Needs attention"
+            frame.message=ok and "Preset applied. Reload UI to activate the changes." or message
+            frame.messageFailed=not ok
+            if V.profileReloadPending then frame.review=nil; frame.reason=nil
+            else frame.review,frame.reason=V:PrepareSetup() end
+            V:RenderSetup()
+        end)
+        frame.reload=parent.reload
+        return frame
+end
+
+local tabs={{"setup","Setup"},{"details","Details"},{"report","Report"},{"perf","Performance"},{"tools","Tools"}}
+function V:OpenDiagnostics(mode) return self:OpenOptions(mode or "report") end
+function V:OpenOptions(mode, fromTab)
+    if mode~="details" and mode~="report" and mode~="perf" and mode~="tools" then mode="setup" end
+    if InCombatLockdown() and (not self.options or not self.options:IsShown()) then
+        self:Print("Leave combat before opening vasagoio."); return
+    end
     if not self.options then
         local frame=CreateFrame("Frame","VasagoioOptions",UIParent)
-        frame:SetSize(px(640),px(608)); frame:SetPoint("CENTER"); frame:SetFrameStrata("DIALOG")
+        frame:SetSize(px(640),px(704)); frame:SetPoint("CENTER"); frame:SetFrameStrata("DIALOG")
         frame:SetClampedToScreen(true); frame:EnableMouse(true); frame:SetMovable(true)
         frame:RegisterForDrag("LeftButton"); frame:SetScript("OnDragStart",frame.StartMoving); frame:SetScript("OnDragStop",frame.StopMovingOrSizing)
         frame.close=closeButton(frame)
         frame.title=plainText(frame,"title"); frame.title:SetPoint("TOPLEFT",px(24),-px(24)); frame.title:SetText("vasagoio")
         local version=plainText(frame,"compact"); version:SetPoint("TOPRIGHT",-px(56),-px(28)); version:SetText(self.version); colorText(version,"muted")
-        frame.summary=plainText(frame,"heading"); frame.summary:SetPoint("TOPLEFT",px(24),-px(64)); frame.summary:SetWidth(px(592))
-        frame.description=plainText(frame,"compact"); frame.description:SetPoint("TOPLEFT",px(24),-px(96)); frame.description:SetWidth(px(592)); frame.description:SetHeight(px(40))
-        makeScroll(frame,144,96); frame.rows={}
-        frame.note=plainText(frame,"compact"); frame.note:SetPoint("BOTTOMLEFT",px(24),px(72)); frame.note:SetWidth(px(592)); frame.note:SetText("Checks cover addons, settings and reported errors."); colorText(frame.note,"muted")
-        frame.apply=actionButton(frame,"Apply preset",24,function()
-            if InCombatLockdown() then self:RenderSetup(); return end
-            local ok,message=self:ApplySetup(frame.review)
-            frame.messageTitle=ok and "Reload needed" or "Needs attention"
-            frame.message=ok and "Preset applied. Reload UI to activate the changes." or message
-            frame.messageFailed=not ok
-            if self.profileReloadPending then frame.review=nil; frame.reason=nil
-            else frame.review,frame.reason=self:PrepareSetup() end
-            self:RenderSetup()
-        end)
         frame.reload=actionButton(frame,"Reload UI",328,function()
-            if not InCombatLockdown() and frame.model and frame.model.needsReload then ReloadUI() end
+            if not InCombatLockdown() then ReloadUI() end
+        end)
+        frame.setup=setupView(frame); frame.diagnostics=diagnosticsView(frame)
+        frame.tools=self:CreateToolsView(frame)
+        frame.tabs={}
+        for index,entry in ipairs(tabs) do
+            local id=entry[1]
+            local button=actionButton(frame,entry[2],0,function() V:OpenOptions(id,true) end)
+            button:ClearAllPoints(); button:SetSize(px(112),px(32)); button:SetPoint("TOPLEFT",px(24+(index-1)*120),-px(64))
+            V:StyleText(button.label,"compact"); frame.tabs[id]=button
+        end
+        frame:SetScript("OnHide",function()
+            frame.diagnostics.copyText:ClearFocus()
+            if frame.tools.CancelConfirmation then frame.tools:CancelConfirmation() end
         end)
         self.options=frame
         UISpecialFrames=UISpecialFrames or {}; table.insert(UISpecialFrames,"VasagoioOptions")
     end
-    local frame=self.options
-    frame.message,frame.messageTitle,frame.messageFailed=nil,nil,nil
-    if self.profileReloadPending then frame.review,frame.reason=nil,nil
-    else frame.review,frame.reason=self:PrepareSetup() end
-    V:Surface(frame,.97,10); self:RenderSetup(); frame:Show()
+    local frame=self.options; local setup=frame.setup
+    frame.activeTab=mode
+    frame.setup:Hide(); frame.diagnostics:Hide(); frame.tools:Hide()
+    for id,button in pairs(frame.tabs) do button.primary=id==mode; paintButton(button) end
+    if mode=="setup" then
+        if not fromTab then setup.message,setup.messageTitle,setup.messageFailed=nil,nil,nil end
+        if self.profileReloadPending or self.uiReloadPending then setup.review,setup.reason=nil,nil
+        elseif not InCombatLockdown() and (not fromTab or not setup.review) then setup.review,setup.reason=self:PrepareSetup() end
+        self:RenderSetup(); setup:Show()
+    elseif mode=="tools" then
+        frame.tools:Refresh(); frame.tools:Show()
+    else
+        -- Reading tabs never invalidates an existing reviewed Apply transaction.
+        if not self.setupReview and not self.profileReloadPending and not self.uiReloadPending and not InCombatLockdown() then
+            setup.review,setup.reason=self:PrepareSetup()
+        end
+        local f=frame.diagnostics
+        f.report=self:DiagnosticReport()
+        local content=mode=="perf" and self:PerformanceText() or mode=="details" and self:ReviewText(self.setupReview) or f.report
+        if mode=="perf" then f.report=f.report.."\n\n"..content end
+        f.title:SetText(mode=="perf" and "Performance" or mode=="details" and "Preset details" or "Diagnostic report")
+        f.note:SetText("Copy report selects a short report with errors and addon versions.")
+        paintButton(f.copy)
+        f.copyText:Hide(); f.content:Show(); f.content:SetText(content)
+        fitScroll(f,f.content:GetStringHeight()+px(16),px(464)); f.slider:SetValue(0); f:Show()
+    end
+    frame.reload:SetEnabled(not InCombatLockdown())
+    frame.reload.primary=self.profileReloadPending==true or self.uiReloadPending==true
+    paintButton(frame.reload)
+    V:Surface(frame,.97,10); frame:Show()
 end
 
 for _,event in ipairs({"PLAYER_REGEN_DISABLED","PLAYER_REGEN_ENABLED"}) do
     V:On(event,function()
-        if V.options and V.options:IsShown() then V:RenderSetup() end
+        if V.options and V.options:IsShown() then
+            V:RenderSetup()
+            V.options.tools:Refresh()
+        end
     end)
 end
 
@@ -287,7 +398,10 @@ function V:SetEnabled(enabled)
         self:RestoreArtwork()
         -- Keep this addon's own enable/restore controls legible while styling
         -- is disabled. This surface does not affect gameplay frames.
-        if self.options then self:Surface(self.options, .97, 10) end
+        if self.options then
+            self:Surface(self.options, .97, 10)
+            for _,tab in pairs(self.options.tabs) do paintButton(tab) end
+        end
     end
     if self.options and self.options:IsShown() then self:RenderSetup() end
     self:Print(enabled and "Enabled. Reload for consistent owner state." or "Disabled. Reload to remove all existing hooks and styling; owner profiles remain unchanged.")
@@ -309,8 +423,10 @@ SlashCmdList.VASAGOIO = function(message)
         else
             local ok,message=V:RollbackProfiles(); V:Print(message)
             if V.options and V.options:IsShown() then
-                V.options.messageTitle=ok and "Reload needed" or "Needs attention"
-                V.options.message=message; V.options.messageFailed=not ok; V:RenderSetup()
+                local setup=V.options.setup
+                setup.messageTitle=ok and "Reload needed" or "Needs attention"
+                setup.message=message; setup.messageFailed=not ok; V:RenderSetup()
+                V.options.tools:Refresh()
             end
         end
     elseif command == "module" then

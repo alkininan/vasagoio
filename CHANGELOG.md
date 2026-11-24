@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0-alpha.9 — 2026-11-25
+
+- Open one window with `/vasagoio`: Setup first, plus Details, Report, Performance and Tools. Keep Apply preset and Reload UI on Setup; make Reload available outside combat throughout the window.
+- Add a selectable Copy report with exact compatibility reasons, addon versions and structured checks. Press Cmd+C or Ctrl+C; no automatic clipboard claim or private profile/chat contents.
+- Show Ready to apply separately from Applied. Identify blocked presets and preserve actionable Bartender explanations.
+- Accept only tiny native square-button rounding differences (0.001 UI unit); guard backpack getters and report invalid measurements without guessing dimensions or bypassing required setup checks.
+- Review FUF 0.81.1, Forever Trinket Menu 1.8.20, Auctionator 353 and Talents Forever 0.38.33.20261124, retaining earlier supported versions. Verify all 730 proposed FUF settings against its installed registries at three supported scales.
+- Add guarded aura-test and styling controls, with an explicit two-step snapshot restore in Tools. Closing or leaving Tools cancels confirmation. No automatic reload or new polling.
+
+This keeps design revision 11 and preset marker 4. An already applied, matching alpha.8 preset does not need another application. A blocked alpha.8 preset still needs Apply and Reload after checks pass. The original Bartender failure's exact runtime cause remains unconfirmed; copy the new report if it persists. Native visuals, combat, clipboard interaction and alpha acceptance require user testing.
+
 ## 0.2.0-alpha.8 — 2026-11-25
 
 - Apply Vasagoio Specs revision 11: Large 304×72, Medium 224×56, Small 176×40, shared 16px resource bars and 72px clearance above the nearest action row. Player XP fits inside the 72px frame.

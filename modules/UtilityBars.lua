@@ -1,13 +1,15 @@
 local _, V = ...
 local T, A = V.Tokens, V.Tokens.action
-local MODULE, VERSION = "utilityBars", "1.8.19"
+local MODULE = "utilityBars"
+-- Both releases retain the two named 36px slot widgets and layoutVersion 3.
+local VERSIONS = {["1.8.19"]=true,["1.8.20"]=true}
 local records, hooked = setmetatable({}, {__mode="k"}), setmetatable({}, {__mode="k"})
 local applying, pending
 
 local function reviewed()
     local get = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
     local version = get and get("ForeverTrinketMenu", "Version")
-    return not V:IsSecret(version) and version == VERSION
+    return not V:IsSecret(version) and type(version)=="string" and VERSIONS[version]==true
 end
 local function usable(frame)
     if V:IsSecret(frame) or not frame or not frame.SetPoint or not frame.GetNumPoints then return false end
@@ -109,7 +111,7 @@ end
 V:RegisterProfileAdapter("trinkets", {
     label="Forever Trinket Menu: aligned utility column", addon="ForeverTrinketMenu", module=MODULE,
     Prepare=function()
-        if not reviewed() then return nil, "Reviewed Forever Trinket Menu 1.8.19 is required" end
+        if not reviewed() then return nil, "Reviewed Forever Trinket Menu 1.8.19 or 1.8.20 is required" end
         if InCombatLockdown() then return nil, "Leave combat before reviewing trinket placement" end
         if type(_G.TrinketMenuDB) ~= "table" or not widgets() then return nil, "Initialize Forever Trinket Menu and reload once" end
         local scale, anchor = position()

@@ -2,15 +2,16 @@ local addonName, V = ...
 local W = V.WindowSkin
 local bagListenerInstalled, ticker
 local discovered = setmetatable({}, {__mode = "k"})
-local TALENTS_VERSIONS = { ["0.38.28.20261116"] = true, ["0.38.33.20261123"] = true }
+local AUCTIONATOR_VERSIONS = {["352"]=true,["353"]=true}
+local TALENTS_VERSIONS = { ["0.38.28.20261116"] = true, ["0.38.33.20261123"] = true, ["0.38.33.20261124"] = true }
 
 -- Named roots verified against these releases. An upgrade keeps all addon
 -- functionality and suspends only this optional cosmetic adapter until reviewed.
 local ROOTS = {
     {addon = "MRT", version = "5335", name = "MRTOptionsFrame", titles = {"HeaderText"}},
-    {addon = "Auctionator", version = "352", name = "AuctionatorFullScanFrame"},
-    {addon = "Auctionator", version = "352", name = "AuctionatorPageStatusDialogFrame"},
-    {addon = "Auctionator", version = "352", name = "AuctionatorThrottlingTimeoutDialogFrame"},
+    {addon = "Auctionator", version = AUCTIONATOR_VERSIONS, name = "AuctionatorFullScanFrame"},
+    {addon = "Auctionator", version = AUCTIONATOR_VERSIONS, name = "AuctionatorPageStatusDialogFrame"},
+    {addon = "Auctionator", version = AUCTIONATOR_VERSIONS, name = "AuctionatorThrottlingTimeoutDialogFrame"},
     {addon = "TalentsForeverBook", version = TALENTS_VERSIONS, name = "TalentsForeverBookFrame",
         art = {"page", "vignette", "titleRule"}, titles = {"tfTitle", "titleText"}, cover = true},
     {addon = "TalentsForeverBook", version = TALENTS_VERSIONS, name = "TalentsForeverBookTrainer",
@@ -20,11 +21,11 @@ local ROOTS = {
 }
 for _, name in ipairs({"AuctionatorShoppingFrame", "AuctionatorConfigFrame", "AuctionatorCancellingFrame",
     "AuctionatorSellingFrame", "AuctionatorBuyFrame"}) do
-    ROOTS[#ROOTS + 1] = {addon = "Auctionator", version = "352", name = name}
+    ROOTS[#ROOTS + 1] = {addon = "Auctionator", version = AUCTIONATOR_VERSIONS, name = name}
 end
 for _, name in ipairs({"BasicOptions", "Tooltips", "ShoppingAlt", "Selling", "SellingAllItems",
     "SellingShortcuts", "Cancelling", "Profile", "Advanced"}) do
-    ROOTS[#ROOTS + 1] = {addon = "Auctionator", version = "352", name = "AuctionatorConfig" .. name .. "Frame"}
+    ROOTS[#ROOTS + 1] = {addon = "Auctionator", version = AUCTIONATOR_VERSIONS, name = "AuctionatorConfig" .. name .. "Frame"}
 end
 
 local function versionMatches(entry)

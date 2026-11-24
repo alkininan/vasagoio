@@ -54,7 +54,9 @@ function V:On(event, fn) events[event] = fn end
 function V:Report(id,state,detail) self.report = {id,state,detail} end
 function V:Refresh(_, id) refreshes = refreshes + 1; self.lastRefreshModule = id end
 function V:IsSecret(value) return type(value)=="table" and value.secret == true end
-function V:SafeNumber(value) if not self:IsSecret(value) and type(value)=="number" then return value end end
+function V:SafeNumber(value)
+    if not self:IsSecret(value) and type(value)=="number" and value==value and value~=math.huge and value~=-math.huge then return value end
+end
 function V:Pixel(value) return value end
 function V:CanvasOrigin() return (UIParent:GetWidth()-2560)/2,(UIParent:GetHeight()-1440)/2 end
 function V:Font(role) return "native.ttf", ({countdown=18,compactCountdown=16,chat=16})[role] or 14, "" end
@@ -105,6 +107,44 @@ local function commit(plan)
     validate(plan)
     for _, change in ipairs(plan.changes) do change.table[change.key] = change.value end
 end
+-- A disabled BagBar still has a valid namespace; review must not enable it
+-- merely to inspect native geometry, and native float rounding is harmless.
+MainMenuBarBackpackButton:SetSize(45,44.999996)
+runtimes[1].button_height=44.999996
+pet.bar.button_height=30.000004
+check(adapters.bartender.Prepare()~=nil,"Tiny native dimension rounding blocked setup")
+check(not bags.db.profile.enabled,"Geometry review enabled the native BagBar")
+runtimes[1].button_height=45;pet.bar.button_height=30
+local function invalidBackpack(width,height,detail)
+    MainMenuBarBackpackButton:SetSize(width,height)
+    local plan,reason=adapters.bartender.Prepare()
+    check(not plan and reason:find(detail,1,true),"Invalid backpack geometry lacked an actionable measurement: "..tostring(reason))
+end
+invalidBackpack(0,0,"width=0, height=0")
+invalidBackpack(45,48,"width=45, height=48")
+invalidBackpack(45,45.01,"width=45, height=45.01")
+invalidBackpack(math.huge,45,"width=non-finite")
+invalidBackpack(45,0/0,"height=non-finite")
+invalidBackpack({secret=true},45,"width=restricted")
+MainMenuBarBackpackButton:SetSize(48,48)
+local getWidth=MainMenuBarBackpackButton.GetWidth
+MainMenuBarBackpackButton.GetWidth=function()error("native getter refused")end
+local failed,reason=adapters.bartender.Prepare()
+check(not failed and reason:find("measurement failed",1,true),"Native getter error escaped setup review")
+MainMenuBarBackpackButton.GetWidth=getWidth
+local forbiddenReads=0
+MainMenuBarBackpackButton.GetWidth=function(self)forbiddenReads=forbiddenReads+1;return getWidth(self)end
+for _,flag in ipairs({true,{secret=true}})do
+    MainMenuBarBackpackButton.IsForbidden=function()return flag end
+    local plan,why=adapters.bartender.Prepare()
+    check(not plan and why:find("refused native size access",1,true),"Forbidden geometry was read")
+end
+MainMenuBarBackpackButton.IsForbidden=function()error("access refused")end
+failed,reason=adapters.bartender.Prepare()
+check(not failed and reason:find("refused native size access",1,true),"Forbidden getter error escaped setup review")
+check(forbiddenReads==0,"Forbidden size getters were invoked")
+MainMenuBarBackpackButton.IsForbidden=nil
+MainMenuBarBackpackButton.GetWidth=getWidth
 local barPlan = adapters.bartender.Prepare()
 validate(barPlan)
 check(actionProfiles[1].rows == nil and actionProfiles[1].showgrid == nil and Bartender4.db.profile.outofrange == "button", "Review wrote a profile")

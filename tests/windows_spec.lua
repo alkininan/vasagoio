@@ -104,6 +104,19 @@ modules.addonWindows.Apply()
 check(registrations == 1 and bag.hooks == 1, "Baganator skin listener/hook duplicated")
 check(V.surfaces[bag] and item.Count.role == "count", "Baganator API types not skinned")
 check(TalentsForeverBookFrame.cover[1].alpha == 0, "reviewed Talents cover not hidden")
+versions.TalentsForeverBook = "0.38.33.20261123"
+TalentsForeverBookFrame = frame()
+local currentTalents = TalentsForeverBookFrame
+modules.addonWindows.Apply()
+check(V.surfaces[currentTalents], "current reviewed Talents shell was skipped")
+for _, unreviewed in ipairs({"0.38.34.20261124", {secret=true}}) do
+    versions.TalentsForeverBook = unreviewed
+    TalentsForeverBookFrame = frame()
+    modules.addonWindows.Apply()
+    check(not V.surfaces[TalentsForeverBookFrame], "unreviewed or restricted Talents shell was styled")
+end
+versions.TalentsForeverBook = "0.38.33.20261123"
+TalentsForeverBookFrame = currentTalents
 before = mutations
 combat = true
 listener({region = frame(), regionType = "ButtonFrame"})

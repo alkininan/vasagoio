@@ -38,3 +38,9 @@ Send the GitHub release link and this guide. They install the functional package
 ## Updating from 0.1
 
 With WoW closed, replace only the `vasagoio` addon folder with the 0.2 release folder. Keep `VasagoioDB` and your existing functional-addon settings. Interior styling activates with the existing nativeWindows/addonWindows module preferences; no new profile reset is needed. If Skinner has not yet received the reviewed palette, use setup and reload. The new selected/focus state uses a near-black fill and a small blue bottom marker, as agreed.
+
+## Alpha acceptance
+
+For the first manual pass, check the **Unavailable** entries in `/vasagoio setup` before applying. An enabled Apply button can represent a partial proposal, including only the addon-owned HUD placement. Missing or unreviewed functional owners must not be treated as a completed setup. After a complete review, apply, reload immediately, and inspect status and the first relevant BugSack error.
+
+Proceed through windows/HUD, party/raid/PvP, combat, and persistence/recovery checks from step 8 and [coverage](COVERAGE.md). Record PASS, FAIL or NOT RUN for each actual context; unresolved failures need fixes and retesting. Current Alpha labels remain until native results support advancing to Beta. Updating between 0.2 alpha builds requires replacing only the addon folder, without resetting SavedVariables or reapplying unchanged owner profiles.

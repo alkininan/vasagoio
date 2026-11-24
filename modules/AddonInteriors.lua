@@ -4,7 +4,8 @@ V.AddonInteriors = A
 local OWNER = "addonWindows"
 local roots, hooks, originals = setmetatable({}, {__mode = "k"}), setmetatable({}, {__mode = "k"}), setmetatable({}, {__mode = "k"})
 local gargulWidgets = setmetatable({}, {__mode = "k"})
-local reviewed = {MRT = "5335", Auctionator = "352", TalentsForeverBook = "0.38.28.20261116", Gargul = "8.1.0"}
+local reviewed = {MRT = "5335", Auctionator = "352", Gargul = "8.1.0",
+    TalentsForeverBook = { ["0.38.28.20261116"] = true, ["0.38.33.20261123"] = true }}
 local function color(role, alpha)
     local c = V.Tokens.colors[role]
     return {c[1], c[2], c[3], alpha or 1}
@@ -12,7 +13,11 @@ end
 
 function A:Reviewed(addon)
     local get = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
-    return get and get(addon, "Version") == reviewed[addon]
+    local version = get and get(addon, "Version")
+    if V:IsSecret(version) or type(version) ~= "string" then return false end
+    local expected = reviewed[addon]
+    if type(expected) == "table" then return expected[version] == true end
+    return version == expected
 end
 local function available(o) return V.WindowSkin:Available(o) end
 local function enabled() return not V.profileReloadPending and V.WindowSkin:Enabled(OWNER) end
@@ -77,6 +82,25 @@ end
 
 local function talentFrame(frame)
     local I = V.InteriorSkin
+    local tf = _G.TalentsForeverBook
+    local ui = available(tf) and tf.UI
+    if available(ui) and frame == ui.orderDrawer then
+        -- 0.38.33's leveling-order drawer: neutral outer chrome only. Row
+        -- next-point fills, completed ticks and desaturated icons remain native.
+        hide(frame.top); edges(frame.topEdge)
+        I:Panel(frame, "inset", OWNER)
+        if available(frame.inset) then I:Panel(frame.inset, "inset", OWNER) end
+    elseif available(ui) and frame == ui.planCard then
+        I:Panel(frame, "panel", OWNER)
+        hide(frame.page); hide(frame.vignette); edges(frame.cover)
+        -- Keep the owner's new opaque backing that stops tree art showing
+        -- through the plan editor, changing only its neutral tint.
+        tint(frame.solid, color("panel", .96))
+    end
+    if frame.icon and frame.rank and frame.lv and frame.check then
+        text(frame.name, "body", true); text(frame.lv, "count", true); text(frame.rank, "count", true)
+        return false
+    end
     -- Talent nodes carry owner-managed rank, planned-rank, prerequisites,
     -- selection/ghost glows and animated path art. Never flatten those states.
     if frame.icon and frame.slot and (frame.rank or frame.ring) then
@@ -353,8 +377,8 @@ function A:Discover()
     if not ready() then return 0 end
     local tf = _G.TalentsForeverBook
     if self:Reviewed("TalentsForeverBook") and available(tf) and available(tf.UI) then
-        for _, method in ipairs({"Refresh", "Layout", "SetTab", "LayoutTabs"}) do hook(tf.UI, method, request) end
-        for _, key in ipairs({"sideFrame", "drawer"}) do self:Register(tf.UI[key], "TalentsForeverBook", false) end
+        for _, method in ipairs({"Refresh", "Layout", "SetTab", "LayoutTabs", "OpenOrder", "OpenPlans"}) do hook(tf.UI, method, request) end
+        for _, key in ipairs({"sideFrame", "drawer", "orderDrawer", "planCard"}) do self:Register(tf.UI[key], "TalentsForeverBook", false) end
     end
     local mrt = _G.GMRT
     if self:Reviewed("MRT") and available(mrt) and available(mrt.Options) then

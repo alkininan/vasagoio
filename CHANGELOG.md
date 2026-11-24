@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0-alpha.2
+
+Adds reviewed compatibility for Talents Forever Book 0.38.33.20261123 so a fresh installation can use its current release. The earlier 0.38.28.20261116 contract remains supported; unreviewed future releases still retain their owner appearance. New drawer and plan-state handling preserves native layout and meaningful state indicators.
+
+This remains an alpha candidate for user-run installation, visual and combat checks. Offline validation does not mark native acceptance complete, and CurseForge publication remains pending that acceptance.
+
 ## 0.2.0-alpha.1
 
 The previous build styled window shells but left their interiors inconsistent. This release extends the shared design into native and selected-addon controls while retaining their original layouts and behavior.

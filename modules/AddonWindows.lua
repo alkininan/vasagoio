@@ -2,6 +2,7 @@ local addonName, V = ...
 local W = V.WindowSkin
 local bagListenerInstalled, ticker
 local discovered = setmetatable({}, {__mode = "k"})
+local TALENTS_VERSIONS = { ["0.38.28.20261116"] = true, ["0.38.33.20261123"] = true }
 
 -- Named roots verified against these releases. An upgrade keeps all addon
 -- functionality and suspends only this optional cosmetic adapter until reviewed.
@@ -10,11 +11,11 @@ local ROOTS = {
     {addon = "Auctionator", version = "352", name = "AuctionatorFullScanFrame"},
     {addon = "Auctionator", version = "352", name = "AuctionatorPageStatusDialogFrame"},
     {addon = "Auctionator", version = "352", name = "AuctionatorThrottlingTimeoutDialogFrame"},
-    {addon = "TalentsForeverBook", version = "0.38.28.20261116", name = "TalentsForeverBookFrame",
+    {addon = "TalentsForeverBook", version = TALENTS_VERSIONS, name = "TalentsForeverBookFrame",
         art = {"page", "vignette", "titleRule"}, titles = {"tfTitle", "titleText"}, cover = true},
-    {addon = "TalentsForeverBook", version = "0.38.28.20261116", name = "TalentsForeverBookTrainer",
+    {addon = "TalentsForeverBook", version = TALENTS_VERSIONS, name = "TalentsForeverBookTrainer",
         art = {"bg", "top", "page", "vignette"}, cover = true},
-    {addon = "TalentsForeverBook", version = "0.38.28.20261116", name = "TalentsForeverBookToast",
+    {addon = "TalentsForeverBook", version = TALENTS_VERSIONS, name = "TalentsForeverBookToast",
         art = {"page", "vignette"}, cover = true},
 }
 for _, name in ipairs({"AuctionatorShoppingFrame", "AuctionatorConfigFrame", "AuctionatorCancellingFrame",
@@ -28,7 +29,10 @@ end
 
 local function versionMatches(entry)
     local metadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
-    return metadata and metadata(entry.addon, "Version") == entry.version
+    local version = metadata and metadata(entry.addon, "Version")
+    if V:IsSecret(version) or type(version) ~= "string" then return false end
+    if type(entry.version) == "table" then return entry.version[version] == true end
+    return version == entry.version
 end
 
 local function applyRoot(entry)
@@ -121,7 +125,7 @@ end)
 
 V.AddonWindowCoverage = {
     baganator = "All 19 public skin-region types: panels, buttons, tabs, inputs, sliders, scrollbars and typography; item/rarity/search/cooldown state retained",
-    talentsForever = "Reviewed book/trainer/toast, tree pane chrome, plate controls, tabs, inputs and typography; talent artwork, ranks, paths and planning state retained",
+    talentsForever = "Reviewed book/trainer/toast, leveling-order drawer and plan card, tree pane chrome, plate controls, tabs, inputs and typography; talent artwork, ranks, paths, next-point/completed and saved/loaded state retained",
     mrt = "Reviewed GMRT options root, lazy tool pages and child dialogs; controls and typography themed, raid-leading behavior retained",
     auctionator = "Reviewed shopping/selling/cancelling/config panes, buy/scan/status dialogs and nine config pages; prices and item semantics retained",
     openMap = "Native WorldMap adapter; canvas, markers and OpenMap behavior retained",

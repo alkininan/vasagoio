@@ -2,7 +2,7 @@
 ## Title: vasagoio
 ## Notes: Bael design system: preserved window layouts, custom HUD, reviewed owner profiles. Alpha; native validation pending.
 ## Author: alkininan
-## Version: 0.1.0-alpha.1
+## Version: 0.2.0-alpha.1
 ## SavedVariables: VasagoioDB
 ## OptionalDeps: ForeverUnitFrames, TidyPlates_ThreatPlates, Bartender4, Prat-3.0, SexyMap, Details, Skinner, Baganator, Syndicator, Auctionator, MRT, TalentsForeverBook, Gargul, ForeverTrinketMenu, BattleGroundEnemiesFixed, LibSharedMedia-3.0
 
@@ -11,11 +11,15 @@ Tokens.lua
 core/Database.lua
 core/Profiles.lua
 core/Media.lua
+core/Interiors.lua
 core/Options.lua
+modules/WindowCatalog.lua
 modules/UnitFrames.lua
 modules/Nameplates.lua
 modules/ActionBars.lua
 modules/HUD.lua
 modules/Auras.lua
 modules/NativeWindows.lua
+modules/NativeInteriors.lua
+modules/AddonInteriors.lua
 modules/AddonWindows.lua

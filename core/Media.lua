@@ -55,26 +55,33 @@ function V:RestoreArtwork()
     for _, surface in pairs(surfaces) do surface:Hide() end
 end
 
-function V:Surface(frame, alpha, radius)
+function V:Surface(frame, alpha, radius, color)
     if self:IsSecret(frame) then return end
     if not frame or not frame.CreateTexture then return end
     if InCombatLockdown() then return surfaces[frame] end
     local surface = surfaces[frame]
     if not surface then
         surface = CreateFrame("Frame", nil, frame)
+        surface.__vasagoio = true
+        surface.ignoreInLayout = true
+        if frame.MarkIgnoreInLayout then pcall(frame.MarkIgnoreInLayout,frame,surface) end
         surface:SetAllPoints(frame)
         surface:EnableMouse(false)
         local level = frame.GetFrameLevel and self:SafeNumber(frame:GetFrameLevel())
         if level and surface.SetFrameLevel then surface:SetFrameLevel(math.max(0, level - 1)) end
         surface.parts = {}
-        for i = 1, 7 do surface.parts[i] = surface:CreateTexture(nil, "BACKGROUND", nil, -8) end
+        for i = 1, 7 do
+            surface.parts[i] = surface:CreateTexture(nil, "BACKGROUND", nil, -8)
+            surface.parts[i].__vasagoio = true
+            surface.parts[i].ignoreInLayout = true
+        end
         surfaces[frame] = surface
     end
     local r = self:Pixel(radius or self.Tokens.radius)
     local width, height = self:SafeNumber(frame:GetWidth()), self:SafeNumber(frame:GetHeight())
     if width and width > 0 then r = math.min(r, width / 2) end
     if height and height > 0 then r = math.min(r, height / 2) end
-    local c = self.Tokens.colors.panel
+    local c = color or self.Tokens.colors.panel
     local p = surface.parts
     for i = 1, 7 do
         p[i]:ClearAllPoints()

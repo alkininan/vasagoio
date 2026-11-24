@@ -2,11 +2,11 @@
 
 A personal World of Warcraft Forever UI built around the Bael design system: neutral black surfaces, restrained blue status colors, native typography, custom HUD geometry, and preserved native window layouts.
 
-**0.1.0-alpha.1 — implemented and tested offline; not yet tested in WoW.** This is a first playable integration build, not a promise of complete visual parity or coverage of every game window. See [coverage and limitations](docs/COVERAGE.md) before installing.
+**0.2.0-alpha.1 — window interiors implemented and tested offline; not yet tested in WoW.** The design now extends through native and selected-addon controls, panes, labels and selection states. See [coverage and boundaries](docs/COVERAGE.md) for exact scope and the remaining native validation.
 
 ## Install
 
-1. Download the **vasagoio-0.1.0-alpha.1.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
+1. Download the **vasagoio-0.2.0-alpha.1.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
 2. With WoW closed, extract the `vasagoio` folder into `World of Warcraft/_forever_/Interface/AddOns/`. The result must be `AddOns/vasagoio/vasagoio.toc`.
 3. Install the desired functional addons separately using CurseForge or their official distribution. The [dependency list](docs/dependencies.json) records the complete selected setup. They are not bundled.
 4. Enable vasagoio and those addons in the game's AddOns menu. Log in yourself, let their profiles initialize, and reload once.
@@ -22,10 +22,11 @@ No prebuilt account-specific WTF folder is distributed. vasagoio creates its own
 - A 16×3 action grid assembled from four native Bartender bars; the left-aligned pet row ends at the eighth main button. No action slots, bindings or paging are rewritten.
 - Full-button cooldown wipes, centered numeric timers, hidden hotkeys during ordinary cooldowns, translucent range feedback and bottom aura signals where supported.
 - Neutral translucent window and HUD surfaces, Friz text roles, Arial Narrow number/chat roles, and original rounded mask artwork.
-- Native window shells retain their original layout. Skinner provides broader native control coverage; Baganator's public skin API and reviewed addon shells retain their functionality.
+- Native windows retain their layouts while receiving scoped interior controls, typography, neutral panes and rounded decoration. Selected tabs/rows and focused inputs keep near-black fills with small blue bottom markers.
+- Baganator's 19 public skin-region types, Talents Forever internals, MRT tools, Auctionator panes and Gargul's audited window/widget registries use the same visual primitives while retaining their functionality.
 - Setup review, persistent snapshots, conflict-aware restoration, module switches and addon-wide disable controls.
 
-The [accepted design](docs/DESIGN.md) lists the full target. [Window coverage](docs/window-coverage.json) tracks all 172 cataloged surfaces without treating source availability as runtime proof. [Window adapters](docs/WINDOW_COVERAGE.md) distinguish implemented skins from remaining work.
+The [accepted design](docs/DESIGN.md) lists the full target. [Window coverage](docs/window-coverage.json) tracks all 172 cataloged surfaces without treating source availability as runtime proof. The catalog registers 132 native interior candidates across 115 primary hosts, with dedicated HUD owners and non-addon surfaces classified separately. [Window adapters](docs/WINDOW_COVERAGE.md) explain the native and addon integrations.
 
 ## Controls
 

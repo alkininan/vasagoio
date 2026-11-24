@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 import re
 import subprocess
+import sys
 import tempfile
 import zipfile
 from package import package
@@ -12,6 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--lua", default="lua5.1")
 parser.add_argument("--luac", default="luac5.1")
 args = parser.parse_args()
+subprocess.run([sys.executable, str(ROOT / "tools/window_catalog.py"), "--check"], check=True)
 for source in sorted(ROOT.rglob("*.lua")):
     subprocess.run([args.luac, "-p", str(source)], check=True)
 for spec in sorted((ROOT / "tests").glob("*_spec.lua")):

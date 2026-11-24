@@ -14,6 +14,7 @@ Source/API review references:
 - [Details](https://github.com/Tercioo/Details-Damage-Meter) — native instance APIs and local profile model.
 - [Prat](https://github.com/sylvanaar/prat-3-0) — Font namespace and shared-media font selection.
 - [SexyMap](https://github.com/funkydude/SexyMap) — minimap profile, native shape, zone and clock APIs.
+- [Gargul 8.1.0](https://github.com/papa-smurf/Gargul/releases/tag/v8.1.0) — public window registries, interface constructors and native font wrapper behavior.
 
 Forever Unit Frames 0.79.1 and selected addon shells were inspected from their installed/distributed source without copying implementation code. Version numbers are compatibility targets, not an endorsement or claim of universal compatibility. Exact frame and adapter limitations are documented with the implementation.
 

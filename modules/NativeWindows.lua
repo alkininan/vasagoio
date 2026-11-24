@@ -1,10 +1,10 @@
 local addonName, V = ...
 
--- These adapters touch named decorative regions only. No frame enumeration,
--- window replacement, control repositioning, or secure attribute changes.
+-- Shell adapters and the source-scoped interior service preserve native
+-- window structure, control placement and secure attributes.
 local W = { hooked = setmetatable({}, {__mode = "k"}) }
 V.WindowSkin = W
-local WHITE = {0.94, 0.95, 0.96, 1}
+local WHITE = V.Tokens.colors.text
 local NINE = {"TopLeftCorner", "TopRightCorner", "BottomLeftCorner", "BottomRightCorner",
     "TopEdge", "BottomEdge", "LeftEdge", "RightEdge", "Center"}
 local ART = {"Bg", "Background", "TitleBg", "TitleBackground", "TopTileStreaks",
@@ -37,7 +37,8 @@ function W:Path(root, path)
     return object
 end
 
-function W:Hide(object)
+function W:Hide(object, owner)
+    if V.InteriorSkin and owner then return V.InteriorSkin:Hide(object,owner) end
     if self:Available(object) and object.SetAlpha then V:HideArtwork(object) end
 end
 
@@ -56,6 +57,19 @@ end
 function W:Shell(frame, extraArt, extraTitles, owner)
     if not self:Available(frame) or not frame.CreateTexture then return false end
     if InCombatLockdown and InCombatLockdown() then return false end
+    if V.InteriorSkin then
+        -- Shell and interior mutations must share the same original snapshot.
+        -- A legacy pre-pass would capture already-themed fonts/backdrops and
+        -- could undo a second, still-active presentation owner on disable.
+        local I, id = V.InteriorSkin, owner or "nativeWindows"
+        if not I:Panel(frame,"window",id) then return false end
+        for _, key in ipairs(ART) do I:Hide(frame[key],id) end
+        for _, path in ipairs(extraArt or {}) do I:Hide(self:Path(frame,path),id) end
+        I:Text(frame.TitleText,"heading",false,id)
+        I:Text(self:Path(frame,"TitleContainer.TitleText"),"heading",false,id)
+        for _, path in ipairs(extraTitles or {}) do I:Text(self:Path(frame,path),"heading",false,id) end
+        return true
+    end
     for _, key in ipairs(ART) do self:Hide(frame[key]) end
     local nine = frame.NineSlice
     if self:Available(nine) then
@@ -73,7 +87,7 @@ function W:Shell(frame, extraArt, extraTitles, owner)
         if frame.SetBackdropBorderColor then frame:SetBackdropBorderColor(0, 0, 0, 0) end
     end
     for _, path in ipairs(extraArt or {}) do self:Hide(self:Path(frame, path)) end
-    V:Surface(frame, 0.84, 10)
+    V:Surface(frame, V.Tokens and V.Tokens.alpha.window or .84, V.Tokens and V.Tokens.radius or 10)
     self:Text(frame.TitleText)
     self:Text(self:Path(frame, "TitleContainer.TitleText"))
     for _, path in ipairs(extraTitles or {}) do self:Text(self:Path(frame, path)) end
@@ -81,6 +95,7 @@ function W:Shell(frame, extraArt, extraTitles, owner)
 end
 
 function W:Hook(frame, id)
+    if V.InteriorSkin then return V.InteriorSkin:Watch(frame,{owner=id}) end
     if not self:Available(frame) or not frame.HookScript or self.hooked[frame] then return end
     self.hooked[frame] = true
     frame:HookScript("OnShow", function()
@@ -90,6 +105,7 @@ end
 
 function W:RestoreBackdrops(owner)
     if InCombatLockdown and InCombatLockdown() then return end
+    if V.InteriorSkin then return V.InteriorSkin:Restore(owner) end
     for frame, record in pairs(originals) do
         if record.owner == owner and self:Available(frame) then
             frame:SetBackdropColor(unpack(record.color))
@@ -128,20 +144,32 @@ local function skinnerPaletteConfigured()
     local profile = _G.Skinner.db.profile
     local backdrop = profile.Backdrop
     if type(backdrop) ~= "table" or profile.FrameBorders ~= false then return false end
-    for _, key in ipairs({"r", "g", "b"}) do
+    for i, key in ipairs({"r", "g", "b"}) do
         local value = V:SafeNumber(backdrop[key])
-        if not value or math.abs(value - 11/255) > .0001 then return false end
+        if not value or math.abs(value - V.Tokens.colors.panel[i]) > .0001 then return false end
     end
     local alpha = V:SafeNumber(backdrop.a)
-    return alpha and math.abs(alpha - .84) < .0001
+    return alpha and math.abs(alpha - V.Tokens.alpha.window) < .0001
 end
 
 V:RegisterModule("nativeWindows", {
     label = "Native window skins",
-    description = "Original native layouts; selective Skinner or guarded shell fallback.",
+    description = "Original layouts with source-scoped interior controls, typography and rounded surfaces.",
     defaultEnabled = true,
     Apply = function()
         if InCombatLockdown and InCombatLockdown() then return false, "Waiting for combat to end" end
+        if V.NativeInteriors and V.InteriorSkin then
+            local result = V.NativeInteriors:Apply()
+            local detail = tostring(result.roots or 0) .. " native roots; " .. tostring(result.controls or 0) ..
+                " controls and " .. tostring(result.texts or 0) .. " text regions themed without native layout changes."
+            if result.limitReached or (result.deferred or 0) > 0 or (result.skipped or 0) > 0 then
+                return false, detail .. " Some widgets could not be inspected, were restricted or exceeded the traversal budget; retry out of combat.", "pending"
+            end
+            if hasSkinner() and not skinnerPaletteConfigured() then
+                return false, detail .. " Review setup to configure Skinner's native palette, then reload.", "pending"
+            end
+            return true, detail .. " Embedded Help web content and front-end screens stay outside addon control. Native validation is pending."
+        end
         if hasSkinner() then
             if not skinnerPaletteConfigured() then
                 return false, "Skinner owns native skins; its vasagoio palette is not configured. Review /vasagoio setup, then reload. Unreviewed versions require manual configuration.", "pending"
@@ -157,7 +185,10 @@ V:RegisterModule("nativeWindows", {
         if W:Available(stats) then W:Hide(stats.ClassBackground) end
         return true, tostring(count) .. " native shells present; load-on-demand roots watched. Inner controls and embedded Help HTML are not fully reskinned."
     end,
-    Disable = function() W:RestoreBackdrops("nativeWindows") end,
+    Disable = function()
+        if V.NativeInteriors then V.NativeInteriors:Disable() end
+        W:RestoreBackdrops("nativeWindows")
+    end,
 })
 
 V:On("ADDON_LOADED", function() if W:Enabled("nativeWindows") then V:Refresh("native window addon loaded") end end)
@@ -204,11 +235,12 @@ V:RegisterProfileAdapter("skinner", {
         nested("Gradient", "enable", false)
         for _, key in ipairs({"CastingBar", "CompactFrames", "MainMenuBar", "Minimap", "MinimapButtons", "ChatEditBox", "ChatBubbles", "ObjectiveTracker"}) do nested(key, "skin", false) end
         for _, key in ipairs({"CharacterFrames", "PlayerSpells", "MailFrame", "HelpFrame", "Settings", "MerchantFrame", "GossipFrame"}) do scalar(key, true) end
+        local function rgba(color, alpha) return {color[1], color[2], color[3], alpha or 1} end
         local colors = {
-            Backdrop = {11/255, 11/255, 11/255, .84}, BackdropBorder = {0, 0, 0, 0},
-            HeadText = {.94, .95, .96, 1}, BodyText = {.88, .90, .92, 1},
-            IgnoredText = {.63, .65, .68, 1}, DisabledText = {.48, .49, .51, 1},
-            TooltipBorder = {0, 0, 0, 0}, SliderBorder = {.24, .26, .28, .50},
+            Backdrop = rgba(V.Tokens.colors.panel, V.Tokens.alpha.window), BackdropBorder = {0, 0, 0, 0},
+            HeadText = rgba(WHITE), BodyText = rgba(WHITE), IgnoredText = rgba(V.Tokens.colors.muted),
+            DisabledText = rgba(V.Tokens.colors.muted, V.Tokens.controls.disabledAlpha),
+            TooltipBorder = {0, 0, 0, 0}, SliderBorder = {0, 0, 0, 0},
         }
         for key, color in pairs(colors) do
             for i, channel in ipairs({"r", "g", "b", "a"}) do nested(key, channel, color[i]) end
@@ -221,7 +253,7 @@ V:RegisterProfileAdapter("skinner", {
             for _, key in ipairs({"arena", "focus", "party", "pet", "petlvl", "player", "target"}) do set(ns.profile, key, false) end
         end
         if #changes == 0 then return nil, "Skinner profile fields did not match the reviewed schema" end
-        return {changes = changes, detail = "Neutral black native skins, borderless surfaces, white text; HUD and third-party skins excluded. Reload required. Skinner corners remain rectangular."}
+        return {changes = changes, detail = "Neutral black native skins, borderless surfaces, white text; HUD and third-party skins excluded. Reviewed decorative Skinner surfaces receive vasagoio corners through the interior adapter. Reload required."}
     end,
     AfterApply = function() V:Print("Skinner palette saved. Reload the UI to rebuild its cached colors; profile rollback remains available.") end,
 })

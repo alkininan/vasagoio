@@ -41,6 +41,7 @@ InCombatLockdown = function() return combat end
 C_AddOns = {GetAddOnMetadata = function(addon) return versions[addon] end}
 local tick, cancelled
 C_Timer = {NewTicker = function(_, callback) tick = callback; return {Cancel = function() cancelled = true end} end}
+assert(loadfile(root .. "/Tokens.lua"))("vasagoio", V)
 assert(loadfile(root .. "/modules/NativeWindows.lua"))("vasagoio", V)
 assert(loadfile(root .. "/modules/AddonWindows.lua"))("vasagoio", V)
 

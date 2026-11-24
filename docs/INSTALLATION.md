@@ -6,7 +6,7 @@
 4. **Install the release ZIP.** Extract its single `vasagoio` folder into `_forever_/Interface/AddOns/`. Check that the TOC is directly inside it; avoid `vasagoio/vasagoio/` nesting.
 5. **Start the game yourself.** Enable the addons you want. For first-time owners, enter the world and reload once so their native profiles exist. vasagoio's cosmetic defaults can load without all optional dependencies.
 6. **Review setup.** Type `/vasagoio setup`. Supported loaded owners appear with proposed fields; missing/unreviewed owners explain why they are skipped. Review the exact changes before Apply. It does not rearrange spell slots or keybindings.
-7. **Apply and reload.** Apply only out of combat. A local snapshot is stored before changes. FUF gets a separately named vasagoio profile. Other supported adapters adjust their active settings. Reload immediately to make private owner state consistent.
+7. **Apply and reload.** Apply only out of combat. A local snapshot is stored before changes. FUF and Threat Plates get separately named vasagoio profiles. Other supported adapters adjust reviewed fields in their active settings. Reload immediately to make private owner state consistent.
 8. **Check the interface manually.** Test Character, talents, bags, spellbook, map, vendor, mail, professions, settings and Help. Confirm unchanged structure, readable labels, working scroll/keyboard focus, tooltips and addon features. Test units with a pet, no pet, a party and raid, then each resource type you use. Check action paging, keybindings, range, cooldowns and aura signals. Finally test combat yourself; report the first BugSack error with game/addon versions, stripping character/account/chat details.
 9. **Inspect limitations before calling the setup finished.** `/vasagoio` shows runtime adapter status. COVERAGE.md records visual and feature gaps. This release was built without launching or controlling WoW; it has no native visual, combat or taint validation yet.
 
@@ -34,3 +34,7 @@ These are selected dependencies, not embedded downloads. Use each publisher's su
 ## Share with someone else
 
 Send the GitHub release link and this guide. They install the functional packages separately, then apply the portable preset to their own initialized profiles. Their bindings, identity and account files are not shared. The release ZIP contains only vasagoio.
+
+## Updating from 0.1
+
+With WoW closed, replace only the `vasagoio` addon folder with the 0.2 release folder. Keep `VasagoioDB` and your existing functional-addon settings. Interior styling activates with the existing nativeWindows/addonWindows module preferences; no new profile reset is needed. If Skinner has not yet received the reviewed palette, use setup and reload. The new selected/focus state uses a near-black fill and a small blue bottom marker, as agreed.

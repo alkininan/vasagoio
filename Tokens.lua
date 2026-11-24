@@ -17,6 +17,8 @@ V.Tokens = {
         ROGUE = rgb("D4BE70"), SHAMAN = rgb("87A5D5"), WARLOCK = rgb("B09AC6")},
     resource = {MANA = rgb("456A8C"), RAGE = rgb("9E5149"), ENERGY = rgb("75602F"), FOCUS = rgb("8F5B2B")},
     alpha = {unit = .56, hud = .40, input = .24, window = .84, range = .30},
+    controls = {selection = "marker", markerHeight = 2, markerInset = 8, markerBottom = 2,
+        disabledAlpha = .45, hoverAlpha = .92, pressedAlpha = .95},
     units = {
         large = {width = 320, height = 64, portrait = 64, health = 46, power = 16, gap = 2},
         medium = {width = 224, height = 48, portrait = 48, health = 34, power = 12, gap = 2},

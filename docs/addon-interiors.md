@@ -1,0 +1,33 @@
+# Selected addon interiors
+
+vasagoio uses the shared neutral-black material, 10px container radius, native-style typography and blue bottom selection marker inside reviewed addon windows. Selection keeps its near-black fill. The adapters change cosmetic objects; they do not move controls, resize the owner's layout, replace handlers, change saved profiles, or trigger addon actions.
+
+| Owner contract | Implemented coverage | Preserved content |
+| --- | --- | --- |
+| Baganator 868 public skin API | All 19 emitted region types: Button, ButtonFrame, CategoryLabel, CategorySectionHeader, CheckBox, CornerWidget, Dialog, Divider, Dropdown, EditBox, IconButton, InsetFrame, ItemButton, SearchBox, SideTabButton, Slider, TabButton, TopTabButton and TrimScrollBar. Existing and newly created regions use one listener. | Item icons, rarity/quest/search/context indicators, item counts, currency text, owner cooldowns, category colors, tooltips and inventory interactions. |
+| Talents Forever Book 0.38.28.20261116 | Book/trainer/toast shells; tree and card chrome; side panes and drawers; custom plate buttons, tabs, edit boxes, checkboxes, slider colors, rules and typography. Refresh/layout/tab post-hooks follow lazy controls. | Class/tree illustrations; talent icons, ranks, current/planned ranks, prerequisite links, ghost/selection/next-point state, progress amounts, QR contrast, training and planning actions. |
+| MRT 5335 | `GMRT.Options.Frame`, its lazy `Frames` pages, ELib controls and tabs/lists, plus reviewed external popup handles for notes, roster editing, attendance, inspect, invites, reminders, cooldown tools and profiles. | Raid tools, roster data, notes, assignment actions, stateful red/green checkbox borders/text, icons and selection identity. |
+| Auctionator 352 | Shopping, selling, cancelling and configuration tabs; buy/scan/status dialogs; nine configuration pages. Native auction-window structure remains under the native adapter. | Search, item/currency data, price semantics, history, auction actions and native tab behavior. |
+| Gargul 8.1.0 | Existing explicit owner window registries and named roots; lazy `Interface:set(..., "Window", widget)` and `Interface:createWindow({name=...})`; owner `UI.components`; master-looter and roller roots, loot, soft-reserve, GDKP and settings dialogs. AceGUI frame headers/status panes and descendant controls use the shared material. | Item/class/quality colors, roll and bid values, timer content, award controls, window bounds, resizing and owner behavior. |
+
+The Baganator API is intentionally not a new selected Baganator skin: it decorates published regions without changing Baganator's layout constants or user skin selection. Unrecognized future region types are ignored. The other adapters require exact reviewed version metadata; an unreviewed release retains the owner's appearance until its contract is checked.
+
+## Integration boundaries
+
+`AddonWindows.lua` selects explicit named roots; `AddonInteriors.lua` follows only reviewed owner fields and registries; `InteriorSkin` traverses descendants of those roots with a node/depth budget. There is no global frame sweep, global AceGUI replacement, or interception of `CreateFrame`. Frames are discovered without opening windows. Post-hooks only schedule cosmetic refreshes; they never invoke owner creation/action methods.
+
+MRT popups whose only handle is an inaccessible function-local variable are outside the named-handle adapter. Other addons are not automatically covered merely because they are installed. OpenMap uses the native WorldMap adapter. Third-party updates may add new popup families that require a new adapter review.
+
+Combat, forbidden/secret objects, a disabled module, and pending profile reloads block cosmetic work. Newly discovered frames can be remembered during combat but styling waits for the normal refresh. Disabling restores the adapter's saved typography, decorative alpha/color and shared surfaces; removing installed hooks requires a UI reload, and their callbacks are inert while disabled.
+
+## Source contracts and validation
+
+The following owner files were read for the integration contract; no vendor implementation or assets are bundled:
+
+- Baganator: `API/Main.lua`, `Skins/Initialize.lua`, `CategoryViews/Components.lua`, `CategoryViews/BagLayout.lua` and the region registrations in its controls and item views.
+- Talents Forever: `Core.lua` and `UI.lua` from the reviewed release, including `Plate`, `Check`, talent-node construction, stage art, `UI.Refresh`, `UI.Layout`, `UI.SetTab` and `UI.LayoutTabs`. Publisher: [Talents Forever](https://talentsforever.com).
+- MRT: `core.lua`, `Options.lua`, `ExLib.lua` and the option-page popup assignments in Note, Reminder, Profiles, RaidAttendance, InspectViewer, InviteTool, Encounter, Interrupts and ExCD2.
+- Auctionator: `Source_LegacyAH/Tabs/Main.lua`, `Source_LegacyAH/Core/Mixin.lua`, `Source_LegacyAH/Config/InitializeFrames.lua` and `Source/Config/InitializeFrames.lua`. Publisher: [Auctionator](https://www.curseforge.com/wow/addons/auctionator).
+- Gargul: official [v8.1.0 release](https://github.com/papa-smurf/Gargul/releases/tag/v8.1.0), including the Forever package's `Version: 8.1.0`; `bootstrap.lua`, `Interface/Interface.lua`, `Classes/UI.lua`, `Classes/MasterLooterUI.lua`, `Classes/RollerUI.lua`, the interface window modules and `AceGUIContainer-Frame.lua`. Gargul's rem-based font wrapper is respected through its native `_SetFont` backing method.
+
+`tests/addon_interiors_spec.lua` exercises all 19 Baganator regions, semantic item/talent art, owner scope, selection following, late window creation, version gates, combat deferral, disabled callbacks and restoration. `tests/windows_spec.lua` covers the surrounding window module. These are source-contract and simulated UI checks. Native in-game appearance, click behavior and third-party conflicts still require manual validation; WoW was not launched for these changes.

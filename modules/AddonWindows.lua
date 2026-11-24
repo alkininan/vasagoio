@@ -17,6 +17,14 @@ local ROOTS = {
     {addon = "TalentsForeverBook", version = "0.38.28.20261116", name = "TalentsForeverBookToast",
         art = {"page", "vignette"}, cover = true},
 }
+for _, name in ipairs({"AuctionatorShoppingFrame", "AuctionatorConfigFrame", "AuctionatorCancellingFrame",
+    "AuctionatorSellingFrame", "AuctionatorBuyFrame"}) do
+    ROOTS[#ROOTS + 1] = {addon = "Auctionator", version = "352", name = name}
+end
+for _, name in ipairs({"BasicOptions", "Tooltips", "ShoppingAlt", "Selling", "SellingAllItems",
+    "SellingShortcuts", "Cancelling", "Profile", "Advanced"}) do
+    ROOTS[#ROOTS + 1] = {addon = "Auctionator", version = "352", name = "AuctionatorConfig" .. name .. "Frame"}
+end
 
 local function versionMatches(entry)
     local metadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
@@ -28,8 +36,9 @@ local function applyRoot(entry)
     if not versionMatches(entry) or not W:Available(frame) then return false end
     if not W:Shell(frame, entry.art, entry.titles, "addonWindows") then return false end
     if entry.cover and type(frame.cover) == "table" then
-        for i = 1, 8 do W:Hide(frame.cover[i]) end
+        for i = 1, 8 do W:Hide(frame.cover[i],"addonWindows") end
     end
+    if V.AddonInteriors then V.AddonInteriors:Apply(frame, entry.addon) end
     W:Hook(frame, "addonWindows")
     discovered[frame] = true
     return true
@@ -40,6 +49,7 @@ local function styleBagRegion(details)
     if InCombatLockdown and InCombatLockdown() then V:Refresh("bag skin deferred in combat"); return end
     local frame, kind = details.region, details.regionType
     if not W:Available(frame) then return end
+    if V.AddonInteriors and V.InteriorSkin then V.AddonInteriors:Bag(details); return end
     if kind == "ButtonFrame" or kind == "Dialog" then
         W:Shell(frame, nil, nil, "addonWindows")
         W:Hook(frame, "addonWindows")
@@ -81,22 +91,24 @@ end
 
 V:RegisterModule("addonWindows", {
     label = "Selected addon window skins",
-    description = "Baganator skin API and reviewed named outer windows; functionality preserved.",
+    description = "Reviewed addon windows, controls and interior panels; owner layouts and functionality preserved.",
     defaultEnabled = true,
     Apply = function()
         if InCombatLockdown and InCombatLockdown() then return false, "Waiting for combat to end" end
         local count = 0
         for _, entry in ipairs(ROOTS) do if applyRoot(entry) then count = count + 1 end end
         local bags = baganator()
+        local interiors = V.AddonInteriors and V.AddonInteriors:Discover() or 0
         if not ticker and C_Timer and C_Timer.NewTicker then ticker = C_Timer.NewTicker(2, discoverLazyRoots) end
-        if count == 0 and not bags then
-            return false, "No reviewed addon shell or Baganator skin API is available yet. Listed lazy window roots are watched; unreviewed versions remain unchanged.", "pending"
+        if count == 0 and interiors == 0 and not bags then
+            return false, "No reviewed addon windows or Baganator skin API are available yet. Lazy owner roots are watched; unreviewed versions retain their own appearance.", "pending"
         end
-        return true, tostring(count) .. " reviewed addon shells present; Baganator API " .. (bags and "connected" or "unavailable") ..
-            ". Talents inner art, MRT inner tools, Gargul and other addon internals remain owner-styled; OpenMap uses native WorldMap shell."
+        return true, tostring(count) .. " reviewed named windows and " .. tostring(interiors) .. " owner-registered interiors; Baganator API " ..
+            (bags and "connected (19 region types)" or "unavailable") .. ". Controls, panels and typography use vasagoio; owner layouts and semantic art retained. Native validation is pending."
     end,
     Disable = function()
         if ticker then ticker:Cancel(); ticker = nil end
+        if V.AddonInteriors then V.AddonInteriors:Disable() end
         W:RestoreBackdrops("addonWindows")
         -- Baganator has no public unregister-listener API; the callback becomes
         -- a no-op when this module is disabled and disappears on UI reload.
@@ -108,11 +120,11 @@ V:On("ADDON_LOADED", function()
 end)
 
 V.AddonWindowCoverage = {
-    baganator = "Public skin API: outer ButtonFrame/Dialog shells and count typography; item/rarity/search behavior retained",
-    talentsForever = "Reviewed named outer shells only; all inner talent nodes, planning and training features retained",
-    mrt = "Reviewed options shell only; raid-leading tools retained and their internals unchanged",
-    auctionator = "Reviewed named scan/status dialog shells; AuctionFrame/House outer shell belongs to native adapter",
-    openMap = "Native WorldMap outer shell only; map canvas, markers and OpenMap behavior retained",
-    gargul = "No reviewed skin API or frame contract available; functionality retained, appearance pending adapter",
-    otherAddons = "Not traversed or globally restyled",
+    baganator = "All 19 public skin-region types: panels, buttons, tabs, inputs, sliders, scrollbars and typography; item/rarity/search/cooldown state retained",
+    talentsForever = "Reviewed book/trainer/toast, tree pane chrome, plate controls, tabs, inputs and typography; talent artwork, ranks, paths and planning state retained",
+    mrt = "Reviewed GMRT options root, lazy tool pages and child dialogs; controls and typography themed, raid-leading behavior retained",
+    auctionator = "Reviewed shopping/selling/cancelling/config panes, buy/scan/status dialogs and nine config pages; prices and item semantics retained",
+    openMap = "Native WorldMap adapter; canvas, markers and OpenMap behavior retained",
+    gargul = "8.1.0 reviewed Interface.set/createWindow and UI.components contracts; owner window controls and text, including lazy loot/roll/GDKP/settings dialogs",
+    otherAddons = "Only reviewed owner roots and public registries are traversed; no global frame sweep",
 }

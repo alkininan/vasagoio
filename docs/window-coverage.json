@@ -1,9 +1,9 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "count": 172,
   "source_build": "1.60.1.70938",
   "source_commit": "bebcb6bf309cf41b41bd74f8ca651e6a105b2676",
-  "note": "All cataloged surfaces retained as scope. No blanket claim that Skinner or vasagoio implements every one. Native structure is preserved. Embedded support web content and front-end UI are separate boundaries.",
+  "note": "All 172 source catalog records retained. Native interior registration is distinct from per-control implementation and runtime visual acceptance. Eight front-end/Glue records, embedded HelpBrowser, dedicated HUD owners and media overlays are explicit boundaries. Normal addons cannot reskin Glue or the embedded support webpage.",
   "surfaces": [
     {
       "id": "character-equipment-statistics",
@@ -14,9 +14,15 @@
       "states_to_capture": "Equipment; primary/secondary stats; expanded/collapsed right pane",
       "open_trigger": "Character microbutton / character keybinding",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CharacterFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "reputation",
@@ -27,9 +33,15 @@
       "states_to_capture": "Faction list; expanded factions; detail panel; at-war and watch state",
       "open_trigger": "Character microbutton; select the relevant side tab or equipment-set control",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CharacterFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "skills",
@@ -40,9 +52,15 @@
       "states_to_capture": "Weapon and profession skill list",
       "open_trigger": "Character microbutton; select the relevant side tab or equipment-set control",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CharacterFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "honor-pvp-rank",
@@ -53,9 +71,15 @@
       "states_to_capture": "Rank and progress",
       "open_trigger": "Character microbutton; select the relevant side tab or equipment-set control",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CharacterFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "equipment-set-popup",
@@ -66,9 +90,15 @@
       "states_to_capture": "New/edit set; icon picker",
       "open_trigger": "Character microbutton; select the relevant side tab or equipment-set control",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CharacterFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "inspect-player",
@@ -79,9 +109,15 @@
       "states_to_capture": "Equipment and player info; target-dependent",
       "open_trigger": "Player context menu \u2192 Inspect",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "InspectFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "talents",
@@ -92,9 +128,15 @@
       "states_to_capture": "Unspent points; applied build; reset; import/export; class-specific tree",
       "open_trigger": "Talents or Spellbook microbutton / respective keybinding",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PlayerSpellsFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "spellbook",
@@ -105,9 +147,15 @@
       "states_to_capture": "Player/pet; collapsed/expanded; search; passive/active spells",
       "open_trigger": "Talents or Spellbook microbutton / respective keybinding",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PlayerSpellsFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "talent-loadout-create",
@@ -118,9 +166,15 @@
       "states_to_capture": "Name and optional action-bar checkbox",
       "open_trigger": "Talents or Spellbook microbutton; loadout menu for the named dialog",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ClassTalentLoadoutCreateDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "talent-loadout-edit",
@@ -131,9 +185,15 @@
       "states_to_capture": "Rename; delete; sharing",
       "open_trigger": "Talents or Spellbook microbutton; loadout menu for the named dialog",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ClassTalentLoadoutEditDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "talent-loadout-import",
@@ -144,9 +204,15 @@
       "states_to_capture": "Paste import string; name; error state",
       "open_trigger": "Talents or Spellbook microbutton; loadout menu for the named dialog",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ClassTalentLoadoutImportDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "separate-bags",
@@ -157,9 +223,22 @@
       "states_to_capture": "Backpack and equipped bags; slot count determines height",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ContainerFrame1",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [
+        "ContainerFrame2",
+        "ContainerFrame3",
+        "ContainerFrame4",
+        "ContainerFrame5",
+        "ContainerFrame6",
+        "ContainerFrame7"
+      ],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "combined-bags",
@@ -170,9 +249,15 @@
       "states_to_capture": "Search; sorting; bag menus; bag-slot changes",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ContainerFrameCombinedBags",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "bank",
@@ -183,9 +268,15 @@
       "states_to_capture": "Character/account tabs; bags; pages; purchase prompt",
       "open_trigger": "Interact with a banker",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "BankFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "bank-cleanup-confirmation",
@@ -196,9 +287,15 @@
       "states_to_capture": "Sort confirmation",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "BankCleanUpConfirmationPopup",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "guild-bank",
@@ -209,9 +306,15 @@
       "states_to_capture": "Items; logs; money; permissions; tab purchase",
       "open_trigger": "Interact with guild bank; guild access and permission required",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GuildBankFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "guild-bank-tab-editor",
@@ -222,9 +325,15 @@
       "states_to_capture": "Name and icon picker",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GuildBankFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "auction-house",
@@ -235,9 +344,15 @@
       "states_to_capture": "Browse; search; buy; sell; auctions; confirmation",
       "open_trigger": "Interact with an auctioneer",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "AuctionHouseFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "auction-multisell-progress",
@@ -248,9 +363,15 @@
       "states_to_capture": "Progress and cancellation",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "AuctionHouseMultisellProgressFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "merchant",
@@ -261,9 +382,15 @@
       "states_to_capture": "Purchase; buyback; repair; alternate currencies",
       "open_trigger": "Interact with a merchant",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "MerchantFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "trade",
@@ -274,9 +401,15 @@
       "states_to_capture": "Offered items/money; enchant slot; acceptance states",
       "open_trigger": "Trade action with another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "TradeFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "mailbox",
@@ -287,9 +420,15 @@
       "states_to_capture": "Inbox and send mail; attachments; pending/empty states",
       "open_trigger": "Interact with a mailbox",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "MailFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "read-mail",
@@ -300,9 +439,15 @@
       "states_to_capture": "Read; reply; take attachments; return; delete",
       "open_trigger": "Mailbox \u2192 open an existing message",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "OpenMailFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "loot",
@@ -313,9 +458,15 @@
       "states_to_capture": "Loot entries; full inventory; empty/long list",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "LootFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "group-loot-roll",
@@ -326,9 +477,19 @@
       "states_to_capture": "Need; greed; pass; roll timer",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GroupLootFrame1",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [
+        "GroupLootFrame2",
+        "GroupLootFrame3",
+        "GroupLootFrame4"
+      ],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "loot-history",
@@ -339,9 +500,15 @@
       "states_to_capture": "Recipients and roll history",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GroupLootHistoryFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "split-stack",
@@ -352,9 +519,15 @@
       "states_to_capture": "Quantity picker",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "StackSplitFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "coin-pickup",
@@ -365,9 +538,15 @@
       "states_to_capture": "Money amount popup",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CoinPickupFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "item-text-books",
@@ -378,9 +557,15 @@
       "states_to_capture": "Letter/book pages; next/previous",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ItemTextFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "dress-up-preview",
@@ -391,9 +576,15 @@
       "states_to_capture": "Equipment preview; model controls",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "DressUpFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "side-dress-up",
@@ -404,9 +595,15 @@
       "states_to_capture": "Preview attached to another panel",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "SideDressUpFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "transmogrification",
@@ -417,9 +614,15 @@
       "states_to_capture": "Appearance and set selection; purchase/apply; game-rule dependent",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "TransmogFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "item-socketing",
@@ -430,9 +633,15 @@
       "states_to_capture": "Conditional item-gem workflow",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ItemSocketingFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "item-interaction",
@@ -443,9 +652,15 @@
       "states_to_capture": "Conditional item interaction workflow",
       "open_trigger": "Open bags or interact with the matching banker, auctioneer, merchant, mailbox, item, or another player",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ItemInteractionFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "npc-dialogue-gossip",
@@ -456,9 +671,15 @@
       "states_to_capture": "Greeting; selectable dialogue; active/available quests",
       "open_trigger": "Interact with an NPC offering dialogue",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GossipFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "quest-offer-turn-in",
@@ -469,9 +690,15 @@
       "states_to_capture": "Offer; objectives; progress; rewards; choice required",
       "open_trigger": "Interact with a quest giver",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "QuestFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "quest-standalone-detail",
@@ -482,9 +709,15 @@
       "states_to_capture": "Quest description; objectives; abandon/share",
       "open_trigger": "Interact with the matching NPC; for professions use the Professions microbutton or profession ability",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "QuestLogPopupDetailFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "trainer",
@@ -495,9 +728,15 @@
       "states_to_capture": "Available/unavailable/already-known skill lists",
       "open_trigger": "Interact with a trainer",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ClassTrainerFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "professions-overview-crafting",
@@ -508,9 +747,15 @@
       "states_to_capture": "Profession book; recipe list; search/filter; craft queue; output log",
       "open_trigger": "Professions microbutton / selected profession ability",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ProfessionsFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "inspect-recipe",
@@ -521,9 +766,15 @@
       "states_to_capture": "Linked recipe detail",
       "open_trigger": "Interact with the matching NPC; for professions use the Professions microbutton or profession ability",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "InspectRecipeFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "stable-master",
@@ -534,9 +785,15 @@
       "states_to_capture": "Pet list; active/stabled; rename/release confirmation",
       "open_trigger": "Interact with a stable master on an eligible character",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PetStableFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "flight-master",
@@ -547,9 +804,15 @@
       "states_to_capture": "Classic route selection",
       "open_trigger": "Interact with a flight master",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "TaxiFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "flight-map",
@@ -560,9 +823,15 @@
       "states_to_capture": "Conditional map-based travel UI",
       "open_trigger": "Interact with the matching NPC; for professions use the Professions microbutton or profession ability",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "FlightMapFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "guild-registration",
@@ -573,9 +842,15 @@
       "states_to_capture": "Create guild and charter",
       "open_trigger": "Interact with the matching NPC; for professions use the Professions microbutton or profession ability",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GuildRegistrarFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "guild-charter-petition",
@@ -586,9 +861,15 @@
       "states_to_capture": "Signatures; sign/turn-in",
       "open_trigger": "Interact with the matching NPC; for professions use the Professions microbutton or profession ability",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PetitionFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "tabard-designer",
@@ -599,9 +880,15 @@
       "states_to_capture": "Color; emblem; border",
       "open_trigger": "Interact with the matching NPC; for professions use the Professions microbutton or profession ability",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "TabardFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "barbershop",
@@ -612,9 +899,15 @@
       "states_to_capture": "Character appearance options; apply cost",
       "open_trigger": "Interact with the matching NPC; for professions use the Professions microbutton or profession ability",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "BarberShopFrame",
+      "boundary": null,
+      "scan_only": true,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "world-map-quest-log",
@@ -625,9 +918,15 @@
       "states_to_capture": "Map-only; quest-log pane; maximized; map layers; details",
       "open_trigger": "Map microbutton / map keybinding",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "WorldMapFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "quest-pane",
@@ -638,9 +937,15 @@
       "states_to_capture": "Quest list; selected quest; campaign/world-quest dependent sections",
       "open_trigger": "Map or quest-log microbutton; select quest/zone; tracker menus for tracker state",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "WorldMapFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "battlefield-map",
@@ -651,9 +956,15 @@
       "states_to_capture": "Zone inset map and opacity/lock controls",
       "open_trigger": "Map or quest-log microbutton; select quest/zone; tracker menus for tracker state",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "BattlefieldMapFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "objective-tracker",
@@ -664,9 +975,15 @@
       "states_to_capture": "Quests; scenario; achievements; collapse/expand",
       "open_trigger": "Map or quest-log microbutton; select quest/zone; tracker menus for tracker state",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ObjectiveTrackerFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "quest-timer",
@@ -677,9 +994,15 @@
       "states_to_capture": "Timed objectives",
       "open_trigger": "Map or quest-log microbutton; select quest/zone; tracker menus for tracker state",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "QuestTimerFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "friends",
@@ -690,9 +1013,15 @@
       "states_to_capture": "Friends; ignore; recent; who/invite related views",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "FriendsFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "add-friend",
@@ -703,9 +1032,15 @@
       "states_to_capture": "BattleTag/character name entry",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "AddFriendFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "battle-net-invite",
@@ -716,9 +1051,15 @@
       "states_to_capture": "Friend invitation",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "BattleNetInviteFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "friends-of-friends",
@@ -729,9 +1070,15 @@
       "states_to_capture": "Friend discovery list",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "FriendsFriendsFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "social-hub",
@@ -742,9 +1089,15 @@
       "states_to_capture": "Social navigation; game-rule/input-mode dependent",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "SocialUIFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "channels",
@@ -755,9 +1108,15 @@
       "states_to_capture": "Channel roster; voice; mute; moderation",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ChannelFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "create-channel",
@@ -768,9 +1127,15 @@
       "states_to_capture": "Name and password",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CreateChannelPopup",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "guild-communities",
@@ -781,9 +1146,15 @@
       "states_to_capture": "Chat; roster; guild info/news; finder where enabled",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CommunitiesFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "guild-invite",
@@ -794,9 +1165,15 @@
       "states_to_capture": "Accept/decline guild invitation",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GuildInviteFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "guild-controls",
@@ -807,9 +1184,15 @@
       "states_to_capture": "Ranks; permissions; allowances",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GuildControlUI",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "guild-text-editor",
@@ -820,9 +1203,15 @@
       "states_to_capture": "Guild information; message of day",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CommunitiesGuildTextEditFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "guild-event-log",
@@ -833,9 +1222,15 @@
       "states_to_capture": "Guild event history",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CommunitiesGuildLogFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "guild-news-filters",
@@ -846,9 +1241,15 @@
       "states_to_capture": "News category toggles",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CommunitiesGuildNewsFiltersFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "community-invite-links",
@@ -859,9 +1260,15 @@
       "states_to_capture": "Community invitations (not GM support tickets)",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CommunitiesTicketManagerDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "community-settings",
@@ -872,9 +1279,15 @@
       "states_to_capture": "Name; description; permissions; privacy",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CommunitiesSettingsDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "community-avatar-picker",
@@ -885,9 +1298,15 @@
       "states_to_capture": "Icon selection",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CommunitiesAvatarPickerDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "add-community",
@@ -898,9 +1317,15 @@
       "states_to_capture": "Join community; invitation code",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CommunitiesAddDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "create-community",
@@ -911,9 +1336,15 @@
       "states_to_capture": "Create/join flow",
       "open_trigger": "Social or guild microbutton; select friends, channels, guild, or communities as applicable",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CommunitiesCreateDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "group-finder",
@@ -924,9 +1355,15 @@
       "states_to_capture": "Browse; listing; who; content/level restrictions",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "LFGParentFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "group-browse",
@@ -937,9 +1374,15 @@
       "states_to_capture": "Search results and role filters",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "LFGParentFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "group-listing",
@@ -950,9 +1393,15 @@
       "states_to_capture": "Create/update listing",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "LFGParentFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "group-who-list",
@@ -963,9 +1412,15 @@
       "states_to_capture": "Candidates and invitation controls",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "LFGParentFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "raid-roster",
@@ -976,9 +1431,15 @@
       "states_to_capture": "Groups; role; leader/assistant operations",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "RaidParentFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "raid-management",
@@ -989,9 +1450,15 @@
       "states_to_capture": "Roster display controls; ready check; raid markers",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CompactRaidFrameManager",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "unitframes",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "ready-check",
@@ -1002,9 +1469,15 @@
       "states_to_capture": "Ready/not-ready and timer",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ReadyCheckFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "role-poll",
@@ -1015,9 +1488,15 @@
       "states_to_capture": "Tank/healer/damage selection",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "RolePollPopup",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "queue-status",
@@ -1028,9 +1507,15 @@
       "states_to_capture": "Queue list; duration; leave queue",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "QueueStatusFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "lfg-invite",
@@ -1041,9 +1526,15 @@
       "states_to_capture": "Group invite confirmation",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "LFGInvitePopup",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "pvp-queue-popup",
@@ -1054,9 +1545,15 @@
       "states_to_capture": "Join/cancel; queue status",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PVPFramePopup",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "pvp-role-check",
@@ -1067,9 +1564,15 @@
       "states_to_capture": "Role check pending/declined",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PVPRoleCheckPopup",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "pvp-ready",
@@ -1080,9 +1583,15 @@
       "states_to_capture": "Enter battleground; leave queue",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PVPReadyDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "pvp-ready-popup",
@@ -1093,9 +1602,15 @@
       "states_to_capture": "Ready confirmation and timer",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PVPReadyPopup",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "pvp-match-results",
@@ -1106,9 +1621,15 @@
       "states_to_capture": "End-of-match summary",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PVPMatchResults",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "pvp-scoreboard",
@@ -1119,9 +1640,15 @@
       "states_to_capture": "Score; statistics; teams",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PVPMatchScoreboard",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "legacy-system",
@@ -1132,9 +1659,15 @@
       "states_to_capture": "Forever legacy/challenge progression; feature availability must be captured",
       "open_trigger": "Group-finder or raid interface; queue/invitation/ready-check state must exist",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "LegacySystemFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "collections-shell",
@@ -1145,9 +1678,15 @@
       "states_to_capture": "Side tabs; conditional unlocks and content availability",
       "open_trigger": "Collections microbutton; select side tab and visible category",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CollectionsJournal",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "mounts",
@@ -1158,9 +1697,15 @@
       "states_to_capture": "Search; list; preview; summon",
       "open_trigger": "Collections microbutton; select side tab and visible category",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CollectionsJournal",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "companion-pets",
@@ -1171,9 +1716,15 @@
       "states_to_capture": "Companion collection; list; preview; summon",
       "open_trigger": "Collections microbutton; select side tab and visible category",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CollectionsJournal",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "toys",
@@ -1184,9 +1735,15 @@
       "states_to_capture": "Search; filtering; favorites",
       "open_trigger": "Collections microbutton; select side tab and visible category",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CollectionsJournal",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "heirlooms",
@@ -1197,9 +1754,15 @@
       "states_to_capture": "Source-present; verify game-rule visibility",
       "open_trigger": "Collections microbutton; select side tab and visible category",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CollectionsJournal",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "appearances",
@@ -1210,9 +1773,15 @@
       "states_to_capture": "Items; sets; search; collected/uncollected",
       "open_trigger": "Collections microbutton; select side tab and visible category",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CollectionsJournal",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "appearance-set-editor",
@@ -1223,9 +1792,15 @@
       "states_to_capture": "Save/rename set",
       "open_trigger": "Collections microbutton; select side tab and visible category",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "WardrobeCustomSetEditFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "achievement-window",
@@ -1236,9 +1811,15 @@
       "states_to_capture": "Source-present; verify feature enablement in Forever",
       "open_trigger": "Collections microbutton; select side tab and visible category",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "AchievementFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "escape-menu",
@@ -1249,9 +1830,15 @@
       "states_to_capture": "Options; support; addons; logout; exit; enabled buttons vary",
       "open_trigger": "Press Esc",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GameMenuFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "settings",
@@ -1262,9 +1849,15 @@
       "states_to_capture": "Game; graphics; audio; keybindings; accessibility; addons; search",
       "open_trigger": "Esc \u2192 Options",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "SettingsPanel",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "addon-list",
@@ -1275,9 +1868,15 @@
       "states_to_capture": "Enabled/disabled; dependencies; reload required",
       "open_trigger": "Esc \u2192 AddOns",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "AddonList",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "edit-mode",
@@ -1288,9 +1887,15 @@
       "states_to_capture": "Layout; systems; selection and settings dialog",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "EditModeManagerFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "edit-mode-system-settings",
@@ -1301,9 +1906,15 @@
       "states_to_capture": "Selected HUD element options",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "EditModeSystemSettingsDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "edit-mode-save-layout",
@@ -1314,9 +1925,15 @@
       "states_to_capture": "New/copy/rename layout",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "EditModeLayoutDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "edit-mode-import-layout",
@@ -1327,9 +1944,15 @@
       "states_to_capture": "Import layout string",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "EditModeImportLayoutDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "edit-mode-unsaved-changes",
@@ -1340,9 +1963,15 @@
       "states_to_capture": "Save/discard confirmation",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "EditModeUnsavedChangesDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "macros",
@@ -1353,9 +1982,15 @@
       "states_to_capture": "General/character macros; edit; action placement",
       "open_trigger": "Macro menu or /macro",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "MacroFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "macro-icon-picker",
@@ -1366,9 +2001,15 @@
       "states_to_capture": "Name and icon selection",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "MacroFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "quick-keybindings",
@@ -1379,9 +2020,15 @@
       "states_to_capture": "Hover binding editor",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "QuickKeybindFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "click-casting",
@@ -1392,9 +2039,15 @@
       "states_to_capture": "Mouse action binding",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ClickBindingFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "chat-settings",
@@ -1405,9 +2058,15 @@
       "states_to_capture": "Chat filters; fonts; timestamps; channel options",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ChatConfigFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "color-picker",
@@ -1418,9 +2077,15 @@
       "states_to_capture": "Color; opacity; accept/cancel",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ColorPickerFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "support-submit-ticket",
@@ -1431,9 +2096,15 @@
       "states_to_capture": "Embedded support browser; help; ticket flow; web content not Lua widgets",
       "open_trigger": "Esc \u2192 Support / Help; then appropriate support topic",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "HelpFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "support-ticket-status",
@@ -1444,9 +2115,15 @@
       "states_to_capture": "Pending response; survey; status banner",
       "open_trigger": "Appears only when account has an applicable support ticket/status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "TicketStatusFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "gm-chat-status",
@@ -1457,9 +2134,15 @@
       "states_to_capture": "GM contact status",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GMChatStatusFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "report-player",
@@ -1470,9 +2153,15 @@
       "states_to_capture": "Reason; details; submission confirmation",
       "open_trigger": "Player context menu \u2192 Report",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ReportFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "report-cheating",
@@ -1483,9 +2172,15 @@
       "states_to_capture": "Cheating report detail",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ReportCheatingDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "report-screenshot-mode",
@@ -1496,9 +2191,15 @@
       "states_to_capture": "Evidence capture overlay",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Media/world-capture overlay intentionally excluded from generic panel backgrounds",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ReportScreenshotModeFrame",
+      "boundary": "media-overlay",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "time-manager",
@@ -1509,9 +2210,15 @@
       "states_to_capture": "Clock; alarm; stopwatch controls",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "TimeManagerFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "stopwatch",
@@ -1522,9 +2229,15 @@
       "states_to_capture": "Start/pause/reset",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "StopwatchFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "death-recap",
@@ -1535,9 +2248,15 @@
       "states_to_capture": "Damage events leading to death",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "DeathRecapFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "damage-meter",
@@ -1548,9 +2267,15 @@
       "states_to_capture": "Session; damage/healing; detail views; layout",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "DamageMeter",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "meter",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "cooldown-settings",
@@ -1561,9 +2286,15 @@
       "states_to_capture": "Viewer groups; settings; spell assignments",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CooldownViewerSettings",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "cooldown-layout-dialog",
@@ -1574,9 +2305,15 @@
       "states_to_capture": "Save/rename layout",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CooldownViewerLayoutDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "cooldown-layout-import",
@@ -1587,9 +2324,15 @@
       "states_to_capture": "Import string",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CooldownViewerImportLayoutDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "lua-error-window",
@@ -1600,9 +2343,15 @@
       "states_to_capture": "Error text; stack; navigation",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ScriptErrorsFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "frame-inspector",
@@ -1613,9 +2362,15 @@
       "states_to_capture": "Developer frame attributes",
       "open_trigger": "Built-in developer frame inspection tools",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "TableAttributeDisplay",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "event-trace",
@@ -1626,9 +2381,15 @@
       "states_to_capture": "Developer event list/details",
       "open_trigger": "Built-in event trace tool /etrace",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "EventTrace",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "store",
@@ -1639,9 +2400,15 @@
       "states_to_capture": "Source-present commerce; account/service and game-rule dependent",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "StoreFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "store-confirmation",
@@ -1652,9 +2419,15 @@
       "states_to_capture": "Purchase confirmation; protected service flow",
       "open_trigger": "Escape menu or matching built-in settings/control; state-dependent support dialogs require a real support status",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "StoreFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "confirmation-dialogs",
@@ -1665,9 +2438,19 @@
       "states_to_capture": "Delete; logout; abandon; resurrect; invites; trade and purchase confirmations",
       "open_trigger": "Trigger the corresponding normal game confirmation, hover tooltip, item link, or context menu",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "StaticPopup1",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [
+        "StaticPopup2",
+        "StaticPopup3",
+        "StaticPopup4"
+      ],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "tooltip",
@@ -1678,9 +2461,15 @@
       "states_to_capture": "Item; spell; unit; link; compare; multiline sizing",
       "open_trigger": "Trigger the corresponding normal game confirmation, hover tooltip, item link, or context menu",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GameTooltip",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "item-link-tooltip",
@@ -1691,9 +2480,15 @@
       "states_to_capture": "Clickable item/spell/quest link details",
       "open_trigger": "Trigger the corresponding normal game confirmation, hover tooltip, item link, or context menu",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Explicit native shell candidate",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ItemRefTooltip",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "comparison-tooltips",
@@ -1704,9 +2499,17 @@
       "states_to_capture": "One/two equipped item comparisons",
       "open_trigger": "Trigger the corresponding normal game confirmation, hover tooltip, item link, or context menu",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "ShoppingTooltip1",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [
+        "ShoppingTooltip2"
+      ],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "dropdown-context-menu",
@@ -1717,9 +2520,18 @@
       "states_to_capture": "Legacy menu framework; newer menu frames are created dynamically",
       "open_trigger": "Trigger the corresponding normal game confirmation, hover tooltip, item link, or context menu",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "DropDownList1",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [
+        "DropDownList2",
+        "DropDownList3"
+      ],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "alert-toasts",
@@ -1730,9 +2542,15 @@
       "states_to_capture": "Loot; achievement; progress and tutorial alerts",
       "open_trigger": "Trigger the corresponding normal game confirmation, hover tooltip, item link, or context menu",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "AlertFrame",
+      "boundary": null,
+      "scan_only": true,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "generic-message-dialog",
@@ -1743,9 +2561,15 @@
       "states_to_capture": "Text and confirmation buttons",
       "open_trigger": "Trigger the corresponding normal game confirmation, hover tooltip, item link, or context menu",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "BasicMessageDialog",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "account-save-status",
@@ -1756,9 +2580,17 @@
       "states_to_capture": "Account settings synchronization",
       "open_trigger": "Trigger the corresponding normal game confirmation, hover tooltip, item link, or context menu",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Outside in-game addon execution: Glue/front-end surface",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "AccountSaveFrame",
+      "boundary": "front-end",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "boundary_evidence": "Blizzard_AccountSaveUI.toc AllowLoad: Glue; frame parent CharacterSelect",
+      "boundary_source_url": "https://github.com/Gethe/wow-ui-source/blob/bebcb6bf309cf41b41bd74f8ca651e6a105b2676/Interface/AddOns/Blizzard_AccountSaveUI/Blizzard_AccountSaveUI.toc",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "login-screen",
@@ -1769,9 +2601,15 @@
       "states_to_capture": "Glue/front-end; normal gameplay addons do not load here",
       "open_trigger": "Login / character-selection flow; normal gameplay addons are not loaded here",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Outside in-game addon execution: Glue/front-end surface",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "AccountLogin",
+      "boundary": "front-end",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "realm-list",
@@ -1782,9 +2620,15 @@
       "states_to_capture": "Glue/front-end realm selector",
       "open_trigger": "Login / character-selection flow; normal gameplay addons are not loaded here",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Outside in-game addon execution: Glue/front-end surface",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "RealmList",
+      "boundary": "front-end",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "character-selection",
@@ -1795,9 +2639,15 @@
       "states_to_capture": "Glue/front-end character selection",
       "open_trigger": "Login / character-selection flow; normal gameplay addons are not loaded here",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Outside in-game addon execution: Glue/front-end surface",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CharacterSelect",
+      "boundary": "front-end",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "character-creation",
@@ -1808,9 +2658,15 @@
       "states_to_capture": "Glue/front-end character customization",
       "open_trigger": "Login / character-selection flow; normal gameplay addons are not loaded here",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Outside in-game addon execution: Glue/front-end surface",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CharCustomizeFrame",
+      "boundary": "front-end",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "character-deletion",
@@ -1821,9 +2677,15 @@
       "states_to_capture": "Glue/front-end protected confirmation",
       "open_trigger": "Login / character-selection flow; normal gameplay addons are not loaded here",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Outside in-game addon execution: Glue/front-end surface",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CharacterDeleteDialog",
+      "boundary": "front-end",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "front-end-menu",
@@ -1834,9 +2696,15 @@
       "states_to_capture": "Glue/front-end menu",
       "open_trigger": "Login / character-selection flow; normal gameplay addons are not loaded here",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Outside in-game addon execution: Glue/front-end surface",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GlueMenuFrame",
+      "boundary": "front-end",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "social-contract",
@@ -1847,9 +2715,15 @@
       "states_to_capture": "Glue/front-end agreement screen",
       "open_trigger": "Login / character-selection flow; normal gameplay addons are not loaded here",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Outside in-game addon execution: Glue/front-end surface",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "SocialContractFrame",
+      "boundary": "front-end",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "player-unit-frame",
@@ -1860,9 +2734,15 @@
       "states_to_capture": "Health/resource; portrait; combat states",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PlayerFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "unitframes",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "target-unit-frame",
@@ -1873,9 +2753,15 @@
       "states_to_capture": "Target health/resource; reactions; cast and auras",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "TargetFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "unitframes",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "focus-unit-frame",
@@ -1886,9 +2772,15 @@
       "states_to_capture": "Focus health/resource; target-related states",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "FocusFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "unitframes",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "pet-unit-frame",
@@ -1899,9 +2791,15 @@
       "states_to_capture": "Pet health/resource; happiness if exposed",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PetFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "unitframes",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "party-frames",
@@ -1912,9 +2810,15 @@
       "states_to_capture": "Party roster; roles; auras; status",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PartyFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "unitframes",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "raid-frames",
@@ -1925,9 +2829,15 @@
       "states_to_capture": "Raid unit grid; groups; roles; dispels; dead/offline",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CompactRaidFrameContainer",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "unitframes",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "boss-frames",
@@ -1938,9 +2848,15 @@
       "states_to_capture": "Boss frame group",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "BossTargetFrameContainer",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "unitframes",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "minimap",
@@ -1951,9 +2867,15 @@
       "states_to_capture": "Map; clock; tracking; mail; zoom; buttons",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "MinimapCluster",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "hud",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "main-action-bar",
@@ -1964,9 +2886,15 @@
       "states_to_capture": "Buttons; pages; hotkeys; counts; cooldowns",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "MainActionBar",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "actionBars",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "secondary-action-bars",
@@ -1977,9 +2905,15 @@
       "states_to_capture": "Bottom-left/right; left/right; bars 5/6/7",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "MultiBarBottomLeft",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "actionBars",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "pet-action-bar",
@@ -1990,9 +2924,15 @@
       "states_to_capture": "Pet commands; autocast",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PetActionBar",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "actionBars",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "stance-bar",
@@ -2003,9 +2943,15 @@
       "states_to_capture": "Forms/stances",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "StanceBar",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "actionBars",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "cast-bar",
@@ -2016,9 +2962,15 @@
       "states_to_capture": "Cast; channel; interrupted; empower if enabled",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PlayerCastingBarFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "buffs",
@@ -2029,9 +2981,15 @@
       "states_to_capture": "Buff rows; duration; tooltips",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "BuffFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "auras",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "debuffs",
@@ -2042,9 +3000,15 @@
       "states_to_capture": "Debuff rows; types; duration",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "DebuffFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "auras",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "personal-resources",
@@ -2055,9 +3019,15 @@
       "states_to_capture": "Player resource display",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PersonalResourceDisplayFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "essential-cooldown-viewer",
@@ -2068,9 +3038,15 @@
       "states_to_capture": "Spell icon group",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "EssentialCooldownViewer",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "utility-cooldown-viewer",
@@ -2081,9 +3057,15 @@
       "states_to_capture": "Utility icon group",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "UtilityCooldownViewer",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "tracked-buff-icons",
@@ -2094,9 +3076,15 @@
       "states_to_capture": "Aura icon group",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "BuffIconCooldownViewer",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "tracked-buff-bars",
@@ -2107,9 +3095,15 @@
       "states_to_capture": "Aura bars",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "BuffBarCooldownViewer",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "swing-timers",
@@ -2120,9 +3114,15 @@
       "states_to_capture": "Melee and ranged timer surfaces",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "SwingTimerManagerFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "raid-warning",
@@ -2133,9 +3133,15 @@
       "states_to_capture": "Warning banner",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "RaidWarningFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "instance-boss-messages",
@@ -2146,9 +3152,15 @@
       "states_to_capture": "Boss/emote text anchor",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "PrivateRaidBossEmoteFrameAnchor",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "cinematic-overlay",
@@ -2159,9 +3171,15 @@
       "states_to_capture": "Subtitles; skip confirmation",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Media/world-capture overlay intentionally excluded from generic panel backgrounds",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "CinematicFrame",
+      "boundary": "media-overlay",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "durability-warning",
@@ -2172,9 +3190,15 @@
       "states_to_capture": "Damaged equipment indicator",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "DurabilityFrame",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "ghost-return-to-graveyard",
@@ -2185,9 +3209,15 @@
       "states_to_capture": "Spirit state and return action",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GhostFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "instance-abandon",
@@ -2198,9 +3228,15 @@
       "states_to_capture": "Leave instance timer",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "InstanceAbandonFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "gamepad-radial-menu",
@@ -2211,9 +3247,15 @@
       "states_to_capture": "Input-mode-specific actions",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Reserved for the dedicated HUD/functional owner; not handled by native window interior traversal",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GamepadRadial",
+      "boundary": "dedicated-hud",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     },
     {
       "id": "gamepad-bar-editor",
@@ -2224,9 +3266,15 @@
       "states_to_capture": "Input-mode-specific action assignment",
       "open_trigger": "Visible gameplay HUD; use Edit Mode where supported; input and encounter states affect visibility",
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Registered native interior candidate; scoped control styling when present, not a claim of runtime visual parity",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "GamepadActionBarEditFrame",
+      "boundary": null,
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Eligible controls, typography and explicitly identified decorative regions; preserve content art, semantic colors and layout"
     },
     {
       "id": "support-browser-content",
@@ -2237,9 +3285,22 @@
       "states_to_capture": "Knowledge base; support topic; ticket form; submitted status; unavailable/error; focus/IME; external-link confirmation",
       "open_trigger": null,
       "layout_policy": "Preserve functional owner structure",
-      "adapter_status": "Coverage requires per-surface adapter review",
+      "adapter_status": "Browser webpage content excluded; its HelpFrame host is a separate skinnable native surface",
       "runtime_status": "Not tested in game",
-      "availability": "Source catalog candidate; current character/realm availability unverified"
+      "availability": "Source catalog candidate; current character/realm availability unverified",
+      "host": "HelpBrowser",
+      "boundary": "embedded-web",
+      "scan_only": false,
+      "aliases": [],
+      "functional_owner": "Blizzard native owner",
+      "interior_scope": "Excluded from generic native interior traversal"
     }
-  ]
+  ],
+  "counts": {
+    "native-interior": 132,
+    "dedicated-hud": 29,
+    "media-overlay": 2,
+    "front-end": 8,
+    "embedded-web": 1
+  }
 }

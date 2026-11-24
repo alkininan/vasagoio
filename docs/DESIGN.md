@@ -89,6 +89,14 @@ Semantic markers sit below the icon: height3, gap2, side insets6, opaque, square
 
 For a valid hostile NPC threat context, tanks with secure aggro and DPS/healers without aggro use calm blue. The inverse uses danger; transitional states use attention. Friendly units, PvP opponents and unavailable threat data retain the owner's reaction/class rules. No threat inference is added.
 
+## Window controls and interior states
+
+The user explicitly selects **near-black fill plus a small blue bottom marker only** for selected tabs/list rows and keyboard-focused inputs. The marker uses the existing information color, with a 2px height, 8px side insets and 2px bottom offset. These dimensions are implementation defaults within the agreed system. Selection does not introduce a blue background fill or a surrounding outline.
+
+Window controls reuse the existing neutral palette, 10px outer corner radius, native Friz face and soft text shadows. Hover and pressed states remain neutral; selected/focused states retain their blue marker. Disabled controls remain legible with reduced emphasis. Checkboxes retain their meaningful checked glyph, sliders retain their native value/drag behavior, and scrollbars retain their range and thumb geometry. Item quality, quest difficulty, requirements and other semantic colors are preserved. Neutral black narrative text becomes near-white so it remains readable on dark panels.
+
+Original control sizes, positions, wrapping, scroll behavior and keyboard/click handling are preserved. New decorative surfaces are excluded from native layout calculations. Known decorative art is replaced through explicit source-backed maps or audited owner APIs; content art, models, links, item icons, currency icons and talent-node state remain owned by their functional interface.
+
 ## Retained addon decisions
 
 Keep MRT for raid leading, SexyMap, What's Training, Baganator, Talents Forever, Prat, Forever Trinket Menu, Gargul and BattleGroundEnemiesFixed. Details and ThreatClassic2 retain distinct meter/Classic threat roles; vasagoio does not enable data collection. Spy and OneForAll are excluded. Chonky, EUI, ElvUI and DaylightUI are not additional presentation owners in this package. Skinner is the selected native skin foundation. The full 27-package functional selection is in dependencies.json.

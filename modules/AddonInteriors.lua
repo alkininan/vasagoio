@@ -288,8 +288,8 @@ local function updateBagSlot(frame)
         local background = frame:CreateTexture(nil, "BACKGROUND", nil, -6)
         background.__vasagoio, background.ignoreInLayout = true, true
         background:SetAllPoints(frame.icon)
-        local c = V.Tokens.colors.raised
-        background:SetColorTexture(c[1], c[2], c[3], V.Tokens.alpha.emptySlot or .32)
+        local c = V.Tokens.colors.emptySlot or V.Tokens.colors.meter
+        background:SetColorTexture(c[1], c[2], c[3], V.Tokens.alpha.emptySlot or .64)
         if V.MaskIcon then V:MaskIcon(background, V.Tokens.radius) end
         record.placeholder = background
     end

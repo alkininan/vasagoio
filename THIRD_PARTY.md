@@ -1,6 +1,6 @@
 # Third-party boundaries and source references
 
-This repository contains original adapter code and original generated masks. It does not contain third-party addon source, font binaries, game screenshots/textures, paid guide content or user account settings. The MIT license applies only to the original materials here.
+This repository contains original adapter code and original generated masks and static material textures. It does not contain third-party addon source, font binaries, game screenshots/textures, paid guide content or user account settings. The MIT license applies only to the original materials here.
 
 Referenced integrations retain their own licenses and must be installed separately. Runtime paths such as `Fonts\\FRIZQT__.TTF` refer to media provided by the user's client, not bundled assets.
 
@@ -16,6 +16,6 @@ Source/API review references:
 - [SexyMap](https://github.com/funkydude/SexyMap) — minimap profile, native shape, zone and clock APIs.
 - [Gargul 8.1.0](https://github.com/papa-smurf/Gargul/releases/tag/v8.1.0) — public window registries, interface constructors and native font wrapper behavior.
 
-Forever Unit Frames 0.79.1 and 0.81.0 and selected addon shells were inspected from their installed/distributed source without copying implementation code. Version numbers are compatibility targets, not an endorsement or claim of universal compatibility. Exact frame and adapter limitations are documented with the implementation.
+Forever Trinket Menu 1.8.19, Forever Unit Frames 0.79.1 and 0.81.0 and selected addon shells were inspected from their installed/distributed source without copying implementation code. Version numbers are compatibility targets, not an endorsement or claim of universal compatibility. Exact frame and adapter limitations are documented with the implementation.
 
 World of Warcraft, Blizzard fonts and all addon names/trademarks remain the property of their respective owners. No affiliation is implied.

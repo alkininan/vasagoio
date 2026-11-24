@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0-alpha.8 — 2026-11-25
+
+- Apply Vasagoio Specs revision 11: Large 304×72, Medium 224×56, Small 176×40, shared 16px resource bars and 72px clearance above the nearest action row. Player XP fits inside the 72px frame.
+- Center the 842px action and utility group. Align two 42px equipped trinkets and the single bag button with the three main rows; retain native actions, flyouts and queue behavior.
+- Correct Threat Plates scale, exact HP and name text, threat colors, cast/status anchors and permitted aura markers. Keep explicit role choices and report conflicting custom rules.
+- Correct the 216×186 map artwork with its 32px bottom label, and the 248×186 total Details bounds. Keep native Prat message frames while styling their chrome.
+- Add player combat and party/raid aggro edges, 16px PvP badges and own hunter-pet happiness name colors. Hide the duplicate Blizzard player castbar through FUF.
+- Normalize layered backdrops, add static material, strengthen empty action/bag placeholders, and set near-unit auras to 28px. Native scene blur and automatic long/short aura routing remain outside this implementation.
+- Advance setup verification: reapply the preset and reload. Offline regressions cover profile changes, restricted values, failed writes and cleanup; native FPS, combat, map pins and visual parity require user testing.
+
 ## 0.2.0-alpha.7
 
 - Added faint, borderless empty placeholders to the four main Bartender action bars and supported empty Baganator slots. Existing action assignments, bag organization, item indicators and bindings remain owned by their addons.

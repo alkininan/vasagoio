@@ -2,11 +2,11 @@
 
 A personal World of Warcraft Forever UI built around the Bael design system: neutral black surfaces, restrained blue status colors, native typography, custom HUD geometry, and preserved native window layouts.
 
-**0.2.0-alpha.7 — empty-slot styling, compact player XP and an optional aura test.** Empty main-action and bag slots receive faint borderless placeholders. XP fits beneath player power inside the existing frame, and its space returns to health/power at maximum level. A manually opened aura comparison is included for native testing; it is not the finished aura layout. The simple **Apply preset** / **Reload UI** screen remains. RestedXP redesign and replacement of the native quest tracker are still pending. See [coverage](docs/COVERAGE.md).
+**0.2.0-alpha.8 — revised unit geometry, aligned utilities and clearer HUD presentation.** Large 304×72, Medium 224×56 and Small 176×40 use shared 16px resource bars. The centered main grid includes two trinkets and one bag button. This update corrects map/meter bounds, nameplate settings, unit indicators and stacked backgrounds, and strengthens empty slots. Reapply the preset and reload. Native visual/combat acceptance remains pending; automatic aura routing and the RestedXP redesign are still separate unfinished work. See [coverage](docs/COVERAGE.md).
 
 ## Install
 
-1. Download the **vasagoio-0.2.0-alpha.7.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
+1. Download the **vasagoio-0.2.0-alpha.8.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
 2. With WoW closed, extract the `vasagoio` folder into `World of Warcraft/_forever_/Interface/AddOns/`. The result must be `AddOns/vasagoio/vasagoio.toc`.
 3. Install the desired functional addons separately using CurseForge or their official distribution. The [dependency list](docs/dependencies.json) records the complete selected setup. They are not bundled.
 4. Enable vasagoio and those addons in the game's AddOns menu. Log in yourself, let their profiles initialize, and reload once.
@@ -18,15 +18,17 @@ No prebuilt account-specific WTF folder is distributed. vasagoio creates its own
 
 ## What is included
 
-- Reviewed profile adapters for Forever Unit Frames, Threat Plates, Bartender4, Prat, SexyMap, Details and Skinner.
+- Reviewed profile adapters for Forever Unit Frames, Threat Plates, Bartender4, Prat, SexyMap, Details, Forever Trinket Menu and Skinner.
 - Large / Medium / Small / Extra small unit geometry, two-column raid groups, attached party pets where the owner supports them, exact health text and role-aware nameplate colors.
-- A 16×3 action grid assembled from four native Bartender bars, with faint empty-slot placeholders; the left-aligned pet row ends at the eighth main button. Setup hides extra normal bars and disables old gryphon art/bag/micro bars and the crossing status strip, preserving slots, binding configuration, paging and special controls.
-- A 4px XP strip inside the existing 320×64 player frame: health42, gap2, power14, gap2, XP4. At maximum level or when XP is unavailable, the original health46/gap2/power16 rows return. Target geometry stays unchanged.
+- A 16×3 action grid assembled from four native Bartender bars, with stronger empty-slot placeholders; the left-aligned pet row ends at the eighth main button. Setup hides extra normal bars and disables old gryphon art/extra bag/micro bars and the crossing status strip, preserving slots, binding configuration, paging and special controls.
+- A 4px XP strip inside the 304×72 player frame: health 48, gap 2, power 16, gap 2, XP 4. At maximum level or when XP is unavailable, health 54/gap 2/power 16 rows return. Target retains 54/2/16.
+- Two 42px native trinket buttons beside the upper/middle main rows and one 42px native bag button beside the bottom row. The combined 842px container is centered; flyouts, swaps, bags and secure actions remain owner-controlled.
+- Player combat and party/raid aggro edges, flagged-only 16px badges, own hunter-pet name happiness, and removal of the duplicate Blizzard castbar.
 - Reviewed RestedXP v4.11.40 guide placement separates it from native objectives without changing guide contents or dimensions.
 - Full-button cooldown wipes, centered numeric timers, hidden hotkeys during ordinary cooldowns, translucent range feedback and bottom aura signals where supported.
-- Neutral translucent window and HUD surfaces, Friz text roles, Arial Narrow number/chat roles, and original rounded mask artwork.
+- Neutral translucent window and HUD surfaces with static low-contrast sheen/grain, Friz text roles, Arial Narrow number/chat roles, and original rounded mask artwork.
 - Native windows retain their layouts while receiving scoped interior controls, typography, neutral panes and rounded decoration. Selected tabs/rows and focused inputs keep near-black fills with small blue bottom markers.
-- Baganator's 19 public skin-region types, including faint placeholders for empty bag slots, Talents Forever internals, MRT tools, Auctionator panes and Gargul's audited window/widget registries use the same visual primitives while retaining their functionality.
+- Baganator's 19 public skin-region types, including stronger placeholders for empty bag slots, Talents Forever internals, MRT tools, Auctionator panes and Gargul's audited window/widget registries use the same visual primitives while retaining their functionality.
 - An optional, closed-by-default native aura experiment with All, Short and Long/permanent comparisons for buffs and debuffs. Exact-60-second classification, permanent effects after button reuse, gaps and combat behavior remain test questions.
 - Setup review, persistent snapshots, conflict-aware restoration, module switches and addon-wide disable controls.
 
@@ -54,7 +56,7 @@ The [accepted design](docs/DESIGN.md) lists the full target. [Window coverage](d
 
 You can also uncheck **vasagoio** in the WoW AddOns menu. Applied settings belong to their functional addons and remain after vasagoio is disabled. To undo those too, use `/vasagoio restore`, then `/vasagoio restore confirm` before disabling, then reload immediately. Restoration stops if a saved field has changed since setup, preserving later edits. A full pre-install WTF backup remains the recovery option for conflicts.
 
-Updating from alpha.6: with WoW closed, replace only the `vasagoio` folder and keep SavedVariables. Open `/vasagoio setup`, select **Apply preset**, then **Reload UI** to enable the empty action grid and compact XP placement. The aura test is separate from those two setup actions: open it manually after reload and hide it when finished. You can run the test without reapplying the preset to isolate it; bare `/vasagoio auratest` also opens it. The existing RestedXP/native-tracker arrangement remains until its replacement is implemented and tested; it is not an accepted substitute for the requested layout.
+Updating from an earlier alpha: with WoW closed, replace only the `vasagoio` folder and keep SavedVariables. Open `/vasagoio setup`, select **Apply preset**, then **Reload UI** for the revised owner settings. Optional trinket integration requires reviewed Forever Trinket Menu 1.8.19. FUF geometry is rejected at scales where native owner bounds would silently clamp it. The aura experiment remains optional and closed by default; the existing RestedXP/native-tracker arrangement is still a documented implementation gap.
 
 ## Maintenance and sharing
 

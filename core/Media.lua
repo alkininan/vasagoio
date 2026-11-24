@@ -1,6 +1,7 @@
 local addonName, V = ...
 local root = "Interface\\AddOns\\" .. addonName .. "\\media\\"
 V.Media = {corner = root .. "corner.tga", mask42 = root .. "mask42.tga", mask36 = root .. "mask36.tga", mask32 = root .. "mask32.tga", mask28 = root .. "mask28.tga"}
+V.Media.minimapMask, V.Media.sheen, V.Media.grain = root .. "minimap-mask.tga", root .. "sheen.tga", root .. "grain.tga"
 local surfaces, masks, hidden = setmetatable({}, {__mode = "k"}), setmetatable({}, {__mode = "k"}), setmetatable({}, {__mode = "k"})
 
 function V:Font(role)
@@ -110,6 +111,44 @@ function V:Surface(frame, alpha, radius, color)
     old = old or {}
     old.r, old.g, old.b, old.a, old.radius, old.corner = c[1], c[2], c[3], opacity, r, self.Media.corner
     surface.style = old
+    -- A static, very low contrast material improves the flat tint without a
+    -- scene capture, blur shader, animation, OnUpdate or extra discovery pass.
+    -- Keep it inside the straight portion of the rounded surface so decorative
+    -- pixels never extend beyond its corners.
+    if self.Tokens.material and width and height and width > 2*r and height > 0 then
+        local material = surface.material
+        if not material then
+            material = {}
+            surface.material = material
+            for _, kind in ipairs({"sheen", "grain"}) do
+                local texture = surface:CreateTexture(nil, "BACKGROUND", nil, -7)
+                texture.__vasagoio, texture.ignoreInLayout = true, true
+                texture:SetTexture(self.Media[kind], "REPEAT", "REPEAT")
+                material[kind] = texture
+            end
+        end
+        if material.radius ~= r then
+            for _, kind in ipairs({"sheen", "grain"}) do
+                local texture = material[kind]
+                texture:ClearAllPoints()
+                texture:SetPoint("TOPLEFT", surface, "TOPLEFT", r, 0)
+                texture:SetPoint("BOTTOMRIGHT", surface, "BOTTOMRIGHT", -r, 0)
+            end
+            material.radius = r
+        end
+        if material.width ~= width or material.height ~= height then
+            material.grain:SetTexCoord(0, (width-2*r)/128, 0, height/128)
+            material.width, material.height = width, height
+        end
+        local sheen = self.Tokens.material.sheenAlpha * opacity
+        local grain = self.Tokens.material.grainAlpha * opacity
+        if material.sheenAlpha ~= sheen then material.sheen:SetVertexColor(1,1,1,sheen); material.sheenAlpha = sheen end
+        if material.grainAlpha ~= grain then material.grain:SetVertexColor(1,1,1,grain); material.grainAlpha = grain end
+    elseif surface.material then
+        local material = surface.material
+        if material.sheenAlpha ~= 0 then material.sheen:SetVertexColor(1,1,1,0); material.sheenAlpha=0 end
+        if material.grainAlpha ~= 0 then material.grain:SetVertexColor(1,1,1,0); material.grainAlpha=0 end
+    end
     if not surface.IsShown or not surface:IsShown() then surface:Show() end
     return surface
 end

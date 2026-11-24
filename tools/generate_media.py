@@ -23,4 +23,21 @@ for dimension in (28, 32, 36, 42):
         dx, dy = max(r-x, 0, x-(1-r)), max(r-y, 0, y-(1-r))
         return dx*dx + dy*dy <= r*r
     tga(f"mask{dimension}.tga", rounded)
-print("Generated 5 original TGA masks.")
+# Original static material, not a captured or blurred game scene.
+tga("sheen.tga", lambda x, y: (1-y)**2)
+def grain(x, y):
+    # Deterministic fine grain; no runtime animation or sampled scene data.
+    cell_x, cell_y = int(x*128), int(y*128)
+    return ((cell_x*73 + cell_y*151 + cell_x*cell_y*19) % 127) / 126
+tga("grain.tga", grain)
+
+# Keep the native map canvas square; crop its visible content to 216 by 186.
+def map_mask(x, y):
+    crop, r = 15/216, 10/216
+    if y < crop or y > 1-crop:
+        return False
+    dx = max(r-x, 0, x-(1-r))
+    dy = max(crop+r-y, 0, y-(1-crop-r))
+    return dx*dx + dy*dy <= r*r
+tga("minimap-mask.tga", map_mask)
+print("Generated 8 original TGA masks and material textures.")

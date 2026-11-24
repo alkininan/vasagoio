@@ -113,7 +113,7 @@ local firstWrites,firstStyle=textureWrites,surface.style
 for _=1,100 do V:Surface(frame,.56,10) end
 assert(textureWrites==firstWrites and surface.style==firstStyle,"Unchanged surface rebuilt geometry/colors or allocated a new cache")
 V:Surface(frame,.80,10)
-assert(textureWrites==firstWrites+7,"Opacity update rebuilt geometry instead of only colors")
+assert(textureWrites==firstWrites+9,"Opacity update rebuilt geometry instead of only base/material colors")
 local afterColor=textureWrites
 frame.height=12
 V:Surface(frame,.80,10)

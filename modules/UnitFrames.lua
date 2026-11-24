@@ -60,7 +60,7 @@ local function appearance(scope, scopeKey)
         auraBorder = false,
         borderShow = false, borderPadding = 0, shadowEnabled = false, cornerRadius = 0,
         boxBorderShow = false, boxCornerRadius = 0, spacingFill = false, footerHeight = 0,
-        healthColorMode = "STATIC", healthColor = rgb(T.colors.healthHigh), backgroundColor = rgb(T.colors.track, T.alpha.unit),
+        healthColorMode = "STATIC", healthColor = rgb(T.colors.healthHigh), backgroundColor = rgb(T.colors.track, 0),
         healthMissingCustom = false, barTexture = "Flat", barVertical = false, barReverse = false,
         healthBarWidth = 100, powerBarWidth = 100, powerFill = "LEFT_TO_RIGHT", powerMatchesHealth = false,
         powerColorMode = "TYPE", titleColorMode = "CLASS", barNameColorMode = "CLASS",
@@ -68,10 +68,24 @@ local function appearance(scope, scopeKey)
         textPowerLeft = "NONE", textPowerCenter = "NONE", textPowerRight = "CURRENT",
         titlePercent = 0, spacingTitle = 0, spacingDocked = 0, spacingPower = px(2), spacingPortrait = px(2),
         portraitStyle = "2D", portraitSquare = true, portraitMirror = false,
-        powerEnabled = true, castbarAlwaysShow = false,
+        powerEnabled = true, castbarAlwaysShow = false, threatGlow = false,
     })
     if scopeKey ~= "pet" and scopeKey ~= "boss" then scope.titleClassIcon = false end
     if scopeKey ~= "player" and scopeKey ~= "pet" and scopeKey ~= "party" then scope.powerHideEmpty = true end
+    if scopeKey == "pet" or scopeKey == "targettarget" or scopeKey == "focustarget" then
+        scope.fontSize = px(T.typography.compact.size)
+    end
+    -- Native flag/FFA/NPC semantics stay with FUF. Only existing badges are
+    -- resized; player and target retain their reviewed PvP warning badges.
+    if scopeKey~="pet" and scopeKey~="boss" then scope.pvpIconSize = px(T.unitState.badgeSize) end
+    if scopeKey~="player" and scopeKey~="pet" then scope.combatIconSize=px(T.unitState.badgeSize) end
+    if scopeKey == "player" or scopeKey == "target" then
+        local right = scopeKey == "target"
+        scope.pvpIcon = true
+        scope.pvpIconFramePoint, scope.pvpIconPoint = right and "TOPRIGHT" or "TOPLEFT", right and "TOPRIGHT" or "TOPLEFT"
+        scope.pvpIconX, scope.pvpIconY = px(right and -T.unitState.badgeInset or T.unitState.badgeInset), -px(T.unitState.badgeInset)
+        if right then scope.pvpIconNPC = true end
+    end
     for resource, color in pairs(design.resources) do scope["powerColor" .. resource] = rgb(color) end
     for _, group in ipairs({ "buffs", "debuffs" }) do
         scope[group .. "Size"], scope[group .. "OwnSize"] = px(T.aura.size), px(T.aura.size)
@@ -111,10 +125,13 @@ local adapter = {
             { "raid name font", px(T.typography.name.size), 6, 24 },
             { "raid amount font", px(T.typography.compact.size), 6, 24 },
             { "unit amount font", px(T.typography.amount.size), 6, 32 },
+            { "player status badge", px(T.unitState.badgeSize), 10, 48 },
+            { "PvP/combat badge", px(T.unitState.badgeSize), 8, 48 },
             { "party pet width", px(design.S.width), 0, 300 },
             { "party pet height", px(design.S.height), 10, 60 },
+            { "party pet aura size", px(T.aura.shortSize), 8, 40 },
             { "standard/own aura size", px(T.aura.size), 10, 64 },
-            { "dispel aura size", px(T.aura.prioritySize), 8, 64 },
+            { "dispel aura size", px(T.aura.shortSize), 8, 64 },
             { "aura spacing", px(T.aura.gap), 0, 20 },
             { "additional aura row gap", px(T.aura.wrapGap - T.aura.gap), 0, 30 },
         }
@@ -145,13 +162,13 @@ local adapter = {
         for class, color in pairs(design.classes) do profile.general["classColor" .. class] = rgb(color) end
         local scopes = { "player", "target", "pet", "targettarget", "party", "focus", "focustarget", "boss" }
         for _, key in ipairs(scopes) do profile[key] = profile[key] or {}; appearance(profile[key], key) end
-        local left, right = T.action.x, T.action.x + T.action.width
-        local top = T.action.petY - 84 - design.L.height
+        local left, right = T.action.x, T.action.x + (T.action.containerWidth or T.action.width)
+        local top = T.action.petY - T.layout.unitGap - design.L.height
         local smallTop = top + (design.L.height - design.S.height) / 2
         size(profile.player, "L", "LEFT", left, top)
         size(profile.target, "L", "RIGHT", right - design.L.width, top)
-        size(profile.pet, "S", "LEFT", left - 20 - design.S.width, smallTop)
-        size(profile.targettarget, "S", "RIGHT", right + 20, smallTop)
+        size(profile.pet, "S", "LEFT", left - T.layout.companionGap - design.S.width, smallTop)
+        size(profile.targettarget, "S", "RIGHT", right + T.layout.companionGap, smallTop)
         -- Auxiliary positions retain the owner's current choice; only size is unified.
         for _, key in ipairs({ "focus", "boss", "focustarget" }) do
             local oldX, oldY = profile[key].x, profile[key].y
@@ -167,13 +184,17 @@ local adapter = {
             partySpacing = px(12), partyShowPets = true, partyPetLayout = "BESIDE", partyPetSide = "RIGHT",
             partyPetWidth = px(design.S.width), partyPetHeight = px(design.S.height), partyPetGap = px(12),
             partyPetsX = 0, partyPetsY = -px((design.M.height - design.S.height) / 2), partyPetTextLeft = "NAME", partyPetTextCenter = "NONE",
-            partyPetTextRight = "CURRENT", castbarEnabled = false })
+            partyPetTextRight = "CURRENT", partyPetAuraSize = px(T.aura.shortSize), castbarEnabled = false })
         -- Newer party grids also wrap attached pets/targets. The agreed layout
         -- remains one column of five members, with each pet beside its owner.
         if ownerVersion() == "0.81.0" then profile.party.partyPerLine = 5 end
-        profile.party.dispelsSize, profile.party.dispelsSpacing, profile.party.dispelsRowGap = px(T.aura.prioritySize), px(T.aura.gap), px(T.aura.wrapGap - T.aura.gap)
+        profile.party.dispelsSize, profile.party.dispelsSpacing, profile.party.dispelsRowGap = px(T.aura.shortSize), px(T.aura.gap), px(T.aura.wrapGap - T.aura.gap)
         profile.player.valueFontSize, profile.target.valueFontSize = px(T.typography.amount.size), px(T.typography.amount.size)
         profile.player.buffsEnabled, profile.player.hideBlizzardAuras, profile.player.cancelBuffs = true, true, true
+        profile.player.hideBlizzardCastbar, profile.player.castbarEnabled = true, true
+        profile.player.statusCombat = false -- The contextual player edge owns this signal.
+        profile.player.statusSize = px(T.unitState.badgeSize)
+        profile.pet.petHappiness = false -- The own-pet name carries the same native state.
         -- The Classic preset otherwise retains an empty cast/threat row under
         -- the player frame. Keep actual casts; TinyThreat owns the threat meter.
         profile.player.threatBar = false
@@ -197,10 +218,10 @@ local adapter = {
                 cellWidth = px(design.XS.width), cellHeight = px(design.XS.height), cellSpacing = px(6), blockSpacing = px(16),
                 blockTitles = false, panelBorder = false, blockBorder = false, cellBorder = false,
                 cellCornerRadius = 0, healthColorMode = "STATIC", healthColor = rgb(T.colors.healthHigh),
-                backgroundColor = rgb(T.colors.track, T.alpha.unit), barTexture = "Flat", fillVertical = false,
+                backgroundColor = rgb(T.colors.track, 0), barTexture = "Flat", fillVertical = false,
                 fillReverse = false, powerStrip = "ALL", powerStripHeight = math.ceil(100 * px(design.XS.power) / px(design.XS.height)), nameClassColor = true,
                 nameFontSize = px(T.typography.name.size), secondFontSize = px(T.typography.compact.size), fontFace = "Friz Quadrata", fontOutline = "NONE",
-                fontShadow = true, secondLine = "PERCENT", secondLineColor = rgb(T.colors.text) })
+                fontShadow = true, secondLine = "PERCENT", secondLineColor = rgb(T.colors.text), aggroBorder = true })
             if ownerVersion() == "0.81.0" then
                 -- 0.81 exposes these colors per raid profile. Configure the
                 -- owner directly as well as retaining the older runtime hook.
@@ -212,18 +233,57 @@ local adapter = {
         if not V.db or type(V.db.overrides)~="table" then return nil,"vasagoio settings are not initialized" end
         changes[#changes+1]={table=V.db.overrides,path={"VasagoioDB","overrides"},key="playerProgress",value=true,
             label="Enable compact player XP strip; restore full rows at maximum level"}
-        return { changes = changes, detail = "Creates a new FUF profile; reload required. Keeps the 320x64 player frame while showing XP below power; normal rows return at maximum level. The adapter decorates existing party pet buttons and supplies 12×16 raid block spacing." }
+        return { changes = changes, detail = "Creates a new FUF profile; reload required. Uses 304x72, 224x56 and 176x40 units, shared 16px resources and a compact player XP row. Native cast duplication is hidden; contextual indicators and own-pet happiness use native state." }
     end,
 }
 V:RegisterProfileAdapter("unitframes", adapter)
 
 local hooked = setmetatable({}, { __mode = "k" })
 local partyPetDecor = setmetatable({}, { __mode = "k" })
-local tintCurve, publicHooks
+local unitSurfaces = setmetatable({}, { __mode = "k" })
+local tintCurve, publicHooks, activeProfile, activeName
+local release
 local powerColors = { [0] = rgb(design.resources.Mana), [1] = rgb(design.resources.Rage),
     [2] = rgb(design.resources.Focus), [3] = rgb(design.resources.Energy) }
 local function running()
-    return V.db and V.db.enabled ~= false and (not V.db.modules or V.db.modules.unitframes ~= false)
+    if reloadPending or V.profileReloadPending or not activeProfile or not V:IsModuleEnabled("unitframes") then return false end
+    local profile,name=V:GetReviewedUnitProfile()
+    return profile==activeProfile and name==activeName
+end
+local function captureGeometry(widget)
+    if not widget.GetNumPoints or not widget.GetPoint or not widget.GetWidth or not widget.GetHeight then return end
+    local count=V:SafeNumber(widget:GetNumPoints())
+    local width,height=V:SafeNumber(widget:GetWidth()),V:SafeNumber(widget:GetHeight())
+    if not count or count<1 or count>4 or not width or not height then return end
+    local points={}
+    for i=1,count do
+        local a,r,b,x,y=widget:GetPoint(i)
+        if V:IsSecret(a) or V:IsSecret(r) or V:IsSecret(b) or type(a)~="string" or type(b)~="string"
+            or not V:SafeNumber(x) or not V:SafeNumber(y) then return end
+        points[i]={a,r,b,x,y}
+    end
+    return {points=points,width=width,height=height}
+end
+local function samePoints(a,b)
+    if not a or not b or #a~=#b then return false end
+    for i,point in ipairs(a) do for j=1,5 do if point[j]~=b[i][j] then return false end end end
+    return true
+end
+local function restorePet(frame,decor)
+    decor.portrait:Hide();decor.resource:Hide()
+    if not decor.applied then return end
+    if InCombatLockdown and InCombatLockdown() then decor.restorePending=true;return end
+    local now=captureGeometry(frame.health)
+    if not now then return end
+    decor.layoutBusy=true
+    if samePoints(now.points,decor.applied.points) then
+        frame.health:ClearAllPoints()
+        for _,point in ipairs(decor.original.points) do frame.health:SetPoint(unpack(point)) end
+    end
+    if now.width==decor.applied.width then frame.health:SetWidth(decor.original.width) end
+    if now.height==decor.applied.height then frame.health:SetHeight(decor.original.height) end
+    decor.layoutBusy=false
+    decor.applied,decor.restorePending=nil,nil
 end
 local function ordinaryUnit(frame)
     local unit = frame.unit
@@ -232,7 +292,7 @@ end
 local function petData(frame, portraitChanged)
     local decor = partyPetDecor[frame]
     if not decor then return end
-    if not running() then decor.portrait:Hide(); decor.resource:Hide(); return end
+    if not running() then restorePet(frame,decor); return end
     local unit = ordinaryUnit(frame)
     if not unit then decor.portrait:Hide(); decor.resource:Hide(); return end
     local exists = UnitExists and UnitExists(unit)
@@ -259,8 +319,10 @@ local function petLayout(frame)
     if not decor or decor.layoutBusy or not running() then return end
     if InCombatLockdown and InCombatLockdown() then V:Refresh("party pet layout after combat", "unitframes"); return end
     decor.layoutBusy = true
-    -- Decorate the same 192×32 secure button:32px picture,2px gap,
-    --158px content; health22, gap2, resource8. No click-unit attributes change.
+    -- Decorate the same Small secure button. The owner retains its unit,
+    -- click area and visibility; only plain health/resource children move.
+    if not decor.applied then decor.original=captureGeometry(frame.health) end
+    if not decor.original then decor.layoutBusy=false;return end
     decor.portrait:ClearAllPoints()
     decor.portrait:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
     local spec = design.S
@@ -272,6 +334,7 @@ local function petLayout(frame)
     decor.resource:ClearAllPoints()
     decor.resource:SetPoint("TOPLEFT", frame, "TOPLEFT", V:Pixel(inset), -V:Pixel(spec.health + spec.gap))
     decor.resource:SetSize(V:Pixel(body), V:Pixel(spec.power))
+    decor.applied=captureGeometry(frame.health)
     decor.layoutBusy = false
 end
 local function stylePartyPet(frame)
@@ -286,12 +349,37 @@ local function stylePartyPet(frame)
         decor.resource:SetStatusBarColor(0.35, 0.35, 0.35, T.alpha.unit)
         decor.track = decor.resource:CreateTexture(nil, "BACKGROUND")
         decor.track:SetAllPoints(decor.resource)
-        decor.track:SetColorTexture(T.colors.track[1], T.colors.track[2], T.colors.track[3], T.alpha.unit)
+        decor.track:SetColorTexture(T.colors.track[1], T.colors.track[2], T.colors.track[3], 0)
         decor.amount = decor.resource:CreateFontString(nil, "OVERLAY")
         decor.amount:SetPoint("RIGHT", decor.resource, "RIGHT", -V:Pixel(4), 0)
         if hooksecurefunc then
-            for _, method in ipairs({ "SetPoint", "SetHeight", "SetWidth", "SetSize" }) do
-                hooksecurefunc(frame.health, method, function() petLayout(frame) end)
+            -- FUF completes its own anchor sequence with SetHeight. Never
+            -- reanchor halfway through its ClearAllPoints/SetPoint sequence.
+            hooksecurefunc(frame.health,"SetPoint",function()
+                if not decor.layoutBusy and running() then V:Refresh("party pet owner anchors", "unitframes") end
+            end)
+            for _, method in ipairs({ "SetHeight", "SetWidth", "SetSize" }) do
+                local ownerMethod=method
+                hooksecurefunc(frame.health, method, function()
+                    if decor.layoutBusy then return end
+                    local owned=running()
+                    if not owned and decor.applied then
+                        -- Even an identical value is now the new owner's
+                        -- deliberate write; do not undo that field on release.
+                        if ownerMethod~="SetWidth" then decor.applied.height=nil end
+                        if ownerMethod~="SetHeight" then decor.applied.width=nil end
+                    end
+                    local now=captureGeometry(frame.health)
+                    if now and decor.original then
+                        if decor.applied then
+                            if samePoints(now.points,decor.applied.points) then now.points=decor.original.points end
+                            if now.width==decor.applied.width then now.width=decor.original.width end
+                            if now.height==decor.applied.height then now.height=decor.original.height end
+                        end
+                        decor.original=now
+                    end
+                    if owned then petLayout(frame) else restorePet(frame,decor) end
+                end)
             end
         end
     end
@@ -304,7 +392,9 @@ local function updatePartyPets(portraitChanged)
     for frame in pairs(partyPetDecor) do petData(frame, portraitChanged) end
 end
 local function tint(frame)
-    if not running() or not tintCurve or hooked[frame].painting then return end
+    if hooked[frame].painting then return end
+    if not running() then if activeProfile then release() end;return end
+    if not tintCurve then return end
     local unit = ordinaryUnit(frame)
     if not unit then return end
     -- The native color curve evaluates restricted HP. Lua neither reads nor
@@ -327,23 +417,28 @@ local function exact(frame, field, getter)
     hooksecurefunc(fs, "SetText", update)
     update()
 end
-local function tintRaidPower(frame)
+local function tintPower(frame)
     local state = hooked[frame]
-    if not running() or state.paintingPower or not UnitPowerType then return end
+    if state.paintingPower then return end
+    if not running() then if activeProfile then release() end;return end
+    local color=state.powerColor
     local unit = ordinaryUnit(frame)
-    if not unit or V:IsSecret(frame.textWord) or frame.textWord then return end
-    local kind = V:SafeNumber(UnitPowerType(unit))
-    local c = kind and powerColors[kind]
-    if not c then return end -- Keep the owner's color for a restricted/unknown type.
+    if (frame.key=="raid" or frame.key=="raidpet") and unit and UnitPowerType
+        and not V:IsSecret(frame.textWord) and not frame.textWord then
+        local kind = V:SafeNumber(UnitPowerType(unit))
+        color = (kind and powerColors[kind]) or color
+    end
+    if not color then return end
     state.paintingPower = true
-    frame.power:SetStatusBarColor(c[1], c[2], c[3])
+    frame.power:SetStatusBarColor(color[1], color[2], color[3], T.alpha.unit)
     state.paintingPower = false
 end
 local function style(frame)
     if not frame or not frame.health or not frame.health.SetStatusBarColor then return end
-    V:Surface(frame, T.alpha.unit, T.radius)
+    unitSurfaces[frame]=V:Surface(frame, T.alpha.unit, T.radius)
     stylePartyPet(frame)
     if frame.key=="player" and V.StylePlayerProgress then V:StylePlayerProgress(frame) end
+    if V.StyleUnitStates then V:StyleUnitStates(frame) end
     if frame.key == "raid" and frame.texts then
         -- The owner's profile exposes two stacked text lines only. Re-anchor
         -- those same FontStrings; status rendering and click areas stay owned.
@@ -355,13 +450,27 @@ local function style(frame)
             amount:SetWidth(V:Pixel(40)); amount:SetJustifyH("RIGHT")
         end
     end
-    if hooked[frame] or not hooksecurefunc then return end
-    hooked[frame] = {}
-    hooksecurefunc(frame.health, "SetStatusBarColor", function() tint(frame) end)
+    if not hooksecurefunc then return end
+    if hooked[frame] then tint(frame);if frame.power then tintPower(frame) end;return end
+    local state={}
+    hooked[frame] = state
+    if frame.health.GetStatusBarColor then state.healthColor={frame.health:GetStatusBarColor()} end
+    hooksecurefunc(frame.health, "SetStatusBarColor", function(_,r,g,b,a)
+        if not state.painting then
+            if type(a)=="nil" then a=1 end
+            state.healthColor={r,g,b,a};tint(frame)
+        end
+    end)
     tint(frame)
-    if (frame.key == "raid" or frame.key == "raidpet") and frame.power and frame.power.SetStatusBarColor then
-        hooksecurefunc(frame.power, "SetStatusBarColor", function() tintRaidPower(frame) end)
-        tintRaidPower(frame)
+    if frame.power and frame.power.SetStatusBarColor then
+        if frame.power.GetStatusBarColor then state.powerColor={frame.power:GetStatusBarColor()} end
+        hooksecurefunc(frame.power, "SetStatusBarColor", function(_,r,g,b,a)
+            if not state.paintingPower then
+                if type(a)=="nil" then a=1 end
+                state.powerColor={r,g,b,a};tintPower(frame)
+            end
+        end)
+        tintPower(frame)
     end
     -- Raid retains its compact percentages and owner status text. Only the
     -- current-value slots selected in our unit profile receive raw amounts.
@@ -369,6 +478,19 @@ local function style(frame)
         exact(frame, "healthRight", UnitHealth)
         exact(frame, "powerRight", UnitPower)
     end
+end
+release=function()
+    activeProfile,activeName=nil,nil
+    if V.DisablePlayerProgress then V:DisablePlayerProgress() end
+    if V.DisableUnitStates then V:DisableUnitStates() end
+    for frame,state in pairs(hooked) do
+        state.painting,state.paintingPower=true,true
+        if state.healthColor then frame.health:SetStatusBarColor(unpack(state.healthColor)) end
+        if state.powerColor and frame.power then frame.power:SetStatusBarColor(unpack(state.powerColor)) end
+        state.painting,state.paintingPower=false,false
+    end
+    for frame,decor in pairs(partyPetDecor) do restorePet(frame,decor) end
+    for _,surface in pairs(unitSurfaces) do surface:Hide() end
 end
 local function walk(frame, depth)
     if not frame or depth > 3 then return end
@@ -383,17 +505,20 @@ V:RegisterModule("unitframes", {
     Apply = function()
         if InCombatLockdown and InCombatLockdown() then return false, "Unit styling waits until combat ends." end
         if reloadPending then
-            if V.DisablePlayerProgress then V:DisablePlayerProgress() end
+            release()
             return false, "Reload to activate the newly selected FUF profile."
         end
         if not versionOK() or not ForeverUnitFrames then
-            if V.DisablePlayerProgress then V:DisablePlayerProgress() end
+            release()
             return false, "Audited FUF 0.79.1 or 0.81.0 is required."
         end
-        if not V:GetReviewedUnitProfile() then
-            if V.DisablePlayerProgress then V:DisablePlayerProgress() end
+        local profile,name=V:GetReviewedUnitProfile()
+        if not profile then
+            release()
             return false, "Run setup to select the reviewed unit profile, then reload."
         end
+        if activeProfile and (activeProfile~=profile or activeName~=name) then release() end
+        activeProfile,activeName=profile,name
         if not tintCurve and C_CurveUtil and C_CurveUtil.CreateColorCurve and CreateColor and UnitHealthPercent then
             tintCurve = C_CurveUtil.CreateColorCurve()
             tintCurve:AddPoint(0, CreateColor(T.colors.healthLow[1], T.colors.healthLow[2], T.colors.healthLow[3], T.alpha.unit))
@@ -429,11 +554,11 @@ V:RegisterModule("unitframes", {
         return true, tintCurve and "FUF surfaces, party pet portrait/resources and native HP curve active; native validation remains pending."
             or "FUF surfaces active; HP curve unavailable on this client (solid dark fallback)."
     end,
-    Disable = function()
-        if V.DisablePlayerProgress then V:DisablePlayerProgress() end
-        for _, decor in pairs(partyPetDecor) do decor.portrait:Hide(); decor.resource:Hide() end
-    end,
+    Disable = function() release() end,
 })
+V:On("PLAYER_REGEN_ENABLED",function()
+    for frame,decor in pairs(partyPetDecor) do if decor.restorePending then restorePet(frame,decor) end end
+end)
 V:On("GROUP_ROSTER_UPDATE", function() V:Refresh("unit roster changed", "unitframes") end)
 for _, event in ipairs({ "UNIT_POWER_FREQUENT", "UNIT_MAXPOWER", "UNIT_DISPLAYPOWER" }) do
     V:On(event, function() updatePartyPets(false) end)

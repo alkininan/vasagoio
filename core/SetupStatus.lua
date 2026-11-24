@@ -6,6 +6,7 @@ local sections = {
     {id="units", label="Unit frames", adapters={"unitframes"}, modules={"unitframes","auras"}, required=true},
     {id="nameplates", label="Nameplates", adapters={"nameplates"}, modules={"nameplates"}, required=true},
     {id="actions", label="Action bars", adapters={"bartender"}, modules={"actionBars"}, required=true},
+    {id="trinkets", label="Trinkets", adapters={"trinkets"}, modules={"utilityBars"}},
     {id="chat", label="Chat", adapters={"hudLayout","prat"}, modules={"hud"}, required=true},
     {id="minimap", label="Minimap", adapters={"sexymap"}, modules={"hud"}, required=true},
     {id="meters", label="Meters", adapters={"details"}, modules={"meter"}, required=true},
@@ -16,6 +17,7 @@ local owners = {
     unitframes={"Forever Unit Frames","ForeverUnitFrames","unitframes"},
     nameplates={"Threat Plates","TidyPlates_ThreatPlates","nameplates"},
     bartender={"Bartender4","Bartender4","actionBars"},
+    trinkets={"Forever Trinket Menu","ForeverTrinketMenu","utilityBars"},
     hudLayout={"HUD placement",nil,"hud"}, prat={"Prat","Prat-3.0","hud"},
     sexymap={"SexyMap","SexyMap","hud"}, details={"Details","Details","meter"},
     skinner={"Skinner","Skinner","nativeWindows"}, restedxp={"RestedXP","RXPGuides","questHUD"},
@@ -23,7 +25,7 @@ local owners = {
 V.SetupSections = sections
 -- Increment when functional preset targets change. Cosmetic/UI-only releases
 -- keep this value; unmarked legacy snapshots require one reviewed application.
-V.setupPresetVersion = 3
+V.setupPresetVersion = 4
 
 local function indexReview(review)
     local available, unavailable = {}, {}

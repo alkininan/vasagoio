@@ -78,7 +78,7 @@ local bag=bagButton()
 A:Bag({region=bag,regionType="ItemButton"})
 local empty=bag.createdTextures[1]
 check(empty and empty.shown and empty.target==bag.icon and empty.maskRadius==10,"Empty bag slot lacks a rounded placeholder")
-check(empty.fill[1]==V.Tokens.colors.raised[1] and empty.fill[4]==(V.Tokens.alpha.emptySlot or .32),"Empty bag slot differs from the shared theme")
+check(empty.fill[1]==V.Tokens.colors.emptySlot[1] and empty.fill[4]==V.Tokens.alpha.emptySlot,"Empty bag slot differs from the shared theme")
 check(bag.SlotBackground.alpha==0 and bag.normal.alpha==0,"Empty slot retained decorative border")
 check(bag.IconBorder.alpha==1 and bag.searchOverlay.alpha==1 and bag.NewItemTexture.alpha==1 and bag.QuestTexture.alpha==1 and bag.Cooldown.value==21,
     "Placeholder changed item status art")

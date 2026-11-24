@@ -19,8 +19,12 @@ local V = { db = { enabled = true, modules = {}, overrides={} } }
 VasagoioDB=V.db
 function V:RegisterProfileAdapter(id, adapter) adapters[id] = adapter end
 function V:RegisterModule(id, module) modules[id] = module end
-function V:On(event, fn) events[event] = fn end
+function V:On(event, fn)
+    local previous=events[event]
+    events[event]=function(...)if previous then previous(...)end;fn(...)end
+end
 function V:Refresh() end
+function V:IsModuleEnabled(id) return self.db.enabled and self.db.modules[id]~=false end
 function V:IsSecret(value) return value == secret end
 function V:SafeNumber(value) if not self:IsSecret(value) and type(value) == "number" then return value end end
 function V:Pixel(value) return value end
@@ -68,14 +72,14 @@ assert(same(before, ForeverUnitFramesDB), "preparing unit plan wrote to owner da
 assert(V.db.overrides.playerProgress==nil,"Unit review enabled player XP before Apply")
 local profile = unitPlan.changes[1].value
 assert(profile.target.keepUserBehavior)
-assert(profile.player.width == 320 and profile.player.height + profile.player.spacingPower == 64)
+assert(profile.player.width == 304 and profile.player.height + profile.player.spacingPower == 72)
 assert(math.floor(profile.player.height * profile.player.powerPercent / 100) == 16)
-assert(math.floor(profile.party.height * profile.party.powerPercent / 100) == 12)
-assert(math.floor(profile.pet.height * profile.pet.powerPercent / 100) == 8)
-assert(profile.player.x == -236 and profile.player.y == -410)
-assert(profile.target.x + 1280 + 160 == 1676)
+assert(math.floor(profile.party.height * profile.party.powerPercent / 100) == 16)
+assert(math.floor(profile.pet.height * profile.pet.powerPercent / 100) == 16)
+assert(profile.player.x == -269 and profile.player.y == -418)
+assert(profile.target.x + 1280 + 152 == 1701)
 assert(profile.player.portraitMode == "LEFT" and profile.target.portraitMode == "RIGHT")
-assert(profile.party.partyPetWidth == 192 and profile.party.partyPetsY == -8)
+assert(profile.party.partyPetWidth == 176 and profile.party.partyPetsY == -8)
 assert(profile.party.partyShowPets and profile.party.partyPetLayout == "BESIDE")
 assert(profile.party.partyPetTextRight == "CURRENT")
 assert(profile.player.cornerRadius == 0 and profile.player.boxCornerRadius == 0)
@@ -84,6 +88,13 @@ assert(profile.player.castbarAlwaysShow == false and profile.target.castbarAlway
     "Inherited idle cast rows were left visible")
 assert(profile.player.castbarEnabled == true and profile.player.threatBar == false,
     "Removing idle/threat rows disabled actual casting feedback")
+assert(profile.player.hideBlizzardCastbar and profile.player.castbarEnabled)
+assert(profile.player.statusCombat==false and profile.player.statusSize==16)
+assert(profile.pet.petHappiness==false and profile.pet.fontSize==14)
+assert(profile.target.pvpIconNPC and profile.player.pvpIconSize==16 and profile.target.pvpIconSize==16)
+assert(profile.player.backgroundColor[4]==0 and profile.party.backgroundColor[4]==0)
+assert(profile.player.buffsSize==28 and profile.party.dispelsSize==28 and profile.party.partyPetAuraSize==28)
+assert(profile.player.threatGlow==false and profile.party.threatGlow==false)
 applyPlan(unitPlan)
 assert(V.db.overrides.playerProgress==true,"Unit setup did not opt into the player XP strip")
 assert(ForeverUnitFramesDB.raid["Example-TestRealm"].r40.customValue == 42)
@@ -121,7 +132,7 @@ assert(modules.nameplates:Apply() == false, "unconfigured nameplates reported ap
 applyPlan(namePlan)
 assert(same(before.profiles.Default, ThreatPlatesDB.profiles.Default), "live AceDB profile was replaced")
 profile = ThreatPlatesDB.profiles[ThreatPlatesDB.profileKeys["Example - Test Realm"]]
-assert(profile.uniqueSettings.SpecialUnit.custom and profile.text.AbsorbsAmount)
+assert(profile.uniqueSettings.SpecialUnit.custom and not profile.text.AbsorbsAmount)
 assert(profile.settings.healthbar.width == 192 and profile.settings.healthbar.height == 24)
 assert(profile.settings.castbar.height == 16 and profile.settings.castbar.y == -28)
 assert(profile.text.amount and profile.text.full and not profile.text.truncate and not profile.text.percent)
@@ -149,6 +160,16 @@ function V:Pixel(n) return n * 2 end
 assert(adapters.unitframes:Prepare() == nil, "owner-clamped scale produced an invalid snapshot")
 function V:Pixel(n) return n * 0.4 end
 assert(adapters.unitframes:Prepare() == nil, "below-minimum raid dimensions were accepted")
+function V:Pixel(n) return n * 0.5 end
+local smallPlan,smallReason=adapters.unitframes:Prepare()
+assert(not smallPlan and smallReason:find("player status badge"),"Native minimum badge size was silently clamped")
+function V:Pixel(n) return n * 1.5 end
+local largePlan,largeReason=adapters.unitframes:Prepare()
+assert(not largePlan and largeReason:find("party pet aura size"),"Attached pet aura maximum was silently clamped")
+function V:Pixel(n) return n * 0.625 end
+assert(adapters.unitframes:Prepare(),"Valid smaller schema dimensions were refused")
+function V:Pixel(n) return n * 1.4 end
+assert(adapters.unitframes:Prepare(),"Valid larger schema dimensions were refused")
 V.Pixel = normalPixel
 versions.TidyPlates_ThreatPlates = "future"
 assert(adapters.nameplates:Prepare() == nil)
@@ -185,10 +206,13 @@ versions.ForeverUnitFrames = "0.81.0"
 assert(modules.unitframes:Apply())
 assert(frame.surfaceApplied and frame.health.colors[1] == secret)
 assert(frame.texts.healthRight.value == secret and frame.texts.healthRight.format == "%d")
+frame.health:SetStatusBarColor(.2,.3,.4,.8)
+assert(frame.health.colors[1]==secret,"Owner repaint removed the native HP curve")
 local progressDisabled=0
 V.DisablePlayerProgress=function()progressDisabled=progressDisabled+1 end
 versions.ForeverUnitFrames = "future"
 assert(modules.unitframes:Apply() == false and progressDisabled==1, "unreviewed FUF runtime retained progress styling")
+assert(frame.health.colors[1]==.2 and frame.health.colors[4]==.8,"Unsupported owner retained our health tint")
 versions.ForeverUnitFrames = "0.79.1"
 assert(modules.unitframes:Apply(), "previously reviewed FUF runtime lost support")
 local selected=ForeverUnitFramesDB.active["Example-TestRealm"]
@@ -214,7 +238,11 @@ function V:StyleText(fs, role) fs.styleRole = role end
 local function region()
     return {
         ClearAllPoints = function(self) self.points = {} end,
-        SetPoint = function(self, ...) self.point = { ... } end,
+        SetPoint = function(self, ...) self.point = { ... }; self.points=self.points or {}; self.points[#self.points+1]=self.point end,
+        GetNumPoints = function(self) return #(self.points or {}) end,
+        GetPoint = function(self,i) return unpack(self.points[i]) end,
+        GetWidth = function(self) return self.width end,
+        GetHeight = function(self) return self.height end,
         SetSize = function(self, w, h) self.width, self.height = w, h; self.resizes = (self.resizes or 0) + 1 end,
         SetWidth = function(self, w) self.width = w end,
         SetHeight = function(self, h) self.height = h end,
@@ -241,6 +269,8 @@ CreateFrame = function(kind)
 end
 local pet = { unit = "partypet1", key = "partypet", textWord = false, health = region(),
     texts = { healthRight = text(), powerRight = text() }, auraMarker = {}, tooltipMarker = {} }
+pet.health:SetPoint("TOPLEFT",pet,"TOPLEFT",0,0)
+pet.health:SetSize(176,40)
 pet.CreateTexture = function(self)
     local picture = region(); self.decorativePortrait = picture; return picture
 end
@@ -254,12 +284,12 @@ InCombatLockdown = function() return combat end
 local auraMarker, tooltipMarker = pet.auraMarker, pet.tooltipMarker
 assert(modules.unitframes:Apply())
 local resource = createdBars[#createdBars]
-assert(resource and resource.width == 158 and resource.height == 8)
-assert(pet.health.width == 158 and pet.health.height == 22)
-assert(pet.decorativePortrait.width == 32 and pet.decorativePortrait.height == 32)
+assert(resource and resource.width == 134 and resource.height == 16)
+assert(pet.health.width == 134 and pet.health.height == 22)
+assert(pet.decorativePortrait.width == 40 and pet.decorativePortrait.height == 40)
 assert(pet.health.point[4] - pet.decorativePortrait.width == 2)
 assert(-resource.point[5] - pet.health.height == 2)
-assert(resource.point[4] == 34 and resource.point[5] == -24)
+assert(resource.point[4] == 42 and resource.point[5] == -24)
 assert(resource.minimum == 0 and resource.maximum == secret and resource.value == secret)
 assert(resource.mouse == false and portraitUnit == "partypet1")
 assert(pet.unit == "partypet1" and pet.auraMarker == auraMarker and pet.tooltipMarker == tooltipMarker)
@@ -278,14 +308,33 @@ events.UNIT_PORTRAIT_UPDATE("UNIT_PORTRAIT_UPDATE", secret)
 assert(resource.shown, "restricted existence was incorrectly inferred as absent")
 combat = true
 local beforeResize = pet.health.resizes
-pet.health:SetSize(192, 32) -- owner changed its widget; our hook must only queue
+pet.health:SetSize(176, 40) -- owner changed its widget; our hook must only queue
 assert(pet.health.resizes == beforeResize + 1 and refreshes > 0)
 assert(modules.unitframes:Apply() == false, "combat apply changed geometry")
 combat, exists = false, true
 assert(modules.unitframes:Apply())
-assert(pet.health.width == 158 and pet.health.height == 22)
+assert(pet.health.width == 134 and pet.health.height == 22)
+-- Height-only owner writes must not turn our portrait inset into a new
+-- baseline; a later full owner layout must be restored exactly as supplied.
+for i=1,4 do pet.health:SetHeight(40) end
+assert(pet.health.point[4]==42 and pet.health.height==22)
+pet.health:ClearAllPoints();pet.health:SetPoint("TOPLEFT",pet,"TOPLEFT",0,0);pet.health:SetHeight(40)
+assert(pet.health.point[4]==42 and pet.health.height==22)
 modules.unitframes:Disable()
 assert(not resource.shown and not pet.decorativePortrait.shown)
+assert(pet.health.width==176 and pet.health.height==40 and pet.health.point[4]==0,"Disabled party decoration did not restore owner geometry")
+assert(modules.unitframes:Apply())
+combat=true
+beforeResize=pet.health.resizes
+modules.unitframes:Disable()
+assert(pet.health.resizes==beforeResize and pet.health.width==134,"Combat disable changed party child geometry")
+combat=false;events.PLAYER_REGEN_ENABLED()
+assert(pet.health.width==176 and pet.health.height==40,"Deferred party child restoration did not finish")
+assert(modules.unitframes:Apply())
+ForeverUnitFramesDB.active["Example-TestRealm"]="Default"
+pet.health:SetHeight(22)
+assert(pet.health.height==22 and pet.health.width==176,"Releasing party pet overwrote an identical new-owner height")
+ForeverUnitFramesDB.active["Example-TestRealm"]=selected
 adapters.unitframes:AfterApply()
 assert(modules.unitframes:Apply() == false, "new saved profile styled old live owner before reload")
 print("unit/nameplate adapter tests passed")

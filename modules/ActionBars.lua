@@ -80,7 +80,7 @@ V:RegisterProfileAdapter("bartender", {
         local profileName = owner.db.keys and owner.db.keys.profile
         if type(profileName) ~= "string" or V:IsSecret(profileName) then return nil, "Bartender active profile could not be resolved" end
         if A.columns ~= 16 or A.rows ~= 3 or A.petCount ~= 10 then return nil, "The native action-slot adapter requires 16x3 main and 10 pet buttons" end
-        local plan = { changes = {}, targetPaths = {}, detail = "Four native 12-button bars (1,3,4,5), each 4x3, form 16x3 with faint empty slots. Pet: 10x1. Hides extra normal bars through Bartender visibility and disables obsolete Blizzard Art, Bag Bar, Micro Menu and the old Status Tracking Bar. Slots, bindings, paging and special action controls are not rewritten. Reload after applying." }
+        local plan = { changes = {}, targetPaths = {}, detail = "Four native 12-button bars (1,3,4,5), each 4x3, form 16x3 with visible empty slots. Pet: 10x1. One backpack button occupies the bottom utility slot. Extra normal bars, decorative artwork, Micro Menu and the old Status Tracking Bar are hidden. Slots, bindings, paging and special action controls are not rewritten. Reload after applying." }
         for column, id in ipairs(bars) do
             local profile = actions.db.profile.actionbars[id]
             if type(profile) ~= "table" then
@@ -97,6 +97,27 @@ V:RegisterProfileAdapter("bartender", {
         plan.targetPaths[pet.db.profile] = { "Bartender4DB", "namespaces", "PetBar", "profiles", profileName }
         local ok, reason = layoutBar(plan, pet.db.profile, pet.bar, A.x, A.petY, A.petSize, 1, "Pet bar")
         if not ok then return nil, reason end
+        local bags = getModule("BagBar")
+        if bags and bags.db and type(bags.db.profile) == "table" then
+            -- BagBar measures its cells from CharacterBag0Slot, but the actual
+            -- backpack can be larger. One-bag geometry must use the backpack.
+            local button = _G.MainMenuBarBackpackButton
+            local width = button and button.GetWidth and V:SafeNumber(button:GetWidth())
+            local height = button and button.GetHeight and V:SafeNumber(button:GetHeight())
+            if not width or not height then return nil, "Native backpack dimensions are unavailable; reload before setup" end
+            plan.targetPaths[bags.db.profile] = { "Bartender4DB", "namespaces", "BagBar", "profiles", profileName }
+            local geometry = {button_width=width, button_height=height, button_margin=0}
+            ok, reason = layoutBar(plan, bags.db.profile, geometry, A.utilityX, A.bagY, A.size, 1, "Backpack")
+            if not ok then return nil, reason end
+            change(plan, bags.db.profile, "onebag", true, "One backpack button")
+            change(plan, bags.db.profile, "onebagreagents", false, "No separate reagent-bag button")
+            change(plan, bags.db.profile, "keyring", false, "No separate keyring button")
+            if type(bags.db.profile.visibility) == "table" then
+                plan.targetPaths[bags.db.profile.visibility] = { "Bartender4DB", "namespaces", "BagBar", "profiles", profileName, "visibility" }
+                change(plan, bags.db.profile.visibility, "always", false, "Backpack visible")
+                change(plan, bags.db.profile.visibility, "custom", false, "Backpack uses native visibility")
+            end
+        end
         -- LAB still calculates outOfRange when its tint mode is none. Its original
         -- usability/mana coloring remains; our separate 30% layer shows range.
         plan.targetPaths[owner.db.profile] = { "Bartender4DB", "profiles", profileName }
@@ -119,7 +140,7 @@ V:RegisterProfileAdapter("bartender", {
         -- Bartender's Blizzard preset enables this independent artwork module.
         -- Hiding native MainMenuBar is insufficient: these are owner-created
         -- gryphons and slot textures, with a persistent, reversible owner flag.
-        for _, name in ipairs({"BlizzardArt", "BagBar", "MicroMenu", "StatusTrackingBar"}) do
+        for _, name in ipairs({"BlizzardArt", "MicroMenu", "StatusTrackingBar"}) do
             local module = getModule(name)
             if module and module.db and type(module.db.profile) == "table" then
                 plan.targetPaths[module.db.profile] = { "Bartender4DB", "namespaces", name, "profiles", profileName }
@@ -140,7 +161,7 @@ end
 
 local function styleFont(button, text, role)
     if V:IsSecret(text) or (type(text) ~= "table" and type(text) ~= "userdata") or not text.SetFont then return end
-    V:StyleText(text, role)
+    V:StyleText(text, role, T.colors.iconText)
     local font, size, flags = V:Font(role)
     local scale = V:SafeNumber(button:GetEffectiveScale())
     local uiScale = V:SafeNumber(UIParent:GetEffectiveScale())
@@ -257,8 +278,8 @@ local function styleButton(button, compact, mainSlot)
             state.empty = button:CreateTexture(nil, "BACKGROUND", nil, -8)
             state.empty.__vasagoio, state.empty.ignoreInLayout = true, true
             state.empty:SetAllPoints(button.icon)
-            local color = T.colors.raised
-            state.empty:SetColorTexture(color[1], color[2], color[3], T.alpha.emptySlot or .32)
+            local color = T.colors.emptySlot
+            state.empty:SetColorTexture(color[1], color[2], color[3], T.alpha.emptySlot)
             state.empty:Hide()
         end
         if hooksecurefunc then
@@ -317,6 +338,74 @@ local function styleButton(button, compact, mainSlot)
     updateEmptySlot(button, state)
 end
 
+-- Presentation for owner-provided utility buttons. References are explicit;
+-- never alias native fields or replace the owner's cooldown/text calculation.
+local utilityStyles = setmetatable({}, {__mode="k"})
+local function utilityEnabled(state)
+    return state and not state.suspended and V.db and V.db.enabled ~= false and not V.readOnly
+        and not V.profileReloadPending and V:IsModuleEnabled(state.owner)
+end
+function V:StyleActionButton(button, options)
+    options = options or {}
+    if V:IsSecret(button) or not button or (InCombatLockdown and InCombatLockdown()) then return false end
+    local owner = options.owner or "actionBars"
+    if not V.db or V.db.enabled == false or V.readOnly or V.profileReloadPending or not V:IsModuleEnabled(owner) then return false end
+    if button.IsForbidden then
+        local ok,forbidden=pcall(button.IsForbidden,button)
+        if not ok or V:IsSecret(forbidden) or forbidden then return false end
+    end
+    local icon = options.icon or button.icon or button.Icon
+    if not icon or V:IsSecret(icon) then return false end
+    local state = utilityStyles[button] or {}
+    utilityStyles[button] = state
+    state.owner, state.suspended = owner, false
+    state.hotkey = options.hotkey or button.HotKey or button.hotkey
+    state.timer = options.timer
+    local count = options.count or button.Count or button.count
+    if V:IsSecret(state.hotkey) or V:IsSecret(state.timer) or V:IsSecret(count) then return false end
+    if V.MaskIcon then V:MaskIcon(icon, T.radius) end
+    hideButtonArtwork(button)
+    styleFont(button, state.hotkey, "hotkey")
+    styleFont(button, count, "count")
+    if state.hotkey then
+        state.hotkey:ClearAllPoints()
+        state.hotkey:SetPoint("TOPRIGHT", button, "TOPRIGHT", localPixels(button,-2), localPixels(button,-2))
+    end
+    local cd = options.cooldown or button.cooldown or button.Cooldown
+    if cd and not V:IsSecret(cd) then
+        if cd.SetSwipeColor then cd:SetSwipeColor(0,0,0,A.cooldownRemaining) end
+        if cd.SetDrawEdge then cd:SetDrawEdge(false) end
+        if cd.SetDrawBling then cd:SetDrawBling(false) end
+        if cd.SetUseCircularEdge then cd:SetUseCircularEdge(false) end
+        local mask = V.Media and V.Media[options.compact and "mask32" or "mask42"]
+        if mask and cd.SetSwipeTexture then cd:SetSwipeTexture(mask) end
+    end
+    local timer = state.timer or (cd and countdownText(cd))
+    if timer then
+        styleFont(button, timer, options.compact and "compactCountdown" or "countdown")
+        timer:ClearAllPoints(); timer:SetPoint("CENTER",button,"CENTER",0,0)
+        timer:SetJustifyH("CENTER")
+        -- FTM already produces plain formatted timer strings. Observing that
+        -- public presentation avoids another timer or reading cooldown values.
+        if state.timer and hooksecurefunc and state.timerHook ~= timer then
+            state.timerHook = timer
+            hooksecurefunc(timer,"SetText",function(_,value)
+                if state.timer ~= timer or not utilityEnabled(state) or not state.hotkey then return end
+                if V:IsSecret(value) then state.hotkey:SetAlpha(1); return end
+                if type(value)=="string" then state.hotkey:SetAlpha(value~="" and 0 or 1) end
+            end)
+        end
+    end
+    return true
+end
+function V:ClearActionButtonStyle(button)
+    local state = utilityStyles[button]
+    if state then
+        state.suspended = true
+        if state.hotkey then state.hotkey:SetAlpha(1) end
+    end
+end
+
 -- Owner adapters must provide a semantic signal; normal buffs receive none.
 -- No aura querying, dispel inference, priority guessing or protected positioning.
 function V:StyleAura(button, options)
@@ -367,6 +456,7 @@ V:RegisterModule("actionBars", {
             if button then styleButton(button, false, mainSlots[id]); count = count + 1 end
         end
         for id = 1, 10 do styleButton(_G["BT4PetButton" .. id], true) end
+        if _G.MainMenuBarBackpackButton then V:StyleActionButton(_G.MainMenuBarBackpackButton, {owner="actionBars"}) end
         if LibStub and not V.actionButtonCallbacks then
             local lab = LibStub("LibActionButton-1.0", true)
             if lab and lab.RegisterCallback then
@@ -408,6 +498,9 @@ V:RegisterModule("actionBars", {
     end,
     Disable = function()
         active = false
+        for button, state in pairs(utilityStyles) do
+            if state.owner == "actionBars" then V:ClearActionButtonStyle(button) end
+        end
         for button, state in pairs(styled) do
             state.elapsed:Hide(); state.range:Hide()
             if state.empty then state.empty:Hide() end

@@ -77,7 +77,7 @@ local function layout()
     local spec=V.Tokens.playerProgress
     local total=frame.GetHeight and number(frame:GetHeight())
     if not spec or not total or math.abs(total-px(V.Tokens.units.large.height))>1 then
-        restore();report("unsupported","Player progress requires the reviewed 64px unit layout.");return
+        restore();report("unsupported","Player progress requires the reviewed unit-frame height.");return
     end
     local health,gap,progress=px(spec.health),px(spec.gap),px(spec.height)
     local power=total-health-2*gap-progress
@@ -147,11 +147,11 @@ function V:StylePlayerProgress(frame)
         local bar=CreateFrame("StatusBar",nil,frame)
         bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
         local color=self.Tokens.colors.informationFill
-        bar:SetStatusBarColor(color[1],color[2],color[3],1)
+        bar:SetStatusBarColor(color[1],color[2],color[3],self.Tokens.alpha.unit)
         local bg=bar:CreateTexture(nil,"BACKGROUND")
         bg:SetAllPoints(bar)
         local track=self.Tokens.colors.track
-        bg:SetColorTexture(track[1],track[2],track[3],self.Tokens.alpha.unit)
+        bg:SetColorTexture(track[1],track[2],track[3],0)
         bar:Hide()
         state={frame=frame,bar=bar,health=health,power=power,enabled=true,profile=profile,profileName=name}
         frame.vasagoioProgress=bar
@@ -160,6 +160,11 @@ function V:StylePlayerProgress(frame)
             local slot=field
             hooksecurefunc(frame[slot],"SetHeight",function()
                 if state~=ownState or state.busy then return end
+                if not configured() and state.applied and state.applied[slot] then
+                    -- Preserve a deliberate new-owner height even when its
+                    -- value happens to equal our compact row's height.
+                    state.applied[slot].height=nil
+                end
                 local baseline=capture(frame[slot])
                 if baseline then
                     local applied=state.layoutActive and state.applied and state.applied[slot]

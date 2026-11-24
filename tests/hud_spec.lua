@@ -13,6 +13,8 @@ local function widget()
     function w:IsShown() return self.shown end
     function w:IsVisible() return self.shown end
     function w:SetSize(x,y) self.width,self.height = x,y end
+    function w:SetWidth(x) self.width=x end
+    function w:GetAlpha() return self.alpha end
     function w:SetHeight(y) self.height = y end
     function w:GetWidth() return self.width end
     function w:GetHeight() return self.height end
@@ -43,7 +45,7 @@ hooksecurefunc = function(target, method, fn)
     local original = target[method]
     target[method] = function(self, ...) local result = original(self, ...); fn(self, ...); return result end
 end
-local V = { db = {enabled=true, modules={}, overrides={}}, Media={mask42="original-mask42",mask32="original-mask32"} }
+local V = { db = {enabled=true, modules={}, overrides={}}, Media={mask42="original-mask42",mask32="original-mask32",minimapMask="original-map-mask"} }
 VasagoioDB = V.db
 function V:RegisterModule(id, spec) modules[id] = spec end
 function V:RegisterProfileAdapter(id, spec) adapters[id] = spec end
@@ -56,10 +58,10 @@ function V:SafeNumber(value) if not self:IsSecret(value) and type(value)=="numbe
 function V:Pixel(value) return value end
 function V:CanvasOrigin() return (UIParent:GetWidth()-2560)/2,(UIParent:GetHeight()-1440)/2 end
 function V:Font(role) return "native.ttf", ({countdown=18,compactCountdown=16,chat=16})[role] or 14, "" end
-function V:StyleText(text, role) text.role = role end
+function V:StyleText(text, role, color) text.role, text.ink = role, color end
 function V:MaskIcon(text, radius) text.maskRadius = radius end
 function V:HideArtwork(text) text:SetAlpha(0) end
-function V:Surface(frame, alpha, radius) frame.surface={alpha=alpha,radius=radius} end
+function V:Surface(frame, alpha, radius) frame.surface=frame.surface or widget(); frame.surface.alpha,frame.surface.radius=alpha,radius; frame.surface:Show(); return frame.surface end
 assert(loadfile(root .. "/Tokens.lua"))("vasagoio", V)
 assert(loadfile(root .. "/modules/ActionBars.lua"))("vasagoio", V)
 assert(loadfile(root .. "/modules/HUD.lua"))("vasagoio", V)
@@ -80,7 +82,8 @@ actionProfiles[11] = {enabled=true,visibility={custom=true,customdata="[possessb
 local actions = {db={profile={actionbars=actionProfiles}},actionbars=runtimes}
 local pet = {db={profile={position={scale=1}}},bar={button_width=30,button_height=30,button_margin=0}}
 local art = {db={profile={enabled=true, leftCap="DWARF", position={point="BOTTOM",x=-600,y=57}}}}
-local bags = {db={profile={enabled=true,onebag=false,position={point="BOTTOM",x=285,y=50}}}}
+MainMenuBarBackpackButton = widget(); MainMenuBarBackpackButton:SetSize(48,48)
+local bags = {db={profile={enabled=false,onebag=false,keyring=true,onebagreagents=true,position={point="BOTTOM",x=285,y=50}}}}
 local micro = {db={profile={enabled=true,position={point="BOTTOM",x=-24,y=48}}}}
 local progress = {db={profile={enabled=true,position={point="BOTTOM",x=0,y=70},width=1425,showReputation=true}}}
 local vehicle = {db={profile={enabled=true}}}
@@ -107,13 +110,16 @@ validate(barPlan)
 check(actionProfiles[1].rows == nil and actionProfiles[1].showgrid == nil and Bartender4.db.profile.outofrange == "button", "Review wrote a profile")
 check(progress.db.profile.enabled,"Review hid the old progression bar")
 check(art.db.profile.enabled, "Review disabled Blizzard artwork before Apply")
-check(actionProfiles[6].visibility.custom and actionProfiles[6].visibility.always==nil and bags.db.profile.enabled,
+check(actionProfiles[6].visibility.custom and actionProfiles[6].visibility.always==nil and not bags.db.profile.enabled,
     "Review changed legacy-bar visibility before Apply")
 commit(barPlan)
 check(not art.db.profile.enabled and art.db.profile.leftCap=="DWARF" and art.db.profile.position.x==-600,
     "Legacy Blizzard artwork must be disabled through its reversible owner setting only")
-check(not bags.db.profile.enabled and not micro.db.profile.enabled and bags.db.profile.position.x==285,
-    "Legacy bag/micro bars must be disabled without rewriting their saved placement")
+check(bags.db.profile.enabled and bags.db.profile.onebag and not bags.db.profile.keyring and not bags.db.profile.onebagreagents and not micro.db.profile.enabled,
+    "One backpack must replace the old bag cluster while the micro menu stays hidden")
+near(bags.db.profile.position.scale*48,42)
+near(bags.db.profile.position.x+5*bags.db.profile.position.scale,1659)
+near(bags.db.profile.position.y-3*bags.db.profile.position.scale,-1390)
 check(not progress.db.profile.enabled and progress.db.profile.position.y==70 and progress.db.profile.width==1425 and progress.db.profile.showReputation,
     "Old progression strip must hide through its reversible owner flag without changing display options")
 check(actionProfiles[6].visibility.always and not actionProfiles[6].visibility.custom
@@ -126,7 +132,7 @@ for column,id in ipairs({1,3,4,5}) do
     local bar = actionProfiles[id]
     local scale = bar.position.scale
     near(45*scale,42); near(bar.padding*scale,8)
-    near(bar.position.x+5*scale,884+(column-1)*200)
+    near(bar.position.x+5*scale,859+(column-1)*200)
     near(bar.position.y-3*scale,-1290)
     check(bar.rows==3 and bar.buttons==12, "Native twelve-slot bars must form 4x3 blocks")
     check(bar.showgrid,"A main bar did not retain its empty slots")
@@ -143,7 +149,7 @@ UIParent:SetSize(3440,1440)
 local widePlan = adapters.bartender.Prepare()
 for _,change in ipairs(widePlan.changes) do
     if change.table == actionProfiles[1].position and change.key == "x" then
-        near(change.value + 5*actionProfiles[1].position.scale,884+440)
+        near(change.value + 5*actionProfiles[1].position.scale,859+440)
     end
 end
 UIParent:SetSize(2560,1440)
@@ -186,27 +192,40 @@ check(font.db.profile.size.ChatFrame1==16 and font.db.profile.fontface=="Arial N
 
 UnitNameUnmodified = function() return "Example" end
 GetRealmName = function() return "Realm" end
+C_AddOns={GetAddOnMetadata=function(addon) return ({SexyMap="v12.1.7",Details="#Details.20261109.15410.172"})[addon] end}
 SexyMap = {}
 SexyMap2DB = {["Example-Realm"]={core={},borders={backdrop={},borders={sentinel=true}},zonetext={},clock={}}}
 local mapPlan = adapters.sexymap.Prepare(); validate(mapPlan)
 check(SexyMap2DB["Example-Realm"].core.scale==nil, "Map review changed geometry")
 commit(mapPlan)
 local map = SexyMap2DB["Example-Realm"]
-near(map.core.scale*140,154)
-near(map.core.x*map.core.scale,2367)
+near(map.core.scale*140,216)
+near(map.core.x*map.core.scale,2336)
+near(map.core.y*map.core.scale,-7)
+check(map.core.shape==V.Media.minimapMask and map.core.clamp==false,"Map crop must preserve square projection without owner clamp")
+check(map.zonetext.bgColor.a==0 and map.clock.bgColor.a==0,"Map labels must not compound their backdrop")
 check(next(map.zonetext.fontColor)==nil, "Zone relationships must retain native colors")
 near(216+16+248,480)
 
-local instance = {baseframe=widget(),bg_alpha=.7,posicao={normal={w=300,h=200}},libwindow={},row_info={texts={}}}
-for i=1,4 do instance.row_info.texts[i]={font={face="Other",size=13,outline="OUTLINE"}} end
+local instance = {baseframe=widget(),bg_alpha=.7,posicao={normal={w=300,h=200}},libwindow={},attribute_text={},row_info={texts={},space={},row_offsets={}}}
+for i=1,4 do instance.row_info.texts[i]={font={face="Other",size=13,outline="OUTLINE"},color={byClass=true}} end
 function instance:ChangeSkin(value) self.refreshed = true; check(value==nil, "Do not replace the owner's skin") end
-Details = {tabela_instancias={instance}}
+instance.skin="Test"
+Details = {tabela_instancias={instance},skins={Test={instance_cprops={row_info={space={left_noborder=2,right_noborder=-3}}}}}}
+Details.class_colors={ENEMY={1,0,0},ARENA_GREEN={0,1,0}}
+for class in pairs(V.Tokens.class) do Details.class_colors[class]={1,1,1} end
 function Details:GetInstance(id) return self.tabela_instancias[id] end
+instance.baseframe.fullWindowFrame=widget()
+local originalEnemy=Details.class_colors.ENEMY
 local meterPlan = adapters.details.Prepare(); validate(meterPlan)
 check(instance.posicao.normal.w==300 and not instance.refreshed, "Meter review caused mutations")
 commit(meterPlan)
-check(instance.posicao.normal.w==248 and instance.posicao.normal.h==186, "Meter body geometry")
+check(Details.class_colors.MAGE[1]==V.Tokens.class.MAGE[1] and Details.class_colors.ENEMY==originalEnemy,"Details palette must use shared classes and preserve semantic colors")
+check(instance.posicao.normal.w==248 and instance.posicao.normal.h==154 and instance.titlebar_height==32, "Meter total envelope must include its title")
 check(instance.libwindow.x==2072 and instance.libwindow.y==8, "Meter placement")
+check(instance.row_info.space.left+instance.row_info.row_offsets.left==8 and instance.row_info.space.right+instance.row_info.row_offsets.right==-16,"Native sidebar normalization must preserve both row insets")
+check(instance.row_info.height==24 and instance.row_info.space.between==4 and instance.row_info.font_size==16,"Meter shared row rhythm")
+check(instance.row_info.texts[1].color.byClass and not instance.row_info.texts[2].color.byClass and not instance.row_info.texture_class_colors,"Meter class names with neutral values/fills")
 check(instance.bg_alpha==0 and not instance.refreshed, "Meter review must not invoke a broad live skin refresh")
 check(instance.row_info.texts[1].font.face==nil and instance.row_info.texts[1].font.outline=="", "Meter typography inheritance")
 
@@ -242,7 +261,7 @@ local function placeholder(b)
     for _,texture in ipairs(b.textures or {}) do if texture.drawLayer=="BACKGROUND" then return texture end end
 end
 local emptySlot=placeholder(empty)
-check(emptySlot and emptySlot.shown and emptySlot.maskRadius==10 and emptySlot.color[4]==(V.Tokens.alpha.emptySlot or .32),
+check(emptySlot and emptySlot.shown and emptySlot.maskRadius==10 and emptySlot.color[4]==V.Tokens.alpha.emptySlot and emptySlot.color[1]==V.Tokens.colors.emptySlot[1],
     "Empty main slot lacks the faint rounded background")
 check(not placeholder(button).shown and placeholder(extra)==nil,"Occupied/extra button gained an empty slot")
 check(button.NormalTexture.alpha==0 and button.SlotBackground.alpha==0 and fallbackNormal.alpha==0,
@@ -293,18 +312,47 @@ modules.hud.Apply()
 check(ChatFrame1.point==nil, "HUD moved before setup review")
 commit(adapters.hudLayout.Prepare())
 modules.hud.Apply()
-check(ChatFrame1.width==464 and ChatFrame1.height==146, "Chat inset within 480x186 surface")
+check(ChatFrame1.width==464 and ChatFrame1.height==106, "Chat input and header belong inside the 480x186 surface")
 local oldPoint = ChatFrame1.point
 combat=true; modules.hud.Apply(); modules.actionBars.Apply()
 check(ChatFrame1.point==oldPoint, "HUD geometry changed during combat")
 combat=false
 modules.meter.Apply()
-check(instance.baseframe.surface.alpha==.4 and instance.baseframe.surface.radius==10, "Meter outer surface")
+check(instance.baseframe.fullWindowFrame.surface.alpha==.4 and instance.baseframe.fullWindowFrame.surface.radius==10, "Meter outer surface")
 modules.actionBars.Disable()
 check(button.HotKey.alpha==1, "Disabled module left key hidden")
 check(not emptySlot.shown,"Disabled module left placeholders visible")
 callbacks.OnButtonUpdate("OnButtonUpdate",empty)
 check(not emptySlot.shown,"Owner callback restyled disabled action bars")
+
+-- External utility presentation uses explicit references and its own guard.
+modules.utilityBars={defaultEnabled=true}
+V.db.modules.actionBars=false
+local utility=widget();utility.scale=2
+local icon,key,timer,cd=widget(),widget(),widget(),cooldown()
+local nativeTextWrites=0
+function timer:SetText(value) self.value=value;nativeTextWrites=nativeTextWrites+1 end
+local opts={owner="utilityBars",icon=icon,hotkey=key,timer=timer,cooldown=cd}
+utility.flashTex,utility.holdBadge,utility.rotationIcon=widget(),widget(),widget()
+check(V:StyleActionButton(utility,opts),"Utility styles depended on actionBars being enabled")
+check(timer.fontSize==9 and timer.point[1]=="CENTER" and timer.ink==V.Tokens.colors.iconText,"Utility timer is not scale-aware icon text")
+check(key.point[4]==-1 and key.point[5]==-1 and utility.icon==nil and utility.HotKey==nil,"Utility styling added aliases or wrong local offsets")
+timer:SetText("12m")
+check(timer.value=="12m" and nativeTextWrites==1 and key.alpha==0,"Utility styling replaced native timer content or retained a duplicate hotkey")
+timer:SetText("");check(key.alpha==1,"Utility hotkey did not return when native timer cleared")
+timer:SetText({secret=true});check(key.alpha==1,"Restricted utility timer was inspected")
+check(utility.flashTex.alpha==1 and utility.holdBadge.alpha==1 and utility.rotationIcon.alpha==1,"Utility queue/rotation overlays were altered")
+V:ClearActionButtonStyle(utility);timer:SetText("2m");check(key.alpha==1,"Suspended utility hook still hid hotkeys")
+V.db.modules.utilityBars=false
+check(not V:StyleActionButton(utility,opts),"Disabled utility module accepted styling")
+V.db.modules.utilityBars=nil;V.db.modules.actionBars=nil
+combat=true;check(not V:StyleActionButton(utility,opts),"Utility geometry was changed in combat");combat=false
+local isForbidden=utility.IsForbidden
+utility.IsForbidden=function()error("native access refused")end
+check(not V:StyleActionButton(utility,opts),"Refused native utility access escaped its guard")
+utility.IsForbidden=function()return {secret=true}end
+check(not V:StyleActionButton(utility,opts),"Restricted forbidden flag was used")
+utility.IsForbidden=isForbidden
 
 -- Real FUF integration: owner pools, including native container records.
 modules.unitframes = {defaultEnabled=true}

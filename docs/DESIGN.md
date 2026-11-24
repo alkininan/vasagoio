@@ -1,6 +1,6 @@
 # Accepted vasagoio design
 
-This is the implementation target, renamed from Bael. Historical experiments are not active options. A design value being listed here does not imply native implementation; see COVERAGE.md and module coverage documents.
+This is a derived implementation summary of the authoritative Vasagoio Specs, revision 11. Historical experiments are not active options. A design value being listed here does not imply native implementation; see COVERAGE.md and module coverage documents.
 
 ## Layout and ownership
 
@@ -14,39 +14,41 @@ Reference canvas: **2560×1440**, centered within UIParent on other aspect ratio
 
 | Variant | Roles | Total | Portrait | Portrait gap | Body width | Health | Bar gap | Power |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Large | Player, target | 320×64 | 64 | 2 | 254 | 46 | 2 | 16 |
-| Medium | Party; auxiliary units | 224×48 | 48 | 2 | 174 | 34 | 2 | 12 |
-| Small | Pet, attached party pet, target of target | 192×32 | 32 | 2 | 158 | 22 | 2 | 8 |
+| Large | Player, target | 304×72 | 72 | 2 | 230 | 54 | 2 | 16 |
+| Medium | Party; auxiliary units | 224×56 | 56 | 2 | 166 | 38 | 2 | 16 |
+| Small | Pet, attached party pet, target of target | 176×40 | 40 | 2 | 134 | 22 | 2 | 16 |
 | Extra small | Raid | 128×32 | None | 0 | 128 | 28 | 0 | 4 |
 
 | Element | Position / size / gap |
 | --- | --- |
-| Player | x884 y1098, portrait left |
-| Target | x1356 y1098, portrait right |
-| Pet | x672 y1114, portrait left |
-| Target of target | x1696 y1114, portrait right |
-| Main unit → nearest action row | 84 |
+| Player | x859 y1102, portrait left |
+| Target | x1397 y1102, portrait right |
+| Pet | x663 y1118, portrait left |
+| Target of target | x1721 y1118, portrait right |
+| Main unit → nearest action row | 72 |
 | Party | x8 y8, five Medium rows, 12 vertical gap |
 | Attached party pet | 12 horizontal gap; 8 below owner top; only shown if a pet exists |
 | Raid | Eight groups, two columns, five members per group, no group titles |
 | Raid gaps | 6 between members; 12 horizontal and 16 vertical between groups |
-| Main buttons | 42×42; 8 gaps; 16 columns × 3 rows; 792×142 at x884 y1290 |
-| Pet buttons | 32×32; 8 gaps; ten buttons; 392×32 at x884 y1246 |
-| Player XP active | Existing 320×64 outer frame and 64px portrait; health42, gap2, power14, gap2, XP4 inside the bar body |
-| Player XP unavailable / maximum level | Reclaim the XP space; return to health46, gap2, power16; no reputation substitute |
+| Main buttons | 42×42; 8 gaps; 16 columns × 3 rows; 792×142 at x859 y1290 |
+| Pet buttons | 32×32; 8 gaps; ten buttons; 392×32 at x859 y1246 |
+| Player XP active | Existing 304×72 outer frame and 72px portrait; health 48, gap 2, power 16, gap 2, XP 4 inside the bar body |
+| Player XP unavailable / maximum level | Reclaim the XP space; return to health 54, gap 2, power 16; no reputation substitute |
+| Utility column | 42px trinket buttons at x1659 y1290 / y1340; single bag button at y1390; 8px gap from main grid |
+| Centered combined action container | 842px wide, x859–1701; player left and target right align with these outer edges |
 | Pet → main row gap | 12; pet endpoint aligns with main button eight |
 | Chat | 480×186 at x8 y1246 |
 | Meter | 248×186 at x2072 y1246 |
-| Map container | 216×186 at x2336 y1246; 32-high location/time header |
+| Map container | 216×186 at x2336 y1246; 32-high bottom location/time overlay |
 | Map + gap + meter | 216 + 16 + 248 = 480, equal to chat width |
-| Standard auras / priority | 36 / 28; horizontal gap 8; wrapped-row gap 16 |
+| Long / short auras | 36 top right / 28 near units; horizontal gap 8; wrapped-row gap 16; priority changes signal only |
 | Aura clearance | At least 8 from icon edge to health/panel |
 | Nameplate | 192×24 health; 192×16 cast; 8 gap; 28 aura with 8 clearance |
 | Nameplate envelope | 84; 92 including top-attached count; extra aura rows can grow |
 
-Player and target show current health/power amounts, not percentages. Raid uses compact percentages. Nameplates show exact current health. Names have no background label anywhere. Party and companion units share one size system; no duplicate Small variants.
+Player and target show current health/power amounts, not percentages. Small names and values use compact14; L/M names and main amounts use16. Details total186 includes its toolbar, padding and content; rows24, gap4, inner padding8 and title24. Raid uses compact percentages. Nameplates show exact current health. Names have no background label anywhere. Party and companion units share one size system; no duplicate Small variants.
 
-The player XP row is a conditional composition within Large, not a new outer size variant. Target keeps the original Large health/resource split. Hide the old standalone XP/status strip after explicit setup. Empty main-action slots and empty bag spaces use faint borderless placeholders so available positions remain readable without moving actions or items.
+The player XP row is a conditional composition within Large, not a new outer size variant. Target keeps the original Large health/resource split. Hide the old standalone XP/status strip after explicit setup. Empty main-action slots and empty bag spaces use stronger borderless placeholders so available positions remain readable without moving actions or items.
 
 ## Color and material
 
@@ -63,11 +65,13 @@ The player XP row is a conditional composition within Large, not a new outer siz
 | Mana / rage / energy / focus | #456A8C / #9E5149 / #75602F / #8F5B2B |
 | Class names | Hunter #95AE78; Warrior #BC9972; Druid #CC9561; Mage #83B7C5; Priest #E8EDF2; Paladin #C996AB; Rogue #D4BE70; Shaman #87A5D5; Warlock #B09AC6 |
 | Surface opacity | Units 0.56; chat/map label/meter 0.40; input 0.24; windows 0.84 |
-| Empty-slot surface | Raised neutral #151515 at 0.32 opacity; borderless, radius10; preserve owner search/disabled fading |
+| Empty-slot surface | Neutral #272727 at 0.64 opacity; borderless, radius10; preserve owner search/disabled fading |
 
-Default corners are **10** on containers and icons. Health, resource and damage-meter fills remain square. The selected system is borderless, with no gold/silver outline toggle. Native rendering uses dark translucent surfaces as a Frosted approximation; there is no supported arbitrary scene blur behind every frame.
+Default corners are **10** on containers and icons. Health, resource and damage-meter fills remain square. The selected system is borderless, with no gold/silver outline toggle. Native rendering uses dark translucent surfaces with static low-contrast sheen and grain as a Frosted approximation; there is no supported arbitrary scene blur behind every frame.
 
-Class colors remain recognizable and use soft dark shadows for readability. Native channel colors retain their identities; no global chat color table is replaced. Location names retain native friendly/hostile/contested meaning. A live scene can alter contrast behind transparent surfaces; offline values do not guarantee contrast on every background.
+Player combat uses a 2px danger edge at35% opacity; party/raid edges follow aggro instead. Native16px player/target PvP badges appear only when flagged and retain FFA/NPC warning semantics. Own hunter-pet names show happy/content/unhappy using hunter green/attention/danger; the separate happiness icon is hidden. Other players’ pets have no invented happiness state.
+
+Class colors remain recognizable and use soft dark shadows for readability. Prat extends native ChatFrame1–10: keep those message frames and reskin their chrome/tabs/input. Native channel colors retain their identities; no global chat color table is replaced. Location names retain native friendly/hostile/contested meaning. A live scene can alter contrast behind transparent surfaces; offline values do not guarantee contrast on every background.
 
 ## Typography
 
@@ -90,7 +94,7 @@ Arial Narrow is already a native Forever family, not a replacement for a separat
 
 Artwork retains original saturation, 0.92 brightness and full opacity. A full-button radial cooldown wipe uses a dark remaining sector at 0.80 and elapsed layer at 0.12; it is not a circular badge. The button's hotkey disappears while an ordinary readable cooldown is active, and its countdown is centered. Active counts move above the top-right edge (top −8 / right +6); ready counts sit bottom-right with 2 inset. Aura timers stay bottom-inside.
 
-Semantic markers sit below the icon: height3, gap2, side insets6, opaque, square ends. Harmful uses danger; dispellable uses information; priority uses attention. Normal buffs get no marker. No surrounding border or glow is substituted. Restricted cooldown/range values stay with native owner widgets instead of being inspected or inferred.
+Semantic markers sit below the icon: height3, gap 2, side insets6, opaque, square ends. Harmful uses danger; dispellable uses information; priority uses attention. Normal buffs get no marker. No surrounding border or glow is substituted. Restricted cooldown/range values stay with native owner widgets instead of being inspected or inferred.
 
 For a valid hostile NPC threat context, tanks with secure aggro and DPS/healers without aggro use calm blue. The inverse uses danger; transitional states use attention. Friendly units, PvP opponents and unavailable threat data retain the owner's reaction/class rules. No threat inference is added.
 

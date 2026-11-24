@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0-alpha.5
+
+- Replaced the technical setup report and management controls with a compact preset/status screen: Apply preset, Reload UI, component rows and inline results. Problems are shown first.
+- Required core HUD readiness is enforced by the profile engine before any writes; optional unavailable components remain visible as Skipped.
+- Applied status checks the preset marker, saved values, active owner profile and available runtime status. Old or partial snapshots cannot silently appear fully configured.
+- Highlighted Reload UI after success, preserved explicit reload, and disabled both actions in combat. The screen adds no polling loop.
+- Kept technical field/status/performance reports and snapshot recovery as separate commands.
+
+The alpha.4 performance and HUD fixes remain included. Updating preserves settings; older unmarked snapshots show Ready until an explicit apply/reload establishes the current preset. Native validation remains pending.
+
 ## 0.2.0-alpha.4
 
 The first user-run alpha.3 test showed a large FPS drop and leftover HUD overlap. This candidate removes confirmed redundant styling work and corrects the reviewed layout. Native FPS recovery is pending the user's comparison.

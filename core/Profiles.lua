@@ -23,13 +23,15 @@ function V:PrepareSetup()
     if not self.db or self.readOnly then return nil, "Settings are not writable." end
     if not self.db.enabled then return nil, "Enable vasagoio before setup." end
     if InCombatLockdown() then return nil, "Leave combat before preparing setup." end
-    if self.profileReloadPending then return nil, "Reload before preparing another owner-profile setup." end
+    if self.profileReloadPending or self.uiReloadPending then return nil, "Reload before preparing another owner-profile setup." end
     local review = {changes = {}, adapters = {}, unavailable = {}, revision = self.Tokens.revision}
     for _, id in ipairs(self.adapterOrder) do
         local spec = self.adapters[id]
         local enabled, module = adapterEnabled(self, id, spec)
         local ok, plan, reason
-        if enabled then ok, plan, reason = pcall(spec.Prepare, spec)
+        local policyIssue = self.SetupAdapterIssue and self:SetupAdapterIssue(id)
+        if enabled and not policyIssue then ok, plan, reason = pcall(spec.Prepare, spec)
+        elseif policyIssue then ok, reason = true, policyIssue
         else ok, reason = true, "Associated module " .. module .. " is disabled or unavailable." end
         if ok and plan and type(plan.changes) == "table" then
             local validated = {}
@@ -53,6 +55,7 @@ function V:PrepareSetup()
         end
     end
     -- A review is ephemeral. Do not silently regenerate it when the user clicks Apply.
+    if self.GetSetupBlockers then review.blockers = self:GetSetupBlockers(review) end
     self.setupReview = review
     return review
 end
@@ -60,13 +63,22 @@ end
 function V:ApplySetup(review)
     if not review or review ~= self.setupReview then return false, "Prepare a fresh setup review first." end
     if self.readOnly or not self.db.enabled then return false, "Settings are disabled." end
-    if self.profileReloadPending then return false, "Reload before applying another owner-profile setup." end
+    if self.profileReloadPending or self.uiReloadPending then return false, "Reload before applying another owner-profile setup." end
     if InCombatLockdown() then return false, "Leave combat before applying setup." end
+    if self.GetSetupBlockers then
+        local blockers = self:GetSetupBlockers(review)
+        if #blockers>0 then
+            return false, "Required HUD needs attention: " .. blockers[1].label .. ". " .. blockers[1].reason
+        end
+    end
     if #review.changes == 0 then return false, "No supported, loaded addon profiles were found." end
     for _, entry in ipairs(review.adapters) do
         local spec = self.adapters[entry.id]
         if not spec or not adapterEnabled(self, entry.id, spec) then
             return false, "A reviewed module is now disabled or unavailable. Prepare setup again."
+        end
+        if self.SetupAdapterIssue and self:SetupAdapterIssue(entry.id) then
+            return false, "A reviewed optional component reported an error. Reopen setup to review the available components."
         end
         -- A profile switch can leave the old table and values unchanged.
         -- Re-prepare without writes so the owner's current target identity and
@@ -111,7 +123,8 @@ function V:ApplySetup(review)
         end
         targets[i] = target
     end
-    local backup = {revision = review.revision, changes = self:Copy(review.changes), time = time and time() or 0}
+    local backup = {revision = review.revision, presetVersion = self.setupPresetVersion,
+        changes = self:Copy(review.changes), time = time and time() or 0}
     self.db.profileBackups[#self.db.profileBackups + 1] = backup
     local written = 0
     local ok = pcall(function()
@@ -160,6 +173,7 @@ function V:ApplySetup(review)
         return false, recovered and "An owner refresh failed. Setup was rolled back; reload before trying again."
             or "An owner refresh failed. Saved settings were rolled back, but live-window recovery failed; inspect the affected owner before reloading."
     end
+    self.pendingSetupReview = review
     self:Refresh()
     return true, "Profiles saved and backed up. Reload to activate all owner profiles."
 end

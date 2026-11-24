@@ -2,15 +2,15 @@
 
 A personal World of Warcraft Forever UI built around the Bael design system: neutral black surfaces, restrained blue status colors, native typography, custom HUD geometry, and preserved native window layouts.
 
-**0.2.0-alpha.4 — performance and HUD correction candidate.** The first user test of alpha.3 found a large FPS regression and leftover HUD overlap. This build limits repeated styling work, hides the extra bars selected by the user and separates the quest panels. Offline checks pass; FPS recovery and corrected visuals still require a user-run comparison. See [coverage and boundaries](docs/COVERAGE.md).
+**0.2.0-alpha.5 — simplified preset and status screen.** `/vasagoio` now shows component checks and two main actions: **Apply preset** and **Reload UI**. Missing core HUD components block setup; optional extras can be skipped. The alpha.4 performance corrections remain included. Offline checks pass; native visuals, FPS and combat acceptance remain user-run work. See [coverage](docs/COVERAGE.md).
 
 ## Install
 
-1. Download the **vasagoio-0.2.0-alpha.4.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
+1. Download the **vasagoio-0.2.0-alpha.5.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
 2. With WoW closed, extract the `vasagoio` folder into `World of Warcraft/_forever_/Interface/AddOns/`. The result must be `AddOns/vasagoio/vasagoio.toc`.
 3. Install the desired functional addons separately using CurseForge or their official distribution. The [dependency list](docs/dependencies.json) records the complete selected setup. They are not bundled.
 4. Enable vasagoio and those addons in the game's AddOns menu. Log in yourself, let their profiles initialize, and reload once.
-5. Type `/vasagoio setup`, review the changes and unavailable adapters, and select **Apply reviewed setup**. Then reload.
+5. Type `/vasagoio setup`, check the component rows and select **Apply preset**. Fix any required HUD issues first. Then select **Reload UI**. Optional unavailable components are shown as Skipped.
 6. Follow the [first-run verification](docs/INSTALLATION.md). Keep your previous `WTF` backup until you have checked the setup yourself.
 
 No prebuilt account-specific WTF folder is distributed. vasagoio creates its own `VasagoioDB` SavedVariables and proposes changes to initialized addon profiles in game. It never installs dependencies or edits their source files.
@@ -33,23 +33,26 @@ The [accepted design](docs/DESIGN.md) lists the full target. [Window coverage](d
 
 | Command | Purpose |
 | --- | --- |
-| `/vasagoio` or `/vsg` | Status and setup window |
-| `/vasagoio setup` | Prepare a fresh review; no changes until Apply |
+| `/vasagoio` or `/vsg` | Simple preset and component-status screen |
+| `/vasagoio setup` | Check readiness; no settings change until Apply preset |
+| `/vasagoio details` | Detailed fields from the current setup review |
+| `/vasagoio report` | Technical module status outside the main screen |
+| `/vasagoio restore` | Explain restoring the latest snapshot; `restore confirm` performs it |
 | `/vasagoio perf` | Snapshot of styling-module calls and timings; not total addon CPU or FPS |
 | `/vasagoio off` | Disable styling; reload to remove hooks |
 | `/vasagoio on` | Enable styling; reload for consistent owner state |
-| `/vasagoio module <id> off` | Disable one module using its status ID |
+| `/vasagoio module <id> off` | Disable one module using its ID from `/vasagoio report` |
 | `/vasagoio refresh` | Reapply available cosmetic modules out of combat |
 | `/vasagoio font <path>` | Use a locally supplied, licensed Arial Narrow Bold file |
 | `/vasagoio font reset` | Return to shared-media/native font resolution |
 
-You can also uncheck **vasagoio** in the WoW AddOns menu. Applied settings belong to their functional addons and remain after vasagoio is disabled. To undo those too, use **Restore profiles** before disabling, then reload immediately. Restoration stops if a saved field has changed since setup, preserving later edits. A full pre-install WTF backup remains the recovery option for conflicts.
+You can also uncheck **vasagoio** in the WoW AddOns menu. Applied settings belong to their functional addons and remain after vasagoio is disabled. To undo those too, use `/vasagoio restore`, then `/vasagoio restore confirm` before disabling, then reload immediately. Restoration stops if a saved field has changed since setup, preserving later edits. A full pre-install WTF backup remains the recovery option for conflicts.
 
 ## Maintenance and sharing
 
 Only original vasagoio code, masks and documentation are packaged. No other addons, fonts, game art, account settings, chat data or paid guide content are redistributed. Share the release ZIP and installation guide; each person installs dependencies through their own sources.
 
-Updates preserve local settings and do not automatically reapply the preset. For alpha.4, run setup again and reload to apply the bar cleanup, idle unit-row correction and quest-panel separation; the runtime performance changes load with the new code. Strictly reviewed owner adapters stop on unreviewed versions; other modules continue. After an owner update, inspect `/vasagoio` before applying a new profile. See [maintenance](docs/MAINTENANCE.md).
+Updates preserve local settings and do not automatically reapply the preset. Older snapshots without the preset-verification marker show Ready until you explicitly apply this preset and reload once. Alpha.4 bar cleanup, idle-row and quest-panel corrections are included. No settings are reset automatically. Strictly reviewed owner adapters stop on unreviewed versions; other modules continue. After an owner update, inspect `/vasagoio` before applying a new profile. See [maintenance](docs/MAINTENANCE.md).
 
 ## Development
 

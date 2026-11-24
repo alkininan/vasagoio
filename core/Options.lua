@@ -8,11 +8,67 @@ local function textLine(parent, text, x, y, width)
     label:SetText(text)
     return label
 end
-local function button(parent, label, x, y, width, callback)
-    local b = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-    b:SetSize(width, 28); b:SetPoint("BOTTOMLEFT", x, y); b:SetText(label)
-    b:SetScript("OnClick", callback)
+local function px(n) return V:Pixel(n) end
+local function plainText(parent, role)
+    local text = parent:CreateFontString(nil, "OVERLAY")
+    V:StyleText(text, role or "body")
+    text:SetJustifyH("LEFT")
+    return text
+end
+local function safeText(value)
+    return not V:IsSecret(value) and type(value) == "string" and value:gsub("|", "||") or ""
+end
+local function colorText(text, role)
+    local c = V.Tokens.colors[role] or V.Tokens.colors.text
+    text:SetTextColor(c[1], c[2], c[3], 1)
+end
+local function paintButton(b)
+    local enabled = b:IsEnabled()
+    V:Surface(b, b.hovered and enabled and .96 or .84, 10, V.Tokens.colors.raised or V.Tokens.colors.panel)
+    b:SetAlpha(enabled and 1 or .45)
+    b.marker:SetShown(enabled and b.primary == true)
+end
+local function actionButton(parent, label, x, callback)
+    local b = CreateFrame("Button", nil, parent)
+    b:SetSize(px(288), px(40)); b:SetPoint("BOTTOMLEFT", px(x), px(24))
+    b.label = plainText(b, "body"); b.label:SetPoint("CENTER"); b.label:SetText(label)
+    b.marker = b:CreateTexture(nil, "OVERLAY")
+    local c = V.Tokens.colors.information
+    b.marker:SetColorTexture(c[1], c[2], c[3], 1)
+    b.marker:SetPoint("BOTTOMLEFT", px(8), px(2)); b.marker:SetPoint("BOTTOMRIGHT", -px(8), px(2)); b.marker:SetHeight(px(2))
+    b:SetScript("OnEnter", function() b.hovered=true; paintButton(b) end)
+    b:SetScript("OnLeave", function() b.hovered=false; paintButton(b) end)
+    b:SetScript("OnClick", function() if b:IsEnabled() then callback() end end)
     return b
+end
+local function closeButton(frame)
+    local close = CreateFrame("Button", nil, frame)
+    close:SetSize(px(24), px(24)); close:SetPoint("TOPRIGHT", -px(16), -px(16))
+    close.label=plainText(close,"heading"); close.label:SetPoint("CENTER"); close.label:SetText("×")
+    close:SetScript("OnClick",function() frame:Hide() end)
+    return close
+end
+local function makeScroll(frame, top, bottom)
+    local scroll=CreateFrame("ScrollFrame",nil,frame)
+    scroll:SetPoint("TOPLEFT",px(24),-px(top)); scroll:SetPoint("BOTTOMRIGHT",-px(40),px(bottom))
+    scroll:EnableMouseWheel(true)
+    local body=CreateFrame("Frame",nil,scroll); body:SetSize(px(576),px(1)); scroll:SetScrollChild(body)
+    local slider=CreateFrame("Slider",nil,frame)
+    slider:SetPoint("TOPRIGHT",-px(24),-px(top)); slider:SetPoint("BOTTOMRIGHT",-px(24),px(bottom)); slider:SetWidth(px(8))
+    slider:SetOrientation("VERTICAL"); slider:SetMinMaxValues(0,0); slider:SetValueStep(px(24))
+    local thumb=slider:CreateTexture(nil,"OVERLAY"); thumb:SetSize(px(8),px(32))
+    local c=V.Tokens.colors.information; thumb:SetColorTexture(c[1],c[2],c[3],.55); slider:SetThumbTexture(thumb)
+    slider:SetScript("OnValueChanged",function(_,value) scroll:SetVerticalScroll(value) end)
+    scroll:SetScript("OnMouseWheel",function(_,delta)
+        slider:SetValue(math.max(0,math.min(slider.maximum or 0,slider:GetValue()-delta*px(32))))
+    end)
+    frame.scroll,frame.body,frame.slider=scroll,body,slider
+end
+local function fitScroll(frame, contentHeight, viewportHeight)
+    frame.body:SetHeight(math.max(contentHeight,viewportHeight))
+    local max=math.max(0,contentHeight-viewportHeight)
+    frame.slider.maximum=max; frame.slider:SetMinMaxValues(0,max)
+    frame.slider:SetValue(math.min(frame.slider:GetValue() or 0,max)); frame.slider:SetShown(max>0)
 end
 
 local summaryKeys = {}
@@ -92,57 +148,113 @@ function V:StatusText()
     return table.concat(lines, "\n")
 end
 
+local stateLabels={ready="Ready",applied="Applied",reload="Reload needed",attention="Needs attention",skipped="Skipped",off="Off"}
+local stateColors={ready="information",applied="information",reload="information",attention="attention",skipped="muted",off="muted"}
+
+function V:RenderSetup()
+    local frame=self.options
+    if not frame then return end
+    local model=self:BuildSetupStatus(frame.review,frame.reason)
+    frame.model=model
+    frame.summary:SetText(safeText(frame.messageTitle or model.title))
+    frame.description:SetText(safeText(frame.message or model.description))
+    colorText(frame.summary,(frame.messageFailed or model.title=="Needs attention") and "attention" or "information")
+    local rows,order={},{}
+    for i,row in ipairs(model.rows) do rows[i]=row; order[row]=i end
+    table.sort(rows,function(a,b)
+        local aa,bb=a.state=="attention",b.state=="attention"
+        if aa~=bb then return aa end
+        return order[a]<order[b]
+    end)
+    local y=0
+    for i,item in ipairs(rows) do
+        local row=frame.rows[i]
+        if not row then
+            row=CreateFrame("Frame",nil,frame.body)
+            row.label=plainText(row,"body"); row.label:SetPoint("TOPLEFT",px(12),-px(8)); row.label:SetWidth(px(332))
+            row.status=plainText(row,"compact"); row.status:SetPoint("TOPRIGHT",-px(12),-px(8)); row.status:SetWidth(px(196)); row.status:SetJustifyH("RIGHT")
+            row.detail=plainText(row,"compact"); row.detail:SetPoint("TOPLEFT",px(12),-px(32)); row.detail:SetWidth(px(544))
+            frame.rows[i]=row
+        end
+        row:ClearAllPoints(); row:SetPoint("TOPLEFT",0,-y); row:SetWidth(px(576))
+        row.label:SetText(safeText(item.label)); row.status:SetText(stateLabels[item.state] or "Needs attention")
+        colorText(row.status,stateColors[item.state] or "attention"); colorText(row.detail,"muted")
+        local explain=item.state=="attention" or item.state=="skipped" or item.state=="off"
+        row.detail:SetText(explain and safeText(item.detail) or ""); row.detail:SetShown(explain)
+        local height=px(32)
+        if explain then height=px(40)+math.ceil((row.detail:GetStringHeight() or px(16))/px(8))*px(8) end
+        row:SetHeight(height); V:Surface(row,.40,10); row:Show()
+        y=y+height+px(8)
+    end
+    for i=#rows+1,#frame.rows do frame.rows[i]:Hide() end
+    fitScroll(frame,math.max(0,y-px(8)),px(368))
+    local combat=InCombatLockdown()
+    frame.apply:SetEnabled(model.canApply and not combat)
+    frame.reload:SetEnabled(model.needsReload and not combat)
+    frame.apply.primary=model.canApply and not model.needsReload
+    frame.reload.primary=model.needsReload
+    paintButton(frame.apply); paintButton(frame.reload)
+    if combat then frame.description:SetText("Leave combat to apply the preset or reload.") end
+end
+
+function V:OpenDiagnostics(mode)
+    if InCombatLockdown() then self:Print("Leave combat before opening diagnostics."); return end
+    if not self.diagnostics then
+        local f=CreateFrame("Frame","VasagoioDiagnostics",UIParent)
+        f:SetSize(px(720),px(608)); f:SetPoint("CENTER"); f:SetFrameStrata("DIALOG"); f:SetClampedToScreen(true); f:EnableMouse(true)
+        f.close=closeButton(f); makeScroll(f,64,24)
+        f.content=plainText(f.body,"compact"); f.content:SetPoint("TOPLEFT"); f.content:SetWidth(px(568))
+        self.diagnostics=f
+        UISpecialFrames=UISpecialFrames or {}; table.insert(UISpecialFrames,"VasagoioDiagnostics")
+    end
+    local f=self.diagnostics
+    local content=mode=="perf" and self:PerformanceText() or mode=="details" and self:ReviewText(self.setupReview) or self:StatusText()
+    f.content:SetText(content); fitScroll(f,f.content:GetStringHeight()+px(16),px(520))
+    V:Surface(f,.97,10); f:Show()
+end
+
 function V:OpenOptions(mode)
+    if mode=="perf" or mode=="details" or mode=="report" then return self:OpenDiagnostics(mode) end
     if InCombatLockdown() then self:Print("Leave combat before opening setup."); return end
     if not self.options then
-        local frame = CreateFrame("Frame", "VasagoioOptions", UIParent)
-        frame:SetSize(760, 600); frame:SetPoint("CENTER"); frame:SetFrameStrata("DIALOG")
+        local frame=CreateFrame("Frame","VasagoioOptions",UIParent)
+        frame:SetSize(px(640),px(608)); frame:SetPoint("CENTER"); frame:SetFrameStrata("DIALOG")
         frame:SetClampedToScreen(true); frame:EnableMouse(true); frame:SetMovable(true)
-        frame:RegisterForDrag("LeftButton")
-        frame:SetScript("OnDragStart", frame.StartMoving); frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-        self:Surface(frame, .97, 10)
-        textLine(frame, "vasagoio", 24, -20, 650)
-        local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-        close:SetPoint("TOPRIGHT", -4, -4)
-        local scroll = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
-        scroll:SetPoint("TOPLEFT", 24, -56); scroll:SetPoint("BOTTOMRIGHT", -48, 100)
-        local body = CreateFrame("Frame", nil, scroll)
-        body:SetSize(680, 600); scroll:SetScrollChild(body)
-        frame.content = textLine(body, "", 0, 0, 670)
-        frame.body = body
-        button(frame, "Review setup", 24, 56, 130, function() V:OpenOptions("setup") end)
-        frame.apply = button(frame, "Apply reviewed setup", 166, 56, 178, function()
-            local ok, message = V:ApplySetup(V.setupReview)
-            V:Print(message)
-            if ok then V:OpenOptions("status") end
+        frame:RegisterForDrag("LeftButton"); frame:SetScript("OnDragStart",frame.StartMoving); frame:SetScript("OnDragStop",frame.StopMovingOrSizing)
+        frame.close=closeButton(frame)
+        frame.title=plainText(frame,"title"); frame.title:SetPoint("TOPLEFT",px(24),-px(24)); frame.title:SetText("vasagoio")
+        local version=plainText(frame,"compact"); version:SetPoint("TOPRIGHT",-px(56),-px(28)); version:SetText(self.version); colorText(version,"muted")
+        frame.summary=plainText(frame,"heading"); frame.summary:SetPoint("TOPLEFT",px(24),-px(64)); frame.summary:SetWidth(px(592))
+        frame.description=plainText(frame,"compact"); frame.description:SetPoint("TOPLEFT",px(24),-px(96)); frame.description:SetWidth(px(592)); frame.description:SetHeight(px(40))
+        makeScroll(frame,144,96); frame.rows={}
+        frame.note=plainText(frame,"compact"); frame.note:SetPoint("BOTTOMLEFT",px(24),px(72)); frame.note:SetWidth(px(592)); frame.note:SetText("Checks cover addons, settings and reported errors."); colorText(frame.note,"muted")
+        frame.apply=actionButton(frame,"Apply preset",24,function()
+            if InCombatLockdown() then self:RenderSetup(); return end
+            local ok,message=self:ApplySetup(frame.review)
+            frame.messageTitle=ok and "Reload needed" or "Needs attention"
+            frame.message=ok and "Preset applied. Reload UI to activate the changes." or message
+            frame.messageFailed=not ok
+            if self.profileReloadPending then frame.review=nil; frame.reason=nil
+            else frame.review,frame.reason=self:PrepareSetup() end
+            self:RenderSetup()
         end)
-        button(frame, "Restore profiles", 356, 56, 140, function()
-            V.restoreArmed = not V.restoreArmed
-            if V.restoreArmed then
-                V:Print("Click Restore profiles again to restore the latest snapshot, only if no saved fields changed since setup.")
-            else
-                local _, message = V:RollbackProfiles(); V:Print(message)
-            end
+        frame.reload=actionButton(frame,"Reload UI",328,function()
+            if not InCombatLockdown() and frame.model and frame.model.needsReload then ReloadUI() end
         end)
-        button(frame, "Status", 508, 56, 90, function() V:OpenOptions("status") end)
-        button(frame, "Reload UI", 610, 56, 126, function() if not InCombatLockdown() then ReloadUI() end end)
-        button(frame, "Disable styling", 24, 16, 140, function() V:SetEnabled(false) end)
-        button(frame, "Enable styling", 176, 16, 140, function() V:SetEnabled(true) end)
-        textLine(frame, "Setup snapshots stay in your local SavedVariables.", 332, -556, 400)
-        self.options = frame
-        UISpecialFrames = UISpecialFrames or {}; table.insert(UISpecialFrames, "VasagoioOptions")
+        self.options=frame
+        UISpecialFrames=UISpecialFrames or {}; table.insert(UISpecialFrames,"VasagoioOptions")
     end
-    local content
-    if mode == "setup" then
-        local review, reason = self:PrepareSetup()
-        content = review and self:ReviewText(review) or reason
-    elseif mode == "perf" then content = self:PerformanceText()
-    else content = self:StatusText() end
-    self.options.content:SetText(content)
-    self.options.body:SetHeight(math.max(420, self.options.content:GetStringHeight() + 24))
-    self.options.apply:SetEnabled(self.setupReview ~= nil and #self.setupReview.changes > 0)
-    self:Surface(self.options, .97, 10)
-    self.options:Show()
+    local frame=self.options
+    frame.message,frame.messageTitle,frame.messageFailed=nil,nil,nil
+    if self.profileReloadPending then frame.review,frame.reason=nil,nil
+    else frame.review,frame.reason=self:PrepareSetup() end
+    V:Surface(frame,.97,10); self:RenderSetup(); frame:Show()
+end
+
+for _,event in ipairs({"PLAYER_REGEN_DISABLED","PLAYER_REGEN_ENABLED"}) do
+    V:On(event,function()
+        if V.options and V.options:IsShown() then V:RenderSetup() end
+    end)
 end
 
 function V:PerformanceText()
@@ -167,6 +279,7 @@ function V:SetEnabled(enabled)
     if self.readOnly then self:Print("Settings are not writable."); return end
     if InCombatLockdown() then self:Print("Leave combat before changing enabled state."); return end
     self.db.enabled = enabled
+    self.uiReloadPending = true
     if enabled then self:Refresh()
     else
         self:ApplyModules() -- Runs each active module's cleanup once, out of combat.
@@ -175,6 +288,7 @@ function V:SetEnabled(enabled)
         -- is disabled. This surface does not affect gameplay frames.
         if self.options then self:Surface(self.options, .97, 10) end
     end
+    if self.options and self.options:IsShown() then self:RenderSetup() end
     self:Print(enabled and "Enabled. Reload for consistent owner state." or "Disabled. Reload to remove all existing hooks and styling; owner profiles remain unchanged.")
 end
 
@@ -186,6 +300,15 @@ SlashCmdList.VASAGOIO = function(message)
     if command == "off" then V:SetEnabled(false)
     elseif command == "on" then V:SetEnabled(true)
     elseif command == "refresh" then V:Refresh()
+    elseif command == "restore" then
+        if argument ~= "confirm" then V:Print("To restore the latest setup snapshot, type /vasagoio restore confirm. Later edits are preserved by conflict checks.")
+        else
+            local ok,message=V:RollbackProfiles(); V:Print(message)
+            if V.options and V.options:IsShown() then
+                V.options.messageTitle=ok and "Reload needed" or "Needs attention"
+                V.options.message=message; V.options.messageFailed=not ok; V:RenderSetup()
+            end
+        end
     elseif command == "module" then
         local id, choice = argument:match("^(%S+)%s+(%S+)$")
         if id and V.modules[id] and (choice == "on" or choice == "off") and not V.readOnly and not InCombatLockdown() then
@@ -196,5 +319,5 @@ SlashCmdList.VASAGOIO = function(message)
             V.db.fonts.narrowBold = argument == "reset" and nil or argument
             V:Refresh(); V:Print("Bold font preference saved. Use only a font you are licensed to use; reload and check it visually.")
         else V:Print("Usage: /vasagoio font Interface\\AddOns\\YourMedia\\ArialNarrowBold.ttf, or /vasagoio font reset") end
-    else V:OpenOptions(command == "setup" and "setup" or command == "perf" and "perf" or "status") end
+    else V:OpenOptions((command == "perf" or command == "details" or command == "report") and command or "setup") end
 end

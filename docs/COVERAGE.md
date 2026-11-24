@@ -22,6 +22,7 @@ The full accepted target is in [DESIGN.md](DESIGN.md). The following table separ
 | Functional addon selection | Full 26-package manifest, including Details' bundled TinyThreat component, installed independently | vasagoio does not bundle, enable, update or test all packages |
 | Performance | Scoped, coalesced styling; bounded reentrant work; surface caching; incremental aura updates and visible-window discovery | Offline operation-count regressions pass. User-reported alpha.3 FPS loss is not marked resolved until alpha.4 is measured in the same scene. `/vasagoio perf` measures module applications only. |
 | Quest HUD | Reviewed RestedXP guide-anchor migration with live/saved apply and restoration | Placement only, exact v4.11.40; native objective layout and guide features preserved |
+| Preset/status screen | Two main actions, component rows, short issues, required-HUD engine gate and snapshot-based applied checks | Checks cover supported configuration and reported runtime errors; native FPS, visuals and combat still require manual tests |
 | Distribution | Standalone addon ZIP, deterministic package, hash manifest, CI | Native acceptance needed before a stable release |
 
 ## Native acceptance gate

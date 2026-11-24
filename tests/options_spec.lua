@@ -60,4 +60,11 @@ local opened
 V.OpenOptions=function(_,mode) opened=mode end
 SlashCmdList.VASAGOIO("perf")
 assert(opened=="perf", "Performance command did not select diagnostics")
+local restored=0
+V.Print=function() end
+V.RollbackProfiles=function() restored=restored+1; return true,"Restored" end
+SlashCmdList.VASAGOIO("restore")
+assert(restored==0,"Restore instructions changed settings without explicit confirmation")
+SlashCmdList.VASAGOIO("restore confirm")
+assert(restored==1,"Confirmed restore command did not use the existing recovery engine")
 print("options_spec: review privacy, lifecycle and scoped performance diagnostics passed")

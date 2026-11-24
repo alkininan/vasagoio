@@ -1,0 +1,94 @@
+# Accepted vasagoio design
+
+This is the implementation target, renamed from Bael. Historical experiments are not active options. A design value being listed here does not imply native implementation; see COVERAGE.md and module coverage documents.
+
+## Layout and ownership
+
+Native Character, Inspect, talents, tickets and other windows keep their existing structures, controls and workflows. Selected functional addons such as Baganator and Talents Forever retain their features and window structures. vasagoio changes their appearance where an audited adapter is available. Custom unit frames, action bars, nameplates and HUD placement are intentional.
+
+Use one functional owner for each area. FUF owns unit behavior and clicks; Threat Plates owns nameplates and threat; Bartender owns action execution, paging and bindings; Prat owns chat features; SexyMap owns the minimap; Details owns meter data; Skinner owns broad native skins when present. There is no gameplay automation in vasagoio.
+
+## Measurements
+
+Reference canvas: **2560×1440**, centered within UIParent on other aspect ratios. Layout units scale uniformly to fit, without changing UIParent scale. Margins are measured from that centered canvas so unit and action anchors stay aligned on ultrawide displays. Eight is the spacing foundation; explicitly accepted 2, 6, 10, 12, 14, 18, 42 and other exceptions take precedence. Owner snapping may produce a one-logical-pixel difference on smaller canvases.
+
+| Variant | Roles | Total | Portrait | Portrait gap | Body width | Health | Bar gap | Power |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Large | Player, target | 320×64 | 64 | 2 | 254 | 46 | 2 | 16 |
+| Medium | Party; auxiliary units | 224×48 | 48 | 2 | 174 | 34 | 2 | 12 |
+| Small | Pet, attached party pet, target of target | 192×32 | 32 | 2 | 158 | 22 | 2 | 8 |
+| Extra small | Raid | 128×32 | None | 0 | 128 | 28 | 0 | 4 |
+
+| Element | Position / size / gap |
+| --- | --- |
+| Player | x884 y1098, portrait left |
+| Target | x1356 y1098, portrait right |
+| Pet | x672 y1114, portrait left |
+| Target of target | x1696 y1114, portrait right |
+| Main unit → nearest action row | 84 |
+| Party | x8 y8, five Medium rows, 12 vertical gap |
+| Attached party pet | 12 horizontal gap; 8 below owner top; only shown if a pet exists |
+| Raid | Eight groups, two columns, five members per group, no group titles |
+| Raid gaps | 6 between members; 12 horizontal and 16 vertical between groups |
+| Main buttons | 42×42; 8 gaps; 16 columns × 3 rows; 792×142 at x884 y1290 |
+| Pet buttons | 32×32; 8 gaps; ten buttons; 392×32 at x884 y1246 |
+| Pet → main row gap | 12; pet endpoint aligns with main button eight |
+| Chat | 480×186 at x8 y1246 |
+| Meter | 248×186 at x2072 y1246 |
+| Map container | 216×186 at x2336 y1246; 32-high location/time header |
+| Map + gap + meter | 216 + 16 + 248 = 480, equal to chat width |
+| Standard auras / priority | 36 / 28; horizontal gap 8; wrapped-row gap 16 |
+| Aura clearance | At least 8 from icon edge to health/panel |
+| Nameplate | 192×24 health; 192×16 cast; 8 gap; 28 aura with 8 clearance |
+| Nameplate envelope | 84; 92 including top-attached count; extra aura rows can grow |
+
+Player and target show current health/power amounts, not percentages. Raid uses compact percentages. Nameplates show exact current health. Names have no background label anywhere. Party and companion units share one size system; no duplicate Small variants.
+
+## Color and material
+
+| Role | Value |
+| --- | --- |
+| Panel / raised / deep / track | #0B0B0B / #151515 / #060606 / #030303 |
+| Health high → low | #151515 → #5B5B5B, progressively lighter as health falls |
+| Meter fill | #272727 |
+| Main text / secondary / icon text | #E8EDF2 / #B6C0CA / #F0F3F7 |
+| Information signal / calm fill | #A8D7EB / #486C89 |
+| Danger signal / fill | #E4A0A8 / #8B4E57 |
+| Attention signal / fill | #E7CC82 / #866242 |
+| Out of range | #AB2D3C at 0.30 opacity |
+| Mana / rage / energy / focus | #456A8C / #9E5149 / #75602F / #8F5B2B |
+| Class names | Hunter #95AE78; Warrior #BC9972; Druid #CC9561; Mage #83B7C5; Priest #E8EDF2; Paladin #C996AB; Rogue #D4BE70; Shaman #87A5D5; Warlock #B09AC6 |
+| Surface opacity | Units 0.56; chat/map label/meter 0.40; input 0.24; windows 0.84 |
+
+Default corners are **10** on containers and icons. Health, resource and damage-meter fills remain square. The selected system is borderless, with no gold/silver outline toggle. Native rendering uses dark translucent surfaces as a Frosted approximation; there is no supported arbitrary scene blur behind every frame.
+
+Class colors remain recognizable and use soft dark shadows for readability. Native channel colors retain their identities; no global chat color table is replaced. Location names retain native friendly/hostile/contested meaning. A live scene can alter contrast behind transparent surfaces; offline values do not guarantee contrast on every background.
+
+## Typography
+
+| Role | Face | Size / line height |
+| --- | --- | --- |
+| Names and main amounts | Native Friz Quadrata | 16 / 24 token; single-line units remain centered |
+| Compact percentages and nameplate health | Native Friz Quadrata | 14 / 16 |
+| Body | Native Friz Quadrata | 16 / 24 |
+| Heading / title | Native Friz Quadrata | 24 / 32 and 32 / 40 |
+| Chat | Arial Narrow Regular | 16 / 24 |
+| Hotkeys, item counts, stacks | Actual Arial Narrow Bold | 14 / 16 |
+| Main / compact action countdown | Actual Arial Narrow Bold | 18 / 24 and 16 / 16 |
+| Aura durations | Native Friz Quadrata | 14 / 16, bottom inside icon |
+
+No opaque number boxes or solid text outlines. Soft dark shadows only. Existing native window control sizes are preserved to avoid clipping; those controls adopt the face/shadow while retaining their native metrics. FontString line-height controls are not equivalent to browser CSS; single-line text is anchored, chat spacing is explicit.
+
+Arial Narrow is already a native Forever family, not a replacement for a separate normal Arial baseline. Native ARIALN.TTF is Regular. Exact Bold requires an existing shared-media registration or a licensed font supplied locally; the distribution includes no font binaries and reports the Regular fallback honestly.
+
+## Icons and threat
+
+Artwork retains original saturation, 0.92 brightness and full opacity. A full-button radial cooldown wipe uses a dark remaining sector at 0.80 and elapsed layer at 0.12; it is not a circular badge. The button's hotkey disappears while an ordinary readable cooldown is active, and its countdown is centered. Active counts move above the top-right edge (top −8 / right +6); ready counts sit bottom-right with 2 inset. Aura timers stay bottom-inside.
+
+Semantic markers sit below the icon: height3, gap2, side insets6, opaque, square ends. Harmful uses danger; dispellable uses information; priority uses attention. Normal buffs get no marker. No surrounding border or glow is substituted. Restricted cooldown/range values stay with native owner widgets instead of being inspected or inferred.
+
+For a valid hostile NPC threat context, tanks with secure aggro and DPS/healers without aggro use calm blue. The inverse uses danger; transitional states use attention. Friendly units, PvP opponents and unavailable threat data retain the owner's reaction/class rules. No threat inference is added.
+
+## Retained addon decisions
+
+Keep MRT for raid leading, SexyMap, What's Training, Baganator, Talents Forever, Prat, Forever Trinket Menu, Gargul and BattleGroundEnemiesFixed. Details and ThreatClassic2 retain distinct meter/Classic threat roles; vasagoio does not enable data collection. Spy and OneForAll are excluded. Chonky, EUI, ElvUI and DaylightUI are not additional presentation owners in this package. Skinner is the selected native skin foundation. The full 27-package functional selection is in dependencies.json.

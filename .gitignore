@@ -1,0 +1,9 @@
+dist/
+__pycache__/
+*.pyc
+.DS_Store
+.build-tools/
+*.zip
+WTF/
+*.ttf
+*.otf

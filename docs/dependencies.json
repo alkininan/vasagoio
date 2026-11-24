@@ -1,0 +1,113 @@
+{
+  "game": "World of Warcraft Forever",
+  "addons": [
+    {
+      "name": "Forever Unit Frames",
+      "folder": "ForeverUnitFrames"
+    },
+    {
+      "name": "Threat Plates",
+      "folder": "TidyPlates_ThreatPlates"
+    },
+    {
+      "name": "Bartender4",
+      "folder": "Bartender4"
+    },
+    {
+      "name": "DBM Core",
+      "folder": "DBM-Core"
+    },
+    {
+      "name": "DBM Forever and Vanilla",
+      "folder": "DBM-Raids-Vanilla"
+    },
+    {
+      "name": "DBM Dungeons",
+      "folder": "DBM-Party-Forever"
+    },
+    {
+      "name": "Capping",
+      "folder": "Capping"
+    },
+    {
+      "name": "Details",
+      "folder": "Details"
+    },
+    {
+      "name": "ThreatClassic2",
+      "folder": "ThreatClassic2"
+    },
+    {
+      "name": "SexyMap",
+      "folder": "SexyMap"
+    },
+    {
+      "name": "OpenMap",
+      "folder": "OpenMap"
+    },
+    {
+      "name": "RestedXP",
+      "folder": "RXPGuides"
+    },
+    {
+      "name": "Attune",
+      "folder": "Attune"
+    },
+    {
+      "name": "AutoPotion",
+      "folder": "AutoPotion"
+    },
+    {
+      "name": "Baganator",
+      "folder": "Baganator"
+    },
+    {
+      "name": "Syndicator",
+      "folder": "Syndicator"
+    },
+    {
+      "name": "Auctionator",
+      "folder": "Auctionator"
+    },
+    {
+      "name": "What's Training",
+      "folder": "WhatsTraining"
+    },
+    {
+      "name": "BugGrabber",
+      "folder": "!BugGrabber"
+    },
+    {
+      "name": "BugSack",
+      "folder": "BugSack"
+    },
+    {
+      "name": "Method Raid Tools",
+      "folder": "MRT"
+    },
+    {
+      "name": "Talents Forever",
+      "folder": "TalentsForeverBook"
+    },
+    {
+      "name": "BattleGroundEnemiesFixed",
+      "folder": "BattleGroundEnemiesFixed"
+    },
+    {
+      "name": "Forever Trinket Menu",
+      "folder": "ForeverTrinketMenu"
+    },
+    {
+      "name": "Gargul",
+      "folder": "Gargul"
+    },
+    {
+      "name": "Prat 3.0",
+      "folder": "Prat-3.0"
+    },
+    {
+      "name": "Skinner",
+      "folder": "Skinner"
+    }
+  ]
+}

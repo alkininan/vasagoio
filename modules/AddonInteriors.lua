@@ -25,7 +25,7 @@ local function ready()
     return enabled() and V.InteriorSkin and not (InCombatLockdown and InCombatLockdown())
 end
 local function request()
-    if enabled() then V:Refresh("selected addon interior changed") end
+    if enabled() then V:Refresh("selected addon interior changed", "addonWindows") end
 end
 local function hook(object, method, callback)
     if not available(object) or type(object[method]) ~= "function" or not hooksecurefunc then return end
@@ -389,7 +389,7 @@ function A:Discover()
             if type(f.Frames) == "table" then for _, page in ipairs(f.Frames) do self:Register(page, "MRT", false) end end
             -- ELib popups are parented to UIParent but retained by these
             -- reviewed options-page fields. Follow only those exact handles.
-            walk(f, function(page)
+            if V.WindowSkin:Visible(f) then walk(f, function(page)
                 for _, key in ipairs({"OtherIconsFrame", "rosteredit", "rosteredit.importWindow", "selectReplaceWindow",
                     "moreInfoWindow", "DialogSetAlts", "DialogSelectBoss", "EditPage", "FBframe", "PullsFrame",
                     "graphsFrame", "linesRightClickMoreInfo", "listInvFrame", "spellExtraSettings",
@@ -397,7 +397,7 @@ function A:Discover()
                     "setupFrame.formattingHelpFrame", "quickStartFrame", "addModSpellFrame"}) do
                     self:Register(V.WindowSkin:Path(page, key), "MRT")
                 end
-            end)
+            end) end
         end
         hook(mrt.Options, "Add", request)
         if available(mrt.lib) then hook(mrt.lib, "Popup", request) end
@@ -410,8 +410,10 @@ function A:Discover()
     for frame, record in pairs(roots) do
         if available(frame) then
             self:Register(frame, record.family, record.shell)
-            if record.shell then V.InteriorSkin:Panel(frame, "window", OWNER) end
-            self:Apply(frame, record.family); count = count + 1
+            if V.WindowSkin:Visible(frame) then
+                if record.shell then V.InteriorSkin:Panel(frame, "window", OWNER) end
+                self:Apply(frame, record.family); count = count + 1
+            end
         end
     end
     return count

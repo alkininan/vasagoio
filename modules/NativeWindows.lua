@@ -28,6 +28,15 @@ function W:Available(object)
     return true
 end
 
+-- Visibility includes hidden parents; avoid scanning entire closed UI trees.
+function W:Visible(frame)
+    if not self:Available(frame) then return false end
+    local query = type(frame.IsVisible) == "function" and frame.IsVisible or frame.IsShown
+    if type(query) ~= "function" then return true end
+    local ok, shown = pcall(query, frame)
+    return ok and not V:IsSecret(shown) and shown == true
+end
+
 function W:Path(root, path)
     local object = root
     for key in path:gmatch("[^.]+") do
@@ -99,7 +108,7 @@ function W:Hook(frame, id)
     if not self:Available(frame) or not frame.HookScript or self.hooked[frame] then return end
     self.hooked[frame] = true
     frame:HookScript("OnShow", function()
-        if W:Enabled(id) then V:Refresh("window shown") end
+        if W:Enabled(id) then V:Refresh("window shown", id) end
     end)
 end
 
@@ -191,7 +200,7 @@ V:RegisterModule("nativeWindows", {
     end,
 })
 
-V:On("ADDON_LOADED", function() if W:Enabled("nativeWindows") then V:Refresh("native window addon loaded") end end)
+V:On("ADDON_LOADED", function() if W:Enabled("nativeWindows") then V:Refresh("native window addon loaded", "nativeWindows") end end)
 
 -- Schema-reviewed integration: no vendor code is bundled and no private
 -- Skinner methods are called. AceDB profile leaves are snapshotted by core.

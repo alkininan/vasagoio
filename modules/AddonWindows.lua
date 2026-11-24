@@ -38,6 +38,9 @@ end
 local function applyRoot(entry)
     local frame = _G[entry.name]
     if not versionMatches(entry) or not W:Available(frame) then return false end
+    W:Hook(frame, "addonWindows")
+    discovered[frame] = true
+    if not W:Visible(frame) then return false end
     if not W:Shell(frame, entry.art, entry.titles, "addonWindows") then return false end
     if entry.cover and type(frame.cover) == "table" then
         for i = 1, 8 do W:Hide(frame.cover[i],"addonWindows") end
@@ -50,7 +53,7 @@ end
 
 local function styleBagRegion(details)
     if not W:Enabled("addonWindows") or type(details) ~= "table" then return end
-    if InCombatLockdown and InCombatLockdown() then V:Refresh("bag skin deferred in combat"); return end
+    if InCombatLockdown and InCombatLockdown() then V:Refresh("bag skin deferred in combat", "addonWindows"); return end
     local frame, kind = details.region, details.regionType
     if not W:Available(frame) then return end
     if V.AddonInteriors and V.InteriorSkin then V.AddonInteriors:Bag(details); return end
@@ -87,7 +90,7 @@ local function discoverLazyRoots()
         if W:Available(frame) and not discovered[frame] and versionMatches(entry) then
             -- Discovery does not open a window. The named frame may be created
             -- on the owner's first user click, after its ADDON_LOADED event.
-            V:Refresh("selected addon window created")
+            V:Refresh("selected addon window created", "addonWindows")
             return
         end
     end
@@ -120,7 +123,7 @@ V:RegisterModule("addonWindows", {
 })
 
 V:On("ADDON_LOADED", function()
-    if W:Enabled("addonWindows") then V:Refresh("selected addon loaded") end
+    if W:Enabled("addonWindows") then V:Refresh("selected addon loaded", "addonWindows") end
 end)
 
 V.AddonWindowCoverage = {

@@ -38,7 +38,7 @@ local function same(a, b)
     return true
 end
 ForeverUnitFramesDB = {
-    profiles = { Default = { general = {}, party = { partySortRole = true }, target = { keepUserBehavior = true } } },
+    profiles = { Default = { general = {}, player = {castbarAlwaysShow=true, castbarEnabled=true, threatBar=true}, party = { partySortRole = true }, target = { keepUserBehavior = true, castbarAlwaysShow=true } } },
     active = { ["Example-TestRealm"] = "Default" },
     raid = { ["Example-TestRealm"] = { general = { raidClickBinding = "preserved" }, r40 = { customValue = 42 } } },
 }
@@ -78,6 +78,10 @@ assert(profile.party.partyShowPets and profile.party.partyPetLayout == "BESIDE")
 assert(profile.party.partyPetTextRight == "CURRENT")
 assert(profile.player.cornerRadius == 0 and profile.player.boxCornerRadius == 0)
 assert(profile.player.titleBackground == false and profile.player.frameAlpha == 100)
+assert(profile.player.castbarAlwaysShow == false and profile.target.castbarAlwaysShow == false,
+    "Inherited idle cast rows were left visible")
+assert(profile.player.castbarEnabled == true and profile.player.threatBar == false,
+    "Removing idle/threat rows disabled actual casting feedback")
 applyPlan(unitPlan)
 assert(ForeverUnitFramesDB.raid["Example-TestRealm"].r40.customValue == 42)
 assert(ForeverUnitFramesDB.raid["Example-TestRealm"].r40.blocksPerLine == 2)

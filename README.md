@@ -2,11 +2,11 @@
 
 A personal World of Warcraft Forever UI built around the Bael design system: neutral black surfaces, restrained blue status colors, native typography, custom HUD geometry, and preserved native window layouts.
 
-**0.2.0-alpha.3 — window interiors implemented and tested offline; not yet tested in WoW.** The design now extends through native and selected-addon controls, panes, labels and selection states. This build reviews Gargul 8.1.1 and selects Details' bundled TinyThreat for threat meters. See [coverage and boundaries](docs/COVERAGE.md) for exact scope and the remaining native validation.
+**0.2.0-alpha.4 — performance and HUD correction candidate.** The first user test of alpha.3 found a large FPS regression and leftover HUD overlap. This build limits repeated styling work, hides the extra bars selected by the user and separates the quest panels. Offline checks pass; FPS recovery and corrected visuals still require a user-run comparison. See [coverage and boundaries](docs/COVERAGE.md).
 
 ## Install
 
-1. Download the **vasagoio-0.2.0-alpha.3.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
+1. Download the **vasagoio-0.2.0-alpha.4.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
 2. With WoW closed, extract the `vasagoio` folder into `World of Warcraft/_forever_/Interface/AddOns/`. The result must be `AddOns/vasagoio/vasagoio.toc`.
 3. Install the desired functional addons separately using CurseForge or their official distribution. The [dependency list](docs/dependencies.json) records the complete selected setup. They are not bundled.
 4. Enable vasagoio and those addons in the game's AddOns menu. Log in yourself, let their profiles initialize, and reload once.
@@ -19,7 +19,8 @@ No prebuilt account-specific WTF folder is distributed. vasagoio creates its own
 
 - Reviewed profile adapters for Forever Unit Frames, Threat Plates, Bartender4, Prat, SexyMap, Details and Skinner.
 - Large / Medium / Small / Extra small unit geometry, two-column raid groups, attached party pets where the owner supports them, exact health text and role-aware nameplate colors.
-- A 16×3 action grid assembled from four native Bartender bars; the left-aligned pet row ends at the eighth main button. No action slots, bindings or paging are rewritten.
+- A 16×3 action grid assembled from four native Bartender bars; the left-aligned pet row ends at the eighth main button. Setup hides extra normal bars and disables old gryphon art/bag/micro bars, preserving slots, binding configuration, paging and special controls.
+- Reviewed RestedXP v4.11.40 guide placement separates it from native objectives without changing guide contents or dimensions.
 - Full-button cooldown wipes, centered numeric timers, hidden hotkeys during ordinary cooldowns, translucent range feedback and bottom aura signals where supported.
 - Neutral translucent window and HUD surfaces, Friz text roles, Arial Narrow number/chat roles, and original rounded mask artwork.
 - Native windows retain their layouts while receiving scoped interior controls, typography, neutral panes and rounded decoration. Selected tabs/rows and focused inputs keep near-black fills with small blue bottom markers.
@@ -34,6 +35,7 @@ The [accepted design](docs/DESIGN.md) lists the full target. [Window coverage](d
 | --- | --- |
 | `/vasagoio` or `/vsg` | Status and setup window |
 | `/vasagoio setup` | Prepare a fresh review; no changes until Apply |
+| `/vasagoio perf` | Snapshot of styling-module calls and timings; not total addon CPU or FPS |
 | `/vasagoio off` | Disable styling; reload to remove hooks |
 | `/vasagoio on` | Enable styling; reload for consistent owner state |
 | `/vasagoio module <id> off` | Disable one module using its status ID |
@@ -47,7 +49,7 @@ You can also uncheck **vasagoio** in the WoW AddOns menu. Applied settings belon
 
 Only original vasagoio code, masks and documentation are packaged. No other addons, fonts, game art, account settings, chat data or paid guide content are redistributed. Share the release ZIP and installation guide; each person installs dependencies through their own sources.
 
-Updates preserve local settings and do not automatically reapply the preset. Strictly reviewed owner adapters stop on unreviewed versions; other modules continue. After an owner update, inspect `/vasagoio` before applying a new profile. See [maintenance](docs/MAINTENANCE.md).
+Updates preserve local settings and do not automatically reapply the preset. For alpha.4, run setup again and reload to apply the bar cleanup, idle unit-row correction and quest-panel separation; the runtime performance changes load with the new code. Strictly reviewed owner adapters stop on unreviewed versions; other modules continue. After an owner update, inspect `/vasagoio` before applying a new profile. See [maintenance](docs/MAINTENANCE.md).
 
 ## Development
 

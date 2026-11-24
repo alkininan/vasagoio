@@ -23,6 +23,7 @@ local function frame(children)
         SetScript = function() error("Owner handler replaced") end}
 end
 function W:Available(o) return type(o) == "table" and not o.secret and not o.forbidden end
+function W:Visible(o) return self:Available(o) and o.shown ~= false end
 function W:Enabled() return V.db.enabled and V.db.modules.addonWindows ~= false end
 function W:Hook() end
 function W:Path(o,path)
@@ -179,6 +180,15 @@ local rejected=frame(); versions.Gargul="8.1.2"; Gargul.Interface.Award.Award.In
 check(not A:Reviewed("Gargul"),"future Gargul release accepted by version prefix")
 A:Discover(); check(not rejected.applied,"unreviewed Gargul release accepted")
 versions.Gargul="8.1.1"
+
+local hiddenWindow=frame(); hiddenWindow.shown=false
+A:Register(hiddenWindow,"Gargul")
+A:Discover()
+check(not hiddenWindow.applied and hiddenWindow.scripts.OnShow,"Closed addon root was traversed or not watched")
+hiddenWindow.shown=true
+hiddenWindow.scripts.OnShow()
+A:Discover()
+check(hiddenWindow.applied,"Newly shown addon root was not styled")
 
 local before=writes; combat=true
 A:Apply(tree,"TalentsForeverBook"); A:Bag({region=item,regionType="ItemButton"}); A:Discover()

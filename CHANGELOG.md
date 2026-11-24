@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0-alpha.4
+
+The first user-run alpha.3 test showed a large FPS drop and leftover HUD overlap. This candidate removes confirmed redundant styling work and corrects the reviewed layout. Native FPS recovery is pending the user's comparison.
+
+- Scoped action/unit refreshes to their own modules, coalesced bursts and bounded reentrant callbacks while preserving a follow-up for newly created widgets.
+- Deferred closed-window traversal, stopped repeated repainting of stationary native windows, deduplicated nested walks and cached unchanged surface/font updates.
+- Filtered aura updates by affected units and buttons; unchanged and unrelated aura events no longer repaint all FUF pools.
+- Added `/vasagoio perf` for module-application counts and timings; it does not measure total addon CPU or FPS.
+- Updated Bartender setup to hide extra normal bars and disable BlizzardArt, BagBar and MicroMenu, preserving slots, binding configuration, paging and special controls.
+- Removed inherited idle cast rows and the player's redundant threat row while preserving actual cast feedback.
+- Added reviewed RestedXP v4.11.40 guide placement beside native objectives, with synchronized saved/live anchors on apply and restore, plus conflict protection.
+
+Replace the addon folder with WoW closed. Keep SavedVariables, enable vasagoio, run `/vasagoio setup` again and reload to apply the layout corrections. Keep Skinner unchanged for a same-scene FPS comparison. CurseForge publication remains deferred until alpha acceptance.
+
 ## 0.2.0-alpha.3
 
 - Added source-reviewed Gargul 8.1.1 compatibility while retaining 8.1.0. Its existing and lazily created windows use the reviewed interior adapter; future unreviewed versions still skip it.

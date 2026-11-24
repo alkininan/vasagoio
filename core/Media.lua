@@ -82,23 +82,35 @@ function V:Surface(frame, alpha, radius, color)
     if width and width > 0 then r = math.min(r, width / 2) end
     if height and height > 0 then r = math.min(r, height / 2) end
     local c = color or self.Tokens.colors.panel
-    local p = surface.parts
-    for i = 1, 7 do
-        p[i]:ClearAllPoints()
-        if i <= 3 then p[i]:SetColorTexture(c[1], c[2], c[3], alpha or .56)
-        else
-            p[i]:SetTexture(self.Media.corner)
-            p[i]:SetVertexColor(c[1], c[2], c[3], alpha or .56)
-            p[i]:SetSize(r, r)
+    local p, opacity = surface.parts, alpha or .56
+    -- These are addon-owned decorations. Repainting an unchanged hover state
+    -- or visiting a shared interior must not rebuild 7 textures and anchors.
+    local old = surface.style
+    if not old or old.r ~= c[1] or old.g ~= c[2] or old.b ~= c[3] or old.a ~= opacity then
+        for i = 1, 7 do
+            if i <= 3 then p[i]:SetColorTexture(c[1], c[2], c[3], opacity)
+            else p[i]:SetVertexColor(c[1], c[2], c[3], opacity) end
         end
     end
-    p[1]:SetPoint("TOPLEFT", r, 0); p[1]:SetPoint("BOTTOMRIGHT", -r, 0)
-    p[2]:SetPoint("TOPLEFT", 0, -r); p[2]:SetPoint("BOTTOMLEFT", 0, r); p[2]:SetWidth(r)
-    p[3]:SetPoint("TOPRIGHT", 0, -r); p[3]:SetPoint("BOTTOMRIGHT", 0, r); p[3]:SetWidth(r)
-    local anchors = {"TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT"}
-    local coordinates = {{0,1,0,1}, {1,0,0,1}, {0,1,1,0}, {1,0,1,0}}
-    for i = 1, 4 do p[i+3]:SetPoint(anchors[i]); p[i+3]:SetTexCoord(unpack(coordinates[i])) end
-    surface:Show()
+    if not old or old.corner ~= self.Media.corner then
+        for i = 4, 7 do p[i]:SetTexture(self.Media.corner) end
+    end
+    if not old or old.radius ~= r then
+        for i = 1, 7 do
+            p[i]:ClearAllPoints()
+            if i > 3 then p[i]:SetSize(r, r) end
+        end
+        p[1]:SetPoint("TOPLEFT", r, 0); p[1]:SetPoint("BOTTOMRIGHT", -r, 0)
+        p[2]:SetPoint("TOPLEFT", 0, -r); p[2]:SetPoint("BOTTOMLEFT", 0, r); p[2]:SetWidth(r)
+        p[3]:SetPoint("TOPRIGHT", 0, -r); p[3]:SetPoint("BOTTOMRIGHT", 0, r); p[3]:SetWidth(r)
+        local anchors = {"TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT"}
+        local coordinates = {{0,1,0,1}, {1,0,0,1}, {0,1,1,0}, {1,0,1,0}}
+        for i = 1, 4 do p[i+3]:SetPoint(anchors[i]); p[i+3]:SetTexCoord(unpack(coordinates[i])) end
+    end
+    old = old or {}
+    old.r, old.g, old.b, old.a, old.radius, old.corner = c[1], c[2], c[3], opacity, r, self.Media.corner
+    surface.style = old
+    if not surface.IsShown or not surface:IsShown() then surface:Show() end
     return surface
 end
 

@@ -112,8 +112,12 @@ function I:Text(text, role, preserveColor, owner)
         end
     end
     local font, _, fontFlags = V:Font(r.role)
-    local loaded, result = pcall(setter, text, font, size, fontFlags)
-    if not loaded or result == false then return false end
+    -- SetFont can invalidate owner layout even when the requested face is
+    -- already active. Preserve the native size and avoid unchanged writes.
+    if oldPath ~= font or (flags or "") ~= fontFlags then
+        local loaded, result = pcall(setter, text, font, size, fontFlags)
+        if not loaded or result == false then return false end
+    end
     -- Neutral black narrative text cannot remain black on a dark panel.
     -- Preserve saturated quality, class, reaction, red requirements and links.
     local color = rgba(text, "GetTextColor")
@@ -218,7 +222,7 @@ local function hookState(frame, r, event, key, value)
         if not activeOwner(r) then return end
         r[key] = value
         if event == "OnLeave" then r.pressed = false end
-        if InCombatLockdown() then V:Refresh("interior state deferred") else state(r) end
+        if InCombatLockdown() then V:Refresh("interior state deferred", r.owner) else state(r) end
     end)
 end
 local function signal(frame, r)
@@ -401,15 +405,17 @@ function I:Watch(root, opts)
     watch = {opts = opts}; claim(watch,opts.owner); self.watched[root] = watch
     if root.HookScript then
         pcall(root.HookScript,root,"OnShow",function()
-            if activeOwner(watch) then V:Refresh("window interior shown") end
+            if not activeOwner(watch) then return end
+            for owner in pairs(watch.owners or {}) do
+                local id = owner ~= false and owner or nil
+                if running(id) then V:Refresh("window interior shown", id) end
+            end
         end)
     end
     return true
 end
 
 local function replaceSkinner(frame, owner, visited)
-    local metadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
-    if not metadata or metadata("Skinner","Version") ~= "beta12.70938.1" then return false end
     local replaced = false
     for _, key in ipairs({"sf","sb"}) do
         local decoration = frame[key]
@@ -442,7 +448,9 @@ function I:Apply(root, opts)
     for key,value in pairs(opts.decorativeAtlases or {}) do
         if type(key)=="number" then atlases[value]=true else atlases[key]=value end
     end
-    local visited = {}
+    local metadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+    local skinner = opts.skinner and metadata and metadata("Skinner","Version") == "beta12.70938.1"
+    local visited = opts.visited or {}
     local function visit(frame, depth)
         if not available(frame) or visited[frame] or (opts.skip and opts.skip[frame]) then return end
         if stats.nodes >= (opts.maxNodes or 4096) or depth>32 then stats.limitReached=true; return end
@@ -458,12 +466,18 @@ function I:Apply(root, opts)
             end
             return
         end
-        if frame ~= root then self:Watch(frame,{owner=opts.owner}) end
+        if frame ~= root then
+            self:Watch(frame,{owner=opts.owner})
+            if type(frame.IsVisible) == "function" then
+                local ok, visible = pcall(frame.IsVisible, frame)
+                if not ok or V:IsSecret(visible) or visible == false then return end
+            end
+        end
         local controlKind = objectKind == "EditBox" and "editbox" or objectKind == "CheckButton" and "checkbox"
             or objectKind == "Slider" and "slider" or objectKind == "Button" and "button"
         if not controlKind and frame.SetupMenu and frame.GenerateMenu then controlKind="dropdown" end
         if controlKind and self:Control(frame,controlKind,opts.owner,{generic=true}) then stats.controls=stats.controls+1 end
-        if opts.skinner and replaceSkinner(frame,opts.owner,visited) then stats.panels=stats.panels+1 end
+        if skinner and replaceSkinner(frame,opts.owner,visited) then stats.panels=stats.panels+1 end
         if opts.onFrame then
             local ok = pcall(opts.onFrame,frame)
             if not ok then stats.skipped=stats.skipped+1 end

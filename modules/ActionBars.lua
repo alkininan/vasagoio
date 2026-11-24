@@ -4,6 +4,9 @@ local T, A = V.Tokens, V.Tokens.action
 -- Bartender owns actions, state drivers, cooldown values, bindings and usability.
 -- This module only proposes profile geometry and decorates existing widgets.
 local bars = { 1, 3, 4, 5 }
+-- Source-reviewed normal action pages only. 11/12 and separate stance,
+-- possess, vehicle and extra-action controls are not ordinary extra bars.
+local extraBars = { 2, 6, 7, 8, 9, 10, 13, 14, 15 }
 local styled, active = setmetatable({}, { __mode = "k" }), false
 local signalColors = {
     danger = T.colors.danger, dispel = T.colors.information, attention = T.colors.attention,
@@ -73,9 +76,12 @@ V:RegisterProfileAdapter("bartender", {
         local profileName = owner.db.keys and owner.db.keys.profile
         if type(profileName) ~= "string" or V:IsSecret(profileName) then return nil, "Bartender active profile could not be resolved" end
         if A.columns ~= 16 or A.rows ~= 3 or A.petCount ~= 10 then return nil, "The native action-slot adapter requires 16x3 main and 10 pet buttons" end
-        local plan = { changes = {}, targetPaths = {}, detail = "Four native 12-button bars (1,3,4,5), each 4x3, form 16x3. Pet: 10x1. Actions, bindings, paging and other bars are preserved. Reload after applying." }
+        local plan = { changes = {}, targetPaths = {}, detail = "Four native 12-button bars (1,3,4,5), each 4x3, form 16x3. Pet: 10x1. Hides extra normal bars through Bartender visibility and disables obsolete Blizzard Art, Bag Bar and Micro Menu. Slots, bindings, paging and special action controls are not rewritten. Reload after applying." }
         for column, id in ipairs(bars) do
             local profile = actions.db.profile.actionbars[id]
+            if type(profile) ~= "table" then
+                return nil, "Bar " .. id .. ": initialize its Bartender profile before setup"
+            end
             local runtime = actions.actionbars[id] or actions.actionbars[1]
             plan.targetPaths[profile] = { "Bartender4DB", "namespaces", "ActionBars", "profiles", profileName, "actionbars", id }
             local blockStride = (A.columns / #bars) * (A.size + A.gap)
@@ -90,6 +96,31 @@ V:RegisterProfileAdapter("bartender", {
         -- usability/mana coloring remains; our separate 30% layer shows range.
         plan.targetPaths[owner.db.profile] = { "Bartender4DB", "profiles", profileName }
         change(plan, owner.db.profile, "outofrange", "none", "Use vasagoio's translucent range layer")
+        -- Hide extra normal rows through the owner's visibility driver, keeping
+        -- their existing action/page data and enabled state intact. A prior
+        -- custom visibility expression overrides Always Hide, so temporarily
+        -- turn off that toggle but preserve its expression for restoration.
+        for _, id in ipairs(extraBars) do
+            local profile = actions.db.profile.actionbars[id]
+            if type(profile) == "table" and profile.enabled ~= false then
+                if type(profile.visibility) ~= "table" then
+                    return nil, "Bar " .. id .. ": unsupported visibility schema"
+                end
+                plan.targetPaths[profile.visibility] = { "Bartender4DB", "namespaces", "ActionBars", "profiles", profileName, "actionbars", id, "visibility" }
+                change(plan, profile.visibility, "custom", false, "Bar " .. id .. " use standard visibility")
+                change(plan, profile.visibility, "always", true, "Hide extra bar " .. id .. "; keep its slots and paging")
+            end
+        end
+        -- Bartender's Blizzard preset enables this independent artwork module.
+        -- Hiding native MainMenuBar is insufficient: these are owner-created
+        -- gryphons and slot textures, with a persistent, reversible owner flag.
+        for _, name in ipairs({"BlizzardArt", "BagBar", "MicroMenu"}) do
+            local module = getModule(name)
+            if module and module.db and type(module.db.profile) == "table" then
+                plan.targetPaths[module.db.profile] = { "Bartender4DB", "namespaces", name, "profiles", profileName }
+                change(plan, module.db.profile, "enabled", false, "Hide obsolete " .. name .. " alongside the agreed grid")
+            end
+        end
         plan.targetPaths = nil
         return plan
     end,
@@ -308,8 +339,8 @@ V:RegisterModule("actionBars", {
         if LibStub and not V.actionButtonCallbacks then
             local lab = LibStub("LibActionButton-1.0", true)
             if lab and lab.RegisterCallback then
-                lab.RegisterCallback(V, "OnButtonCreated", function() V:Refresh("new action button") end)
-                lab.RegisterCallback(V, "OnKeybindingChanged", function() V:Refresh("action key labels") end)
+                lab.RegisterCallback(V, "OnButtonCreated", function() V:Refresh("new action button", "actionBars") end)
+                lab.RegisterCallback(V, "OnKeybindingChanged", function() V:Refresh("action key labels", "actionBars") end)
                 V.actionButtonCallbacks = true
             end
         end
@@ -339,5 +370,5 @@ V:RegisterModule("actionBars", {
     end,
 })
 
-V:On("ACTIONBAR_SLOT_CHANGED", function() V:Refresh("action buttons") end)
-V:On("PET_BAR_UPDATE", function() V:Refresh("pet buttons") end)
+V:On("ACTIONBAR_SLOT_CHANGED", function() V:Refresh("action buttons", "actionBars") end)
+V:On("PET_BAR_UPDATE", function() V:Refresh("pet buttons", "actionBars") end)

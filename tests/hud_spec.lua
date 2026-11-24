@@ -46,7 +46,7 @@ function V:RegisterProfileAdapter(id, spec) adapters[id] = spec end
 function V:IsModuleEnabled(id) return self.db.enabled and self.db.modules[id] ~= false and modules[id] ~= nil end
 function V:On(event, fn) events[event] = fn end
 function V:Report(id,state,detail) self.report = {id,state,detail} end
-function V:Refresh() refreshes = refreshes + 1 end
+function V:Refresh(_, id) refreshes = refreshes + 1; self.lastRefreshModule = id end
 function V:IsSecret(value) return type(value)=="table" and value.secret == true end
 function V:SafeNumber(value) if not self:IsSecret(value) and type(value)=="number" then return value end end
 function V:Pixel(value) return value end
@@ -70,12 +70,20 @@ for _,id in ipairs({1,3,4,5}) do
     actionProfiles[id] = {position={scale=1}, states={sentinel="preserve"}, buttons=12, enabled=true}
     runtimes[id] = {button_width=45,button_height=45,button_margin=0}
 end
+actionProfiles[6] = {enabled=true, buttons=12, position={point="BOTTOM",x=-570,y=118},
+    states={sentinel="extra-page"},visibility={custom=true,customdata="[combat]show;hide",vehicleui=true}}
+actionProfiles[11] = {enabled=true,visibility={custom=true,customdata="[possessbar]show;hide"},states={sentinel="special"}}
 local actions = {db={profile={actionbars=actionProfiles}},actionbars=runtimes}
 local pet = {db={profile={position={scale=1}}},bar={button_width=30,button_height=30,button_margin=0}}
+local art = {db={profile={enabled=true, leftCap="DWARF", position={point="BOTTOM",x=-600,y=57}}}}
+local bags = {db={profile={enabled=true,onebag=false,position={point="BOTTOM",x=285,y=50}}}}
+local micro = {db={profile={enabled=true,position={point="BOTTOM",x=-24,y=48}}}}
+local vehicle = {db={profile={enabled=true}}}
 Bartender4 = {CONFIG_VERSION=3,db={profile={outofrange="button"},keys={profile="Test"}}}
-function Bartender4:GetModule(name) return ({ActionBars=actions,PetBar=pet})[name] end
+function Bartender4:GetModule(name) return ({ActionBars=actions,PetBar=pet,BlizzardArt=art,BagBar=bags,MicroMenu=micro,Vehicle=vehicle})[name] end
 Bartender4DB = {profiles={Test=Bartender4.db.profile},namespaces={
-    ActionBars={profiles={Test=actions.db.profile}},PetBar={profiles={Test=pet.db.profile}}
+    ActionBars={profiles={Test=actions.db.profile}},PetBar={profiles={Test=pet.db.profile}},BlizzardArt={profiles={Test=art.db.profile}},
+    BagBar={profiles={Test=bags.db.profile}},MicroMenu={profiles={Test=micro.db.profile}},Vehicle={profiles={Test=vehicle.db.profile}}
 }}
 local function validate(plan)
     check(plan and #plan.changes > 0, "No review plan")
@@ -92,7 +100,20 @@ end
 local barPlan = adapters.bartender.Prepare()
 validate(barPlan)
 check(actionProfiles[1].rows == nil and Bartender4.db.profile.outofrange == "button", "Review wrote a profile")
+check(art.db.profile.enabled, "Review disabled Blizzard artwork before Apply")
+check(actionProfiles[6].visibility.custom and actionProfiles[6].visibility.always==nil and bags.db.profile.enabled,
+    "Review changed legacy-bar visibility before Apply")
 commit(barPlan)
+check(not art.db.profile.enabled and art.db.profile.leftCap=="DWARF" and art.db.profile.position.x==-600,
+    "Legacy Blizzard artwork must be disabled through its reversible owner setting only")
+check(not bags.db.profile.enabled and not micro.db.profile.enabled and bags.db.profile.position.x==285,
+    "Legacy bag/micro bars must be disabled without rewriting their saved placement")
+check(actionProfiles[6].visibility.always and not actionProfiles[6].visibility.custom
+    and actionProfiles[6].visibility.customdata=="[combat]show;hide" and actionProfiles[6].visibility.vehicleui
+    and actionProfiles[6].enabled and actionProfiles[6].states.sentinel=="extra-page" and actionProfiles[6].buttons==12,
+    "Hiding an extra bar must preserve its actions, saved expression, enabled state and paging")
+check(actionProfiles[11].visibility.custom and actionProfiles[11].visibility.always==nil and vehicle.db.profile.enabled,
+    "Special action/vehicle controls must not be hidden by ordinary-bar cleanup")
 for column,id in ipairs({1,3,4,5}) do
     local bar = actionProfiles[id]
     local scale = bar.position.scale
@@ -116,6 +137,31 @@ for _,change in ipairs(widePlan.changes) do
     end
 end
 UIParent:SetSize(2560,1440)
+events.ACTIONBAR_SLOT_CHANGED()
+check(V.lastRefreshModule=="actionBars", "Action slot changes must not rescan all window interiors")
+events.PET_BAR_UPDATE()
+check(V.lastRefreshModule=="actionBars", "Pet action events must not rescan all window interiors")
+local savedArt, savedBags, savedMicro = art, bags, micro
+art,bags,micro=nil,nil,nil
+local noUtilityPlan = adapters.bartender.Prepare()
+validate(noUtilityPlan)
+for _, change in ipairs(noUtilityPlan.changes) do
+    check(change.table~=savedArt.db.profile and change.table~=savedBags.db.profile and change.table~=savedMicro.db.profile,
+        "Missing optional utility modules must not block setup or receive guessed writes")
+end
+art,bags,micro=savedArt,savedBags,savedMicro
+local savedMain = actionProfiles[3]
+actionProfiles[3]=nil
+local missingOK, missingPlan, missingReason = pcall(adapters.bartender.Prepare)
+check(missingOK and missingPlan==nil and type(missingReason)=="string",
+    "An uninitialized main bar must explain why setup is unavailable without an API error")
+actionProfiles[3]=savedMain
+local savedVisibility=actionProfiles[6].visibility
+actionProfiles[6].visibility=nil
+check(adapters.bartender.Prepare()==nil,"An enabled extra bar with unknown visibility must not receive guessed settings")
+actionProfiles[6].enabled=false
+validate(adapters.bartender.Prepare())
+actionProfiles[6].enabled=true; actionProfiles[6].visibility=savedVisibility
 
 Prat = {db={keys={profile="Test"}}}
 local font = {db={profile={size={ChatFrame1=12},fontface="Original"}}}

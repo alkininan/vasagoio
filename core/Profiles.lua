@@ -126,18 +126,42 @@ function V:ApplySetup(review)
         return false, "Setup failed; the changes were rolled back."
     end
     self.setupReview = nil
+    local previousRevision = self.db.appliedRevision
     self.db.appliedRevision = review.revision
     self.profileReloadPending = true
     local callbackFailed = false
     for _, entry in ipairs(review.adapters) do
         local spec = self.adapters[entry.id]
         if spec.AfterApply then
-            local success = pcall(spec.AfterApply, spec)
-            if not success then callbackFailed = true end
+            local success, result = pcall(spec.AfterApply, spec)
+            if not success or result == false then callbackFailed = true; break end
         end
     end
+    if callbackFailed then
+        -- A live-anchor owner can overwrite saved positions during reload.
+        -- Failed activation is not a successful setup: restore saved values
+        -- and synchronize only the reviewed owners back to their before state.
+        for i = #review.changes, 1, -1 do targets[i][review.changes[i].key] = self:Copy(review.changes[i].before) end
+        local recovered = true
+        for _, entry in ipairs(review.adapters) do
+            local spec = self.adapters[entry.id]
+            if spec.AfterRestore then
+                local changes = {}
+                for _, change in ipairs(review.changes) do
+                    if change.adapter == entry.id then changes[#changes + 1] = change end
+                end
+                local success, result = pcall(spec.AfterRestore, spec, changes)
+                if not success or result == false then recovered = false end
+            end
+        end
+        table.remove(self.db.profileBackups)
+        self.db.appliedRevision = previousRevision
+        self:Refresh()
+        return false, recovered and "An owner refresh failed. Setup was rolled back; reload before trying again."
+            or "An owner refresh failed. Saved settings were rolled back, but live-window recovery failed; inspect the affected owner before reloading."
+    end
     self:Refresh()
-    return true, callbackFailed and "Profiles saved. An owner refresh failed; reload to activate, then inspect status." or "Profiles saved and backed up. Reload to activate all owner profiles."
+    return true, "Profiles saved and backed up. Reload to activate all owner profiles."
 end
 
 function V:RollbackProfiles()
@@ -146,7 +170,7 @@ function V:RollbackProfiles()
     local backups = self.db.profileBackups
     local backup = backups[#backups]
     if not backup then return false, "There is no setup snapshot to restore." end
-    local targets = {}
+    local targets, byAdapter = {}, {}
     for i, change in ipairs(backup.changes) do
         local target = resolve(change.path)
         if not target then return false, "Load the affected addon before restoring its profile." end
@@ -154,10 +178,44 @@ function V:RollbackProfiles()
             return false, "A setting changed after setup. Automatic rollback stopped to preserve your edits. Restore using the owner's profile menu or your WTF backup."
         end
         targets[i] = target
+        if type(change.adapter) == "string" then
+            byAdapter[change.adapter] = byAdapter[change.adapter] or {}
+            table.insert(byAdapter[change.adapter], change)
+        end
+    end
+    -- Some owners save live window anchors at logout. Validate their ability
+    -- to restore those anchors before any saved settings are changed.
+    for id, changes in pairs(byAdapter) do
+        local spec = self.adapters[id]
+        if spec and spec.ValidateRestore then
+            local ok, valid, reason = pcall(spec.ValidateRestore, spec, changes)
+            if not ok or valid ~= true then
+                return false, ok and reason or "An owner could not validate profile restoration. No settings were changed."
+            end
+        end
     end
     for i = #backup.changes, 1, -1 do
         local change = backup.changes[i]
         targets[i][change.key] = self:Copy(change.before)
+    end
+    local callbackFailed = false
+    for id, changes in pairs(byAdapter) do
+        local spec = self.adapters[id]
+        if spec and spec.AfterRestore then
+            local ok, result = pcall(spec.AfterRestore, spec, changes)
+            if not ok or result == false then callbackFailed = true end
+        end
+    end
+    if callbackFailed then
+        -- Keep the snapshot and saved values as they were before this attempt.
+        -- Reconcile the few adapters with live restore callbacks to that state.
+        for i, change in ipairs(backup.changes) do targets[i][change.key] = self:Copy(change.after) end
+        for id in pairs(byAdapter) do
+            local spec = self.adapters[id]
+            if spec and spec.AfterRestore and spec.AfterApply then pcall(spec.AfterApply, spec, byAdapter[id]) end
+        end
+        self.profileReloadPending = true
+        return false, "An owner window could not be restored. Saved settings and the snapshot were retained; reload and inspect the owner before retrying."
     end
     table.remove(backups)
     self.db.appliedRevision = nil

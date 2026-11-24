@@ -48,4 +48,16 @@ V:ApplyModules()
 V.db.modules.partial = false
 V:ApplyModules()
 assert(cleanups == 2, "Partially applied module was not cleaned up")
-print("options_spec: safe before/after review, table privacy and module cleanup lifecycle passed")
+V.runtimeStats = {modules = {
+    lifecycle = {calls=4, errors=0, timedCalls=4, totalMs=8, maxMs=3},
+    partial = {calls=1, errors=1, timedCalls=0, totalMs=0, maxMs=0},
+}}
+local perf = V:PerformanceText()
+assert(perf:find("not FPS or total addon CPU",1,true))
+assert(perf:find("4 calls; 0 errors; 8.00 ms total; 2.00 ms average; 3.00 ms max",1,true))
+assert(perf:find("1 calls; 1 errors; Timing unavailable",1,true))
+local opened
+V.OpenOptions=function(_,mode) opened=mode end
+SlashCmdList.VASAGOIO("perf")
+assert(opened=="perf", "Performance command did not select diagnostics")
+print("options_spec: review privacy, lifecycle and scoped performance diagnostics passed")

@@ -1,6 +1,6 @@
 # Implementation and acceptance status
 
-**Window interior implementation is included in this alpha.** Code and offline fixtures are available; source registration is not a claim that every candidate exists or renders identically in every game state. No game session was launched or controlled, so every implemented path still needs user-run native validation. Status in the addon means an adapter ran without a caught error; it does not certify visual parity, taint safety or combat correctness.
+**Window interior implementation is included in this alpha.** Code and offline fixtures are available; source registration is not a claim that every candidate exists or renders identically in every game state. Development does not launch or control the game. The first user test of alpha.3 found an FPS regression and HUD overlap; alpha.4 addresses those code paths but native acceptance remains open. Status in the addon means an adapter ran without a caught error; it does not certify visual parity, taint safety or combat correctness.
 
 The full accepted target is in [DESIGN.md](DESIGN.md). The following table separates implementation from unresolved work rather than treating a configuration token as a finished feature.
 
@@ -20,6 +20,8 @@ The full accepted target is in [DESIGN.md](DESIGN.md). The following table separ
 | Selected addon windows | All 19 Baganator skin-region types, Talents Forever interiors, MRT tools/popups, Auctionator panes, Gargul audited registries and OpenMap native shell | Audited versions/APIs only; owner-created custom content/state art is preserved. Other selected addons retain their owner interfaces unless covered by a separate adapter. See [addon interiors](addon-interiors.md) |
 | Help/tickets | Native surrounding panels and controls styled; original functionality retained | Embedded support webpage is outside addon skin control; login/character-select frontends do not load normal in-game addons |
 | Functional addon selection | Full 26-package manifest, including Details' bundled TinyThreat component, installed independently | vasagoio does not bundle, enable, update or test all packages |
+| Performance | Scoped, coalesced styling; bounded reentrant work; surface caching; incremental aura updates and visible-window discovery | Offline operation-count regressions pass. User-reported alpha.3 FPS loss is not marked resolved until alpha.4 is measured in the same scene. `/vasagoio perf` measures module applications only. |
+| Quest HUD | Reviewed RestedXP guide-anchor migration with live/saved apply and restoration | Placement only, exact v4.11.40; native objective layout and guide features preserved |
 | Distribution | Standalone addon ZIP, deterministic package, hash manifest, CI | Native acceptance needed before a stable release |
 
 ## Native acceptance gate
@@ -31,6 +33,7 @@ Before upgrading this release to stable, manually verify at the intended resolut
 3. Solo/party/raid transitions, pets appearing/disappearing, portrait/resource changes, health text/gradient, role-aware threat, aura updates and range.
 4. Action paging, every existing binding, cooldown/charge/loss-of-control interactions and spell/item usability.
 5. Combat entering/leaving with frames opening/updating; no blocked protected actions or Lua errors.
-6. Exact visible bounds and contrast over light and dark scenes, including very long names/place names and large amounts.
+6. Same-scene FPS comparison with Skinner unchanged and vasagoio enabled/disabled; watch idle gameplay, action/aura updates and open-window behavior.
+7. Exact visible bounds and contrast over light and dark scenes, including very long names/place names and large amounts.
 
 The [172-surface ledger](window-coverage.json) retains 132 native interior candidates, 29 dedicated HUD-owner records, 2 media/world-capture overlays, 8 frontend records and 1 embedded browser boundary. It intentionally marks all runtime results untested and does not imply every source-listed surface is available on every character or realm.

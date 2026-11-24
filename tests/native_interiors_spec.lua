@@ -1,6 +1,7 @@
 local root = (arg and arg[1]) or "."
 local V = {db = {enabled = true, modules = {}}, modules = {}, surfaces = {}, events = {}, errors = {}}
 local combat, calls, rows, tick, cancelled = false, {}, {}, nil, false
+local applyCounts = {}
 local function texture(atlas)
     return {alpha = 1, atlas = atlas, GetAlpha = function(self) return self.alpha end,
         SetAlpha = function(self, a) self.alpha = a end, GetAtlas = function(self) return self.atlas end,
@@ -46,6 +47,7 @@ local function path(f, name)
     return f
 end
 function V.InteriorSkin:Apply(f, opts)
+    applyCounts[f] = (applyCounts[f] or 0) + 1
     calls[f] = opts
     self:Watch(f, opts)
     for _, key in ipairs(opts.art or {}) do local t = path(f,key); if t then t:SetAlpha(0) end end
@@ -79,12 +81,14 @@ function V.InteriorSkin:Panel(f, kind, owner)
 end
 function V.InteriorSkin:Watch(f, opts)
     if not f then return false end
+    self.watchClaims=self.watchClaims or {}
+    self.watchClaims[f]=true
     if self.watched[f] then return true end
     self.watched[f]=opts
     f:HookScript("OnShow",function() if V:IsModuleEnabled(opts.owner) then V:Refresh("native shown") end end)
     return true
 end
-function V.InteriorSkin:Restore(owner) self.restored = owner end
+function V.InteriorSkin:Restore(owner) self.restored = owner;self.watchClaims={} end
 function V.InteriorSkin:Control(f, kind) f.controlKind=kind end
 function V.InteriorSkin:SetSelected(f, selected) f.markerSelected=selected end
 function V.InteriorSkin:Hide(t) if t then t:SetAlpha(0) end end
@@ -243,6 +247,16 @@ CharacterFrame.shown=true
 tick()
 assert(calls[CharacterFrame] and calls[PaperDollFrame], "Visible native root did not resume polling")
 
+local countBefore=applyCounts[CharacterFrame]
+for _=1,20 do tick() end
+assert(applyCounts[CharacterFrame]==countBefore, "Stationary visible window was rescanned every ticker pass")
+local closed=frame(UIParent); closed.shown=false; _G.TradeFrame=closed
+tick()
+assert(not calls[closed] and closed.hooks==1, "Closed root traversed before user showed it")
+closed.shown=true
+tick()
+assert(calls[closed], "Previously closed root was not styled on visibility transition")
+
 V.db.modules.nativeWindows=false
 local blocked=frame(UIParent); _G.TradeFrame=blocked
 tick()
@@ -251,4 +265,8 @@ tab:SetTabSelected(true)
 assert(not tab.markerSelected, "Disabled module repainted selected tab")
 V.modules.nativeWindows.Disable()
 assert(cancelled and V.InteriorSkin.restored=="nativeWindows", "Disable did not stop discovery/restore primitives")
+CharacterFrame.shown=false
+V.db.modules.nativeWindows=true
+V.modules.nativeWindows.Apply()
+assert(V.InteriorSkin.watchClaims[CharacterFrame],"Reenabled closed native root lost its show observer ownership")
 print("native_interiors_spec: catalog scope, unchanged layouts, pooled rows, selected tabs/rows, semantic art, browser boundaries, lazy roots and combat cleanup passed")

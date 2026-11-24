@@ -1,5 +1,5 @@
 local addonName, V = ...
-V.name, V.version = addonName, "0.2.0-alpha.3"
+V.name, V.version = addonName, "0.2.0-alpha.4"
 V.modules, V.moduleOrder, V.listeners, V.status = {}, {}, {}, {}
 V.adapters, V.adapterOrder = {}, {}
 V.activeModules = {}
@@ -67,11 +67,30 @@ function V:IsModuleEnabled(id)
     return choice == true
 end
 
-function V:ApplyModules()
-    if not self.ready then return end
-    if InCombatLockdown() then self.pending = true; return end
+local function safeClock(fn)
+    if type(fn) ~= "function" then return end
+    local ok, value = pcall(fn)
+    return ok and V:SafeNumber(value) or nil
+end
+
+function V:ApplyModules(only, followup)
+    if not self.ready or self.applyingModules then return end
+    if InCombatLockdown() then
+        self.pending = true
+        if not only then self.pendingAll = true
+        else
+            self.pendingModules = self.pendingModules or {}
+            for id in pairs(only) do self.pendingModules[id] = true end
+        end
+        return
+    end
     self.pending = false
+    self.applyingModules, self.followupPass = true, followup
+    self.refreshDuringApply = {}
+    self.runtimeStats = self.runtimeStats or {startedAt = safeClock(GetTime), modules = {}}
     for _, id in ipairs(self.moduleOrder) do
+      if not only or only[id] then
+        self.applyingModule = id
         local spec = self.modules[id]
         if self:IsModuleEnabled(id) and self.profileReloadPending then
             self:Report(id, "pending", "Owner profiles changed; reload before applying cosmetic adapters.")
@@ -79,8 +98,22 @@ function V:ApplyModules()
             -- Track attempted applications too: an API error may follow a
             -- partial cosmetic change that still needs its Disable cleanup.
             self.activeModules[id] = true
+            local stats = self.runtimeStats.modules[id]
+            if not stats then
+                stats = {calls=0,errors=0,timedCalls=0,totalMs=0,maxMs=0}
+                self.runtimeStats.modules[id] = stats
+            end
+            stats.calls = stats.calls + 1
+            local start = safeClock(debugprofilestop)
             local ok, applied, detail, state = pcall(spec.Apply, spec)
+            local stop = start and safeClock(debugprofilestop)
+            if stop and stop >= start then
+                local elapsed = stop - start
+                stats.timedCalls = stats.timedCalls + 1
+                stats.totalMs, stats.maxMs = stats.totalMs + elapsed, math.max(stats.maxMs, elapsed)
+            end
             if not ok then
+                stats.errors = stats.errors + 1
                 self:Report(id, "error", "Module stopped after an API error; other modules continue.")
                 if geterrorhandler then geterrorhandler()(applied) end
             elseif applied then self:Report(id, "applied", detail)
@@ -93,17 +126,40 @@ function V:ApplyModules()
             end
             self:Report(id, "disabled", cleanupOK and "Disabled; reload to remove existing hooks and styling." or "Disabled; cleanup needs a reload to finish.")
         end
+      end
     end
+    local again = self.refreshDuringApply
+    self.applyingModule, self.applyingModules, self.followupPass, self.refreshDuringApply = nil, nil, nil, nil
+    -- Owner layouts can allocate a legitimate late widget during styling.
+    -- Permit one follow-up for those callbacks, but never an unbounded chain
+    -- when an owner's setter keeps notifying us on every cosmetic pass.
+    if not followup and next(again) then self:ApplyModules(again, true) end
 end
 
-function V:Refresh()
+-- Owner callbacks invalidate only their module. A bar update must not traverse
+-- every hidden native/addon window. Reentrant callbacks from our own cosmetic
+-- writes receive at most one follow-up instead of an endless repaint chain.
+function V:Refresh(_, moduleId)
+    if moduleId and not self.modules[moduleId] then return end
+    if self.applyingModules then
+        if not self.followupPass then
+            if moduleId then self.refreshDuringApply[moduleId] = true
+            else for _, id in ipairs(self.moduleOrder) do self.refreshDuringApply[id] = true end end
+        end
+        return
+    end
+    if moduleId then
+        self.refreshModules = self.refreshModules or {}
+        self.refreshModules[moduleId] = true
+    else self.refreshAll = true end
     if self.refreshQueued then return end
     self.refreshQueued = true
     local function apply()
-        V.refreshQueued = false
-        V:ApplyModules()
+        local only = not V.refreshAll and V.refreshModules or nil
+        V.refreshQueued, V.refreshAll, V.refreshModules = false, nil, nil
+        V:ApplyModules(only)
     end
-    if C_Timer and C_Timer.After then C_Timer.After(0, apply) else apply() end
+    if C_Timer and C_Timer.After then C_Timer.After(.05, apply) else apply() end
 end
 
 events:SetScript("OnEvent", function(_, event, ...)
@@ -117,7 +173,11 @@ events:SetScript("OnEvent", function(_, event, ...)
         V:Refresh()
         if V.db.enabled then V:Print("Alpha build. Type /vasagoio for setup, coverage and disable controls.") end
     elseif event == "PLAYER_REGEN_ENABLED" then
-        if V.pending then V:Refresh() end
+        if V.pending then
+            if V.pendingAll then V:Refresh()
+            else for id in pairs(V.pendingModules or {}) do V:Refresh("combat ended", id) end end
+            V.pendingAll, V.pendingModules = nil, nil
+        end
     elseif event == "UI_SCALE_CHANGED" or event == "DISPLAY_SIZE_CHANGED" then
         V:Refresh()
     end

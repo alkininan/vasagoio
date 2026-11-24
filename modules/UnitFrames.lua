@@ -53,7 +53,7 @@ local function appearance(scope, scopeKey)
         textPowerLeft = "NONE", textPowerCenter = "NONE", textPowerRight = "CURRENT",
         titlePercent = 0, spacingTitle = 0, spacingDocked = 0, spacingPower = px(2), spacingPortrait = px(2),
         portraitStyle = "2D", portraitSquare = true, portraitMirror = false,
-        powerEnabled = true,
+        powerEnabled = true, castbarAlwaysShow = false,
     })
     if scopeKey ~= "pet" and scopeKey ~= "boss" then scope.titleClassIcon = false end
     if scopeKey ~= "player" and scopeKey ~= "pet" and scopeKey ~= "party" then scope.powerHideEmpty = true end
@@ -156,6 +156,9 @@ local adapter = {
         profile.party.dispelsSize, profile.party.dispelsSpacing, profile.party.dispelsRowGap = px(T.aura.prioritySize), px(T.aura.gap), px(T.aura.wrapGap - T.aura.gap)
         profile.player.valueFontSize, profile.target.valueFontSize = px(T.typography.amount.size), px(T.typography.amount.size)
         profile.player.buffsEnabled, profile.player.hideBlizzardAuras, profile.player.cancelBuffs = true, true, true
+        -- The Classic preset otherwise retains an empty cast/threat row under
+        -- the player frame. Keep actual casts; TinyThreat owns the threat meter.
+        profile.player.threatBar = false
         for _, key in ipairs({ "player", "target", "pet", "targettarget" }) do profile[key].enabled = true end
         -- Never replace a profile that FUF may still flush from its private
         -- in-memory copy at logout. A fresh name survives that save safely.
@@ -227,7 +230,7 @@ end
 local function petLayout(frame)
     local decor = partyPetDecor[frame]
     if not decor or decor.layoutBusy or not running() then return end
-    if InCombatLockdown and InCombatLockdown() then V:Refresh("party pet layout after combat"); return end
+    if InCombatLockdown and InCombatLockdown() then V:Refresh("party pet layout after combat", "unitframes"); return end
     decor.layoutBusy = true
     -- Decorate the same 192×32 secure button:32px picture,2px gap,
     --158px content; health22, gap2, resource8. No click-unit attributes change.
@@ -366,7 +369,7 @@ V:RegisterModule("unitframes", {
         if not publicHooks and hooksecurefunc then
             for _, api in ipairs({ "PartyButtonOnLoad", "PartyPetButtonOnLoad", "PartyPetBesideOnLoad", "RaidButtonOnLoad" }) do
                 if type(ForeverUnitFrames[api]) == "function" then
-                    hooksecurefunc(ForeverUnitFrames, api, function() V:Refresh("new FUF unit") end)
+                    hooksecurefunc(ForeverUnitFrames, api, function() V:Refresh("new FUF unit", "unitframes") end)
                 end
             end
             if type(ForeverUnitFrames.PartyPetButtonOnAttributeChanged) == "function" then
@@ -397,7 +400,7 @@ V:RegisterModule("unitframes", {
         for _, decor in pairs(partyPetDecor) do decor.portrait:Hide(); decor.resource:Hide() end
     end,
 })
-V:On("GROUP_ROSTER_UPDATE", function() V:Refresh("unit roster changed") end)
+V:On("GROUP_ROSTER_UPDATE", function() V:Refresh("unit roster changed", "unitframes") end)
 for _, event in ipairs({ "UNIT_POWER_FREQUENT", "UNIT_MAXPOWER", "UNIT_DISPLAYPOWER" }) do
     V:On(event, function() updatePartyPets(false) end)
 end

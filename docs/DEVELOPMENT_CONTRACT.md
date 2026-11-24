@@ -5,7 +5,7 @@ Original addon; no vendor code/assets copied. Public repository contains only th
 Every Lua file receives `local addonName, V = ...`. Core defines these APIs before module files load:
 
 - `V:RegisterModule(id, spec)`: spec contains label, description, defaultEnabled, Apply(self), optional Disable(self). `self` is the spec and `V` is captured from the namespace. Apply must be repeat-safe and out of combat. Return `true, detail` for applied; `false, reason` for unavailable/unsupported. Core stores status and catches errors.
-- `V:On(event, fn)`: callback receives event and event arguments. Multiple listeners supported. `V:Refresh(reason)` schedules module applications out of combat.
+- `V:On(event, fn)`: callback receives event and event arguments. Multiple listeners supported. `V:Refresh(reason, moduleId)` coalesces and schedules only that module out of combat; omit moduleId only for explicit global setup/manual/display refresh. Reentrant callbacks receive one bounded follow-up.
 - `V:Report(id, state, detail)`: record concise status; states applied, pending, unsupported, disabled, error. Do not log personal data.
 - `V:Print(text)`: user-facing chat message.
 - `V:SafeNumber(value)`: returns an ordinary number only if not a secret value; never compare/stringify restricted values first.
@@ -26,6 +26,10 @@ Accepted design: L320x64 health46/resource16; M224x48 health34/resource12; S192x
 Semantic colors danger signal#E4A0A8/fill#8B4E57/range#AB2D3C30%; information#A8D7EB/fill#486C89; attention#E7CC82/fill#866242. Buff36priority28, bottom signal3high/gap2/insets6, aura wrapgap16. Cooldown full-button radial wipe, remainingblack.8/elapsed.12, centered18main16compact; hotkeyhiddenactive, counttop-right(-8,+6)active/restoredbottomright2ready. No boxes. Nameplates192x24cast16gap8, exact currentHP, valid hostileNPC role/threat states0/3calm/dangerinvertTankvsDPS,1/2warning. Native restricted values are passed through supported owner widgets; never infer hidden values.
 
 All agreed details must be present in code/config/coverage manifest with honest implementation status. Do not mark an unsupported effect implemented merely because a token exists. Browser blur cannot be claimed as native Frosted blur. All native behavior untested until user-run validation.
+
+Alpha.3 failed the user's native FPS/layout check. Alpha.4 must not claim recovery from offline operation counts. `V.runtimeStats` measures registered Apply calls only. Skip unchanged texture geometry and font writes, and never traverse hidden window trees in response to action/aura updates. Dynamic controls use reviewed owner callbacks or visibility changes; stationary-window discovery is not a repaint loop.
+
+Profile adapters with owner-saved live anchors may implement `ValidateRestore(self, changes)` (pure preflight, returns true or false/reason) and `AfterRestore(self, changes)` (synchronize restored live anchors). Only the adapter's own snapshot entries are passed. Validation happens before any saved writes; restore-callback failure retains the snapshot, restores its after values and attempts `AfterApply(self, changes)` recovery. That optional changes argument must respect inactive profiles. An initial AfterApply failure rolls saved values back, reconciles live anchors through AfterRestore, removes the failed snapshot and preserves the earlier applied revision; it is not reported as a successful setup. RestedXP captures every live anchor before any move and restores touched frames if any write fails. Do not move guide frames before explicit setup or resize their contents.
 
 ## Scoped window interiors
 

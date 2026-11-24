@@ -7,6 +7,8 @@ local watched, rowCallbacks = setmetatable({}, {__mode = "k"}), setmetatable({},
 local selections = setmetatable({}, {__mode = "k"})
 local selectionHooks = {}
 local ticker
+local visibility = setmetatable({}, {__mode = "k"})
+local reconcileAfterCombat
 
 -- Exact decorative atlases from the reviewed client XML. No substring or
 -- color-based removal: item icons, quest markers, talent states and model
@@ -126,7 +128,7 @@ end
 local function paintSelection(frame, value)
     if not running() or not W:Available(frame) or not V.InteriorSkin then return end
     if V:IsSecret(value) or type(value) ~= "boolean" then return end
-    if InCombatLockdown() then V:Refresh("native selection after combat"); return end
+    if InCombatLockdown() then V:Refresh("native selection after combat", "nativeWindows"); return end
     local binding = selections[frame]
     if not binding then return end
     binding.selected = value
@@ -285,7 +287,7 @@ end
 
 local function rowStyle(...)
     if not running() or not V.InteriorSkin then return end
-    if InCombatLockdown() then V:Refresh("native row styling after combat"); return end
+    if InCombatLockdown() then V:Refresh("native row styling after combat", "nativeWindows"); return end
     local row
     -- ScrollUtil's iterate-existing path uses (frame, data); subsequent
     -- callbacks use (owner, frame, data). Never inspect elementData.
@@ -308,7 +310,7 @@ local function registerStatRows()
     end
 end
 
-local function style(record)
+local function style(record, visited)
     local frame, name = record.frame, record.name
     if not W:Available(frame) then return end
     local spec = interiors[name] or {}
@@ -321,7 +323,7 @@ local function style(record)
         end
     end
     local stats = V.InteriorSkin:Apply(frame, {owner = OWNER, art = spec.art, panels = spec.panels, skip = skip,
-        decorativeAtlases = decorativeAtlases, skinner = true, maxNodes = 2400, onFrame = selectionFrame})
+        decorativeAtlases = decorativeAtlases, skinner = true, maxNodes = 2400, onFrame = selectionFrame, visited = visited})
     if not watched[frame] then
         W:Hook(frame, OWNER)
         watched[frame] = true
@@ -329,33 +331,40 @@ local function style(record)
     return stats
 end
 
-local function visible(frame)
-    -- IsShown stays true for a child whose native parent is hidden.
-    local query = type(frame.IsVisible) == "function" and frame.IsVisible or frame.IsShown
-    if type(query) ~= "function" then return true end
-    local ok, shown = pcall(query, frame)
-    return ok and not V:IsSecret(shown) and shown == true
-end
-
-local function run(onlyVisible)
+local function run(discoveryOnly)
     local totals = {roots = 0, controls = 0, texts = 0, panels = 0, skipped = 0, deferred = 0}
     if not running() or not V.InteriorSkin then return totals end
-    if InCombatLockdown() then V:Refresh("native interiors after combat"); totals.deferred = 1; return totals end
+    if InCombatLockdown() then
+        V:Refresh("native interiors after combat", OWNER); totals.deferred = 1; return totals
+    end
     registerSelectionHooks()
+    local visited = {}
     for _, record in ipairs(records()) do
-        if not onlyVisible or not watched[record.frame] or visible(record.frame) then
-            local ok, stats = pcall(style, record)
+        local frame = record.frame
+        local isVisible = W:Visible(frame)
+        local wasVisible = visibility[frame]
+        -- Install the cheap OnShow observer even for closed windows, but defer
+        -- their descendant traversal until they are actually shown.
+        -- Watch is deduplicated and also renews the ownership claim after
+        -- disable/reenable while a window remains closed.
+        W:Hook(frame, OWNER); watched[frame] = true
+        visibility[frame] = isVisible
+        if isVisible and (not discoveryOnly or not wasVisible or reconcileAfterCombat) then
+            local ok, stats = pcall(style, record, visited)
             if ok then totals.roots = totals.roots + 1; accumulated(totals, stats)
             else totals.deferred = totals.deferred + 1 end
         end
     end
-    for _, name in ipairs(globalArt) do W:Hide(get(name),OWNER) end
-    for _, name in ipairs(narrativeText) do
-        local text = get(name)
-        if text then pcall(V.InteriorSkin.Text, V.InteriorSkin, text, "body", false, OWNER) end
+    if not discoveryOnly or totals.roots > 0 then
+        for _, name in ipairs(globalArt) do W:Hide(get(name),OWNER) end
+        for _, name in ipairs(narrativeText) do
+            local text = get(name)
+            if text then pcall(V.InteriorSkin.Text, V.InteriorSkin, text, "body", false, OWNER) end
+        end
+        registerStatRows()
     end
-    registerStatRows()
-    N.last = totals
+    reconcileAfterCombat = nil
+    if not discoveryOnly or totals.roots > 0 then N.last = totals end
     return totals
 end
 
@@ -378,4 +387,6 @@ function N:Disable()
 end
 
 N.Specifications, N.DecorativeAtlases = interiors, decorativeAtlases
-V:On("PLAYER_REGEN_ENABLED", function() if running() then V:Refresh("native interiors combat ended") end end)
+V:On("PLAYER_REGEN_ENABLED", function()
+    if running() then reconcileAfterCombat = true; V:Refresh("native interiors combat ended", OWNER) end
+end)

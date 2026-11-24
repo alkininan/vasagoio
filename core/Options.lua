@@ -136,12 +136,31 @@ function V:OpenOptions(mode)
     if mode == "setup" then
         local review, reason = self:PrepareSetup()
         content = review and self:ReviewText(review) or reason
+    elseif mode == "perf" then content = self:PerformanceText()
     else content = self:StatusText() end
     self.options.content:SetText(content)
     self.options.body:SetHeight(math.max(420, self.options.content:GetStringHeight() + 24))
     self.options.apply:SetEnabled(self.setupReview ~= nil and #self.setupReview.changes > 0)
     self:Surface(self.options, .97, 10)
     self.options:Show()
+end
+
+function V:PerformanceText()
+    local lines = {"vasagoio " .. self.version .. " — module application timings",
+        "Since this UI load. These measure styling passes, not FPS or total addon CPU.",
+        "Direct widget callbacks and other addons are outside these timings.", ""}
+    local stats = self.runtimeStats and self.runtimeStats.modules or {}
+    for _, id in ipairs(self.moduleOrder) do
+        local s = stats[id]
+        if s then
+            local timing = s.timedCalls > 0 and ("%.2f ms total; %.2f ms average; %.2f ms max"):format(
+                s.totalMs, s.totalMs / s.timedCalls, s.maxMs) or "Timing unavailable on this client"
+            lines[#lines + 1] = ("%s: %d calls; %d errors; %s"):format(id, s.calls, s.errors, timing)
+        end
+    end
+    lines[#lines + 1] = ""
+    lines[#lines + 1] = "Reopen /vasagoio perf to update this snapshot. Compare FPS in the same scene with styling on/off and reload between tests."
+    return table.concat(lines, "\n")
 end
 
 function V:SetEnabled(enabled)
@@ -177,5 +196,5 @@ SlashCmdList.VASAGOIO = function(message)
             V.db.fonts.narrowBold = argument == "reset" and nil or argument
             V:Refresh(); V:Print("Bold font preference saved. Use only a font you are licensed to use; reload and check it visually.")
         else V:Print("Usage: /vasagoio font Interface\\AddOns\\YourMedia\\ArialNarrowBold.ttf, or /vasagoio font reset") end
-    else V:OpenOptions(command == "setup" and "setup" or "status") end
+    else V:OpenOptions(command == "setup" and "setup" or command == "perf" and "perf" or "status") end
 end

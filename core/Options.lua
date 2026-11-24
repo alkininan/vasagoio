@@ -282,6 +282,7 @@ function V:SetEnabled(enabled)
     self.uiReloadPending = true
     if enabled then self:Refresh()
     else
+        if self.HideAuraProbe then self:HideAuraProbe() end
         self:ApplyModules() -- Runs each active module's cleanup once, out of combat.
         self:RestoreArtwork()
         -- Keep this addon's own enable/restore controls legible while styling
@@ -299,6 +300,9 @@ SlashCmdList.VASAGOIO = function(message)
     command = command:lower()
     if command == "off" then V:SetEnabled(false)
     elseif command == "on" then V:SetEnabled(true)
+    elseif command == "auratest" then
+        if V.AuraProbeCommand then V:AuraProbeCommand(argument)
+        else V:Print("Aura test unavailable; reload after installing the complete addon folder.") end
     elseif command == "refresh" then V:Refresh()
     elseif command == "restore" then
         if argument ~= "confirm" then V:Print("To restore the latest setup snapshot, type /vasagoio restore confirm. Later edits are preserved by conflict checks.")

@@ -32,6 +32,8 @@ Reference canvas: **2560×1440**, centered within UIParent on other aspect ratio
 | Raid gaps | 6 between members; 12 horizontal and 16 vertical between groups |
 | Main buttons | 42×42; 8 gaps; 16 columns × 3 rows; 792×142 at x884 y1290 |
 | Pet buttons | 32×32; 8 gaps; ten buttons; 392×32 at x884 y1246 |
+| Player XP active | Existing 320×64 outer frame and 64px portrait; health42, gap2, power14, gap2, XP4 inside the bar body |
+| Player XP unavailable / maximum level | Reclaim the XP space; return to health46, gap2, power16; no reputation substitute |
 | Pet → main row gap | 12; pet endpoint aligns with main button eight |
 | Chat | 480×186 at x8 y1246 |
 | Meter | 248×186 at x2072 y1246 |
@@ -43,6 +45,8 @@ Reference canvas: **2560×1440**, centered within UIParent on other aspect ratio
 | Nameplate envelope | 84; 92 including top-attached count; extra aura rows can grow |
 
 Player and target show current health/power amounts, not percentages. Raid uses compact percentages. Nameplates show exact current health. Names have no background label anywhere. Party and companion units share one size system; no duplicate Small variants.
+
+The player XP row is a conditional composition within Large, not a new outer size variant. Target keeps the original Large health/resource split. Hide the old standalone XP/status strip after explicit setup. Empty main-action slots and empty bag spaces use faint borderless placeholders so available positions remain readable without moving actions or items.
 
 ## Color and material
 
@@ -59,6 +63,7 @@ Player and target show current health/power amounts, not percentages. Raid uses 
 | Mana / rage / energy / focus | #456A8C / #9E5149 / #75602F / #8F5B2B |
 | Class names | Hunter #95AE78; Warrior #BC9972; Druid #CC9561; Mage #83B7C5; Priest #E8EDF2; Paladin #C996AB; Rogue #D4BE70; Shaman #87A5D5; Warlock #B09AC6 |
 | Surface opacity | Units 0.56; chat/map label/meter 0.40; input 0.24; windows 0.84 |
+| Empty-slot surface | Raised neutral #151515 at 0.32 opacity; borderless, radius10; preserve owner search/disabled fading |
 
 Default corners are **10** on containers and icons. Health, resource and damage-meter fills remain square. The selected system is borderless, with no gold/silver outline toggle. Native rendering uses dark translucent surfaces as a Frosted approximation; there is no supported arbitrary scene blur behind every frame.
 
@@ -100,3 +105,9 @@ Original control sizes, positions, wrapping, scroll behavior and keyboard/click 
 ## Retained addon decisions
 
 Keep MRT for raid leading, SexyMap, What's Training, Baganator, Talents Forever, Prat, Forever Trinket Menu, Gargul and BattleGroundEnemiesFixed. Details provides damage meters and its bundled TinyThreat plugin provides the selected threat meter. ThreatClassic2 is no longer selected. Threat Plates remains the separate nameplate owner. vasagoio does not enable data collection or automatically switch Details displays. Spy and OneForAll are excluded. Chonky, EUI, ElvUI and DaylightUI are not additional presentation owners in this package. Skinner is the selected native skin foundation. The full 26-package functional selection, including TinyThreat within Details, is in dependencies.json.
+
+## Pending aura and quest work
+
+The accepted aura target places long buffs at the top right, long debuffs below them, and short effects near the unit frames. Grouping uses an effect's full duration with a 60-second threshold, retaining the agreed Battle Shout exception. The themed RestedXP window belongs below the long-aura region, with automatic hiding in combat and a manual visibility toggle; the native quest tracker should be hidden. These changes are still pending implementation and native validation. Keeping the current separate guide/objective columns in alpha.7 is an implementation limitation, not acceptance of a fallback design.
+
+Alpha.7 includes a manually opened [aura experiment](AURA_TEST.md) to evaluate native duration grouping. All, Short and Long/permanent views compare buffs and debuffs without replacing the working aura display. The test does not establish compact packing, exact-60-second behavior, permanent-effect pool reuse or combat correctness. Production aura placement/grouping and spell-specific exceptions require the test results and further implementation.

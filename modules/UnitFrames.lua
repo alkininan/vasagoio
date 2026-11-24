@@ -39,6 +39,16 @@ local function characterKey()
     if V:IsSecret(realm) or type(name) ~= "string" or type(realm) ~= "string" then return end
     return name .. "-" .. realm
 end
+-- Shared ownership check for event-driven child decorations. A stored setup
+-- flag alone must not style an unsupported owner version or another profile.
+function V:GetReviewedUnitProfile()
+    if not versionOK() or not _G.ForeverUnitFrames then return end
+    local db,char=_G.ForeverUnitFramesDB,characterKey()
+    local active=db and db.active and char and db.active[char]
+    if V:IsSecret(active) or type(active)~="string" or not active:match("^vasagoio") then return end
+    local profile=type(db.profiles)=="table" and db.profiles[active]
+    if type(profile)=="table" then return profile,active end
+end
 local function px(value) return math.floor(V:Pixel(value) + 0.5) end
 local function put(tableValue, values)
     for key, value in pairs(values) do tableValue[key] = copy(value) end
@@ -199,7 +209,10 @@ local adapter = {
             end
             changes[#changes + 1] = { table = raid, path = { "ForeverUnitFramesDB", "raid", char }, key = key, value = r, label = "Two-column XS raid layout " .. key }
         end
-        return { changes = changes, detail = "Creates a new FUF profile; reload required. The adapter decorates existing party pet buttons with portrait/resources and supplies 12×16 raid block spacing." }
+        if not V.db or type(V.db.overrides)~="table" then return nil,"vasagoio settings are not initialized" end
+        changes[#changes+1]={table=V.db.overrides,path={"VasagoioDB","overrides"},key="playerProgress",value=true,
+            label="Enable compact player XP strip; restore full rows at maximum level"}
+        return { changes = changes, detail = "Creates a new FUF profile; reload required. Keeps the 320x64 player frame while showing XP below power; normal rows return at maximum level. The adapter decorates existing party pet buttons and supplies 12×16 raid block spacing." }
     end,
 }
 V:RegisterProfileAdapter("unitframes", adapter)
@@ -330,6 +343,7 @@ local function style(frame)
     if not frame or not frame.health or not frame.health.SetStatusBarColor then return end
     V:Surface(frame, T.alpha.unit, T.radius)
     stylePartyPet(frame)
+    if frame.key=="player" and V.StylePlayerProgress then V:StylePlayerProgress(frame) end
     if frame.key == "raid" and frame.texts then
         -- The owner's profile exposes two stacked text lines only. Re-anchor
         -- those same FontStrings; status rendering and click areas stay owned.
@@ -368,11 +382,16 @@ V:RegisterModule("unitframes", {
     description = "FUF-owned frames with neutral glass surfaces and a native health color curve.",
     Apply = function()
         if InCombatLockdown and InCombatLockdown() then return false, "Unit styling waits until combat ends." end
-        if reloadPending then return false, "Reload to activate the newly selected FUF profile." end
-        if not versionOK() or not ForeverUnitFrames then return false, "Audited FUF 0.79.1 or 0.81.0 is required." end
-        local db, char = ForeverUnitFramesDB, characterKey()
-        local active = db and db.active and char and db.active[char]
-        if type(active) ~= "string" or not active:match("^vasagoio") then
+        if reloadPending then
+            if V.DisablePlayerProgress then V:DisablePlayerProgress() end
+            return false, "Reload to activate the newly selected FUF profile."
+        end
+        if not versionOK() or not ForeverUnitFrames then
+            if V.DisablePlayerProgress then V:DisablePlayerProgress() end
+            return false, "Audited FUF 0.79.1 or 0.81.0 is required."
+        end
+        if not V:GetReviewedUnitProfile() then
+            if V.DisablePlayerProgress then V:DisablePlayerProgress() end
             return false, "Run setup to select the reviewed unit profile, then reload."
         end
         if not tintCurve and C_CurveUtil and C_CurveUtil.CreateColorCurve and CreateColor and UnitHealthPercent then
@@ -411,6 +430,7 @@ V:RegisterModule("unitframes", {
             or "FUF surfaces active; HP curve unavailable on this client (solid dark fallback)."
     end,
     Disable = function()
+        if V.DisablePlayerProgress then V:DisablePlayerProgress() end
         for _, decor in pairs(partyPetDecor) do decor.portrait:Hide(); decor.resource:Hide() end
     end,
 })

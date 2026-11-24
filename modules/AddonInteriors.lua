@@ -4,7 +4,8 @@ V.AddonInteriors = A
 local OWNER = "addonWindows"
 local roots, hooks, originals = setmetatable({}, {__mode = "k"}), setmetatable({}, {__mode = "k"}), setmetatable({}, {__mode = "k"})
 local gargulWidgets = setmetatable({}, {__mode = "k"})
-local reviewed = {MRT = "5335", Auctionator = "352", Gargul = { ["8.1.0"] = true, ["8.1.1"] = true },
+local bagSlots = setmetatable({}, {__mode = "k"})
+local reviewed = {Baganator = "868", MRT = "5335", Auctionator = "352", Gargul = { ["8.1.0"] = true, ["8.1.1"] = true },
     TalentsForeverBook = { ["0.38.28.20261116"] = true, ["0.38.33.20261123"] = true }}
 local function color(role, alpha)
     local c = V.Tokens.colors[role]
@@ -267,6 +268,75 @@ local BAG = {
     Dropdown = "dropdown", EditBox = "editbox", SearchBox = "editbox",
     Slider = "slider", TrimScrollBar = "scrollbar", CategorySectionHeader = "button",
 }
+local function restoreBagSlot(record)
+    if record.placeholder then record.placeholder:Hide() end
+    for texture, alpha in pairs(record.hidden) do
+        if available(texture) and texture.SetAlpha then texture:SetAlpha(alpha) end
+    end
+    record.hidden = {}
+end
+local function updateBagSlot(frame)
+    local record = bagSlots[frame]
+    if not record then return end
+    if not ready() then if enabled() then request() end; return end
+    if not A:Reviewed("Baganator") then restoreBagSlot(record); return end
+    local details = frame.BGR
+    local empty = available(details) and not V:IsSecret(details.itemID) and not V:IsSecret(details.itemLink) and
+        details.itemID == nil and details.itemLink == nil and not V:IsSecret(frame.dummyType) and frame.dummyType == nil
+    if not empty then restoreBagSlot(record); return end
+    if not record.placeholder then
+        local background = frame:CreateTexture(nil, "BACKGROUND", nil, -6)
+        background.__vasagoio, background.ignoreInLayout = true, true
+        background:SetAllPoints(frame.icon)
+        local c = V.Tokens.colors.raised
+        background:SetColorTexture(c[1], c[2], c[3], V.Tokens.alpha.emptySlot or .32)
+        if V.MaskIcon then V:MaskIcon(background, V.Tokens.radius) end
+        record.placeholder = background
+    end
+    local normal
+    if type(frame.GetNormalTexture) == "function" then
+        local ok, region = pcall(frame.GetNormalTexture, frame)
+        if ok then normal = region end
+    end
+    for _, texture in pairs({frame.SlotBackground, normal}) do
+        if available(texture) and texture.GetAlpha and texture.SetAlpha then
+            local ok, alpha = pcall(texture.GetAlpha, texture)
+            alpha = ok and V:SafeNumber(alpha)
+            if alpha then
+                if record.hidden[texture] == nil then record.hidden[texture] = alpha end
+                if alpha ~= 0 then texture:SetAlpha(0) end
+            end
+        end
+    end
+    -- The owner fades its widget container for search/context matches. Follow
+    -- that display alpha without reading search text or modifying its overlays.
+    local widgets = frame.widgetContainer
+    local alpha = 1
+    if available(widgets) and type(widgets.GetAlpha) == "function" then
+        local ok, value = pcall(widgets.GetAlpha, widgets)
+        alpha = ok and V:SafeNumber(value) or 1
+        hook(widgets, "SetAlpha", function() updateBagSlot(frame) end)
+    end
+    record.placeholder:SetAlpha(alpha)
+    record.placeholder:Show()
+end
+local function bagSlot(frame, tags)
+    if not A:Reviewed("Baganator") then
+        if bagSlots[frame] then restoreBagSlot(bagSlots[frame]) end
+        return
+    end
+    if type(frame.SetItemDetails) ~= "function" or not available(frame.icon) then return end
+    if type(tags) == "table" then
+        if tags.containerBag then return end
+        for _, tag in ipairs(tags) do if tag == "containerBag" then return end end
+    end
+    if not bagSlots[frame] then bagSlots[frame] = {hidden = {}} end
+    -- SetItemDetails is the shared live/cached pool update point in the
+    -- reviewed owner. UpdateTextures also covers changes to owner skin settings.
+    hook(frame, "SetItemDetails", function() updateBagSlot(frame) end)
+    hook(frame, "UpdateTextures", function() updateBagSlot(frame) end)
+    updateBagSlot(frame)
+end
 A.BaganatorTypes = {"Button", "ButtonFrame", "CategoryLabel", "CategorySectionHeader", "CheckBox",
     "CornerWidget", "Dialog", "Divider", "Dropdown", "EditBox", "IconButton", "InsetFrame", "ItemButton",
     "SearchBox", "SideTabButton", "Slider", "TabButton", "TopTabButton", "TrimScrollBar"}
@@ -295,6 +365,7 @@ function A:Bag(details)
     elseif kind == "ItemButton" then
         -- Never replace/hide IconBorder, quest, search, context or cooldown art.
         I:Control(f, "icon", OWNER); text(f.Count, "count", true)
+        bagSlot(f, details.tags)
     elseif kind == "CategoryLabel" or kind == "CornerWidget" then
         text(f, "body", true)
     elseif kind == "Divider" then tint(f, color("muted", V.Tokens.alpha.input))
@@ -421,6 +492,7 @@ end
 
 function A:Disable()
     if InCombatLockdown and InCombatLockdown() then return end
+    for _, record in pairs(bagSlots) do restoreBagSlot(record) end
     if V.InteriorSkin then V.InteriorSkin:Restore(OWNER) end
     for texture, old in pairs(originals) do
         if available(texture) then

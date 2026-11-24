@@ -16,7 +16,7 @@ V.Tokens = {
         MAGE = rgb("83B7C5"), PRIEST = rgb("E8EDF2"), PALADIN = rgb("C996AB"),
         ROGUE = rgb("D4BE70"), SHAMAN = rgb("87A5D5"), WARLOCK = rgb("B09AC6")},
     resource = {MANA = rgb("456A8C"), RAGE = rgb("9E5149"), ENERGY = rgb("75602F"), FOCUS = rgb("8F5B2B")},
-    alpha = {unit = .56, hud = .40, input = .24, window = .84, range = .30},
+    alpha = {unit = .56, hud = .40, input = .24, window = .84, range = .30, emptySlot = .32},
     controls = {selection = "marker", markerHeight = 2, markerInset = 8, markerBottom = 2,
         disabledAlpha = .45, hoverAlpha = .92, pressedAlpha = .95},
     units = {
@@ -25,6 +25,7 @@ V.Tokens = {
         small = {width = 192, height = 32, portrait = 32, health = 22, power = 8, gap = 2},
         xsmall = {width = 128, height = 32, portrait = 0, health = 28, power = 4, gap = 0},
     },
+    playerProgress = {health = 42, power = 14, height = 4, gap = 2},
     typography = {
         name = {size = 16, line = 24}, amount = {size = 16, line = 24}, compact = {size = 14, line = 16},
         heading = {size = 24, line = 32}, title = {size = 32, line = 40}, body = {size = 16, line = 24},

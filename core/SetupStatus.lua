@@ -23,7 +23,7 @@ local owners = {
 V.SetupSections = sections
 -- Increment when functional preset targets change. Cosmetic/UI-only releases
 -- keep this value; unmarked legacy snapshots require one reviewed application.
-V.setupPresetVersion = 2
+V.setupPresetVersion = 3
 
 local function indexReview(review)
     local available, unavailable = {}, {}

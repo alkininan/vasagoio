@@ -67,4 +67,14 @@ SlashCmdList.VASAGOIO("restore")
 assert(restored==0,"Restore instructions changed settings without explicit confirmation")
 SlashCmdList.VASAGOIO("restore confirm")
 assert(restored==1,"Confirmed restore command did not use the existing recovery engine")
+local auraArgument, auraHides
+V.AuraProbeCommand=function(_,argument) auraArgument=argument end
+V.HideAuraProbe=function() auraHides=(auraHides or 0)+1 end
+SlashCmdList.VASAGOIO("auratest hide")
+assert(auraArgument=="hide","Aura test command did not route to the optional probe")
+SlashCmdList.VASAGOIO("auratest")
+assert(auraArgument=="","Bare aura test command did not reach the probe")
+V.RestoreArtwork=function() end
+SlashCmdList.VASAGOIO("off")
+assert(auraHides==1 and not V.db.enabled,"Global disable left the aura experiment active")
 print("options_spec: review privacy, lifecycle and scoped performance diagnostics passed")

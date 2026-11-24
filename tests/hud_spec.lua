@@ -23,12 +23,16 @@ local function widget()
     function w:SetColorTexture(...) self.color = {...} end
     function w:SetVertexColor(...) self.color = {...} end
     function w:GetVertexColor() return unpack(self.color) end
-    function w:SetFont(path, size, flags) self.font,self.fontSize,self.fontFlags = path,size,flags end
+    function w:SetFont(path, size, flags) self.font,self.fontSize,self.fontFlags = path,size,flags; self.fontWrites=(self.fontWrites or 0)+1 end
     function w:SetJustifyH(value) self.justify = value end
     function w:SetFrameStrata(value) self.strata = value end
     function w:SetSpacing(value) self.spacing = value end
     function w:SetScript(event, fn) self[event] = fn end
-    function w:CreateTexture() return widget() end
+    function w:CreateTexture(_, layer)
+        local texture=widget(); texture.drawLayer=layer
+        self.textures=self.textures or {}; self.textures[#self.textures+1]=texture
+        return texture
+    end
     return w
 end
 CreateFrame = function() return widget() end
@@ -78,12 +82,13 @@ local pet = {db={profile={position={scale=1}}},bar={button_width=30,button_heigh
 local art = {db={profile={enabled=true, leftCap="DWARF", position={point="BOTTOM",x=-600,y=57}}}}
 local bags = {db={profile={enabled=true,onebag=false,position={point="BOTTOM",x=285,y=50}}}}
 local micro = {db={profile={enabled=true,position={point="BOTTOM",x=-24,y=48}}}}
+local progress = {db={profile={enabled=true,position={point="BOTTOM",x=0,y=70},width=1425,showReputation=true}}}
 local vehicle = {db={profile={enabled=true}}}
 Bartender4 = {CONFIG_VERSION=3,db={profile={outofrange="button"},keys={profile="Test"}}}
-function Bartender4:GetModule(name) return ({ActionBars=actions,PetBar=pet,BlizzardArt=art,BagBar=bags,MicroMenu=micro,Vehicle=vehicle})[name] end
+function Bartender4:GetModule(name) return ({ActionBars=actions,PetBar=pet,BlizzardArt=art,BagBar=bags,MicroMenu=micro,StatusTrackingBar=progress,Vehicle=vehicle})[name] end
 Bartender4DB = {profiles={Test=Bartender4.db.profile},namespaces={
     ActionBars={profiles={Test=actions.db.profile}},PetBar={profiles={Test=pet.db.profile}},BlizzardArt={profiles={Test=art.db.profile}},
-    BagBar={profiles={Test=bags.db.profile}},MicroMenu={profiles={Test=micro.db.profile}},Vehicle={profiles={Test=vehicle.db.profile}}
+    BagBar={profiles={Test=bags.db.profile}},MicroMenu={profiles={Test=micro.db.profile}},StatusTrackingBar={profiles={Test=progress.db.profile}},Vehicle={profiles={Test=vehicle.db.profile}}
 }}
 local function validate(plan)
     check(plan and #plan.changes > 0, "No review plan")
@@ -99,7 +104,8 @@ local function commit(plan)
 end
 local barPlan = adapters.bartender.Prepare()
 validate(barPlan)
-check(actionProfiles[1].rows == nil and Bartender4.db.profile.outofrange == "button", "Review wrote a profile")
+check(actionProfiles[1].rows == nil and actionProfiles[1].showgrid == nil and Bartender4.db.profile.outofrange == "button", "Review wrote a profile")
+check(progress.db.profile.enabled,"Review hid the old progression bar")
 check(art.db.profile.enabled, "Review disabled Blizzard artwork before Apply")
 check(actionProfiles[6].visibility.custom and actionProfiles[6].visibility.always==nil and bags.db.profile.enabled,
     "Review changed legacy-bar visibility before Apply")
@@ -108,6 +114,8 @@ check(not art.db.profile.enabled and art.db.profile.leftCap=="DWARF" and art.db.
     "Legacy Blizzard artwork must be disabled through its reversible owner setting only")
 check(not bags.db.profile.enabled and not micro.db.profile.enabled and bags.db.profile.position.x==285,
     "Legacy bag/micro bars must be disabled without rewriting their saved placement")
+check(not progress.db.profile.enabled and progress.db.profile.position.y==70 and progress.db.profile.width==1425 and progress.db.profile.showReputation,
+    "Old progression strip must hide through its reversible owner flag without changing display options")
 check(actionProfiles[6].visibility.always and not actionProfiles[6].visibility.custom
     and actionProfiles[6].visibility.customdata=="[combat]show;hide" and actionProfiles[6].visibility.vehicleui
     and actionProfiles[6].enabled and actionProfiles[6].states.sentinel=="extra-page" and actionProfiles[6].buttons==12,
@@ -121,9 +129,11 @@ for column,id in ipairs({1,3,4,5}) do
     near(bar.position.x+5*scale,884+(column-1)*200)
     near(bar.position.y-3*scale,-1290)
     check(bar.rows==3 and bar.buttons==12, "Native twelve-slot bars must form 4x3 blocks")
+    check(bar.showgrid,"A main bar did not retain its empty slots")
     check(bar.states.sentinel=="preserve", "Paging changed")
 end
 near(pet.bar.button_width*pet.db.profile.position.scale,32)
+check(pet.db.profile.showgrid==nil and actionProfiles[6].showgrid==nil,"Main grid visibility leaked into pet/extra bars")
 near(10*32+9*8,8*42+7*8)
 check(Bartender4.db.profile.outofrange=="none", "Old range tint would compound the overlay")
 runtimes[1].button_margin = 1
@@ -216,9 +226,45 @@ local function cooldown()
 end
 local button = widget()
 button.icon,button.HotKey,button.Count,button.cooldown = widget(),widget(),widget(),cooldown()
+button.NormalTexture,button.SlotBackground,button.Border,button.CheckedTexture,button.SpellActivationAlert=widget(),widget(),widget(),widget(),widget()
+local fallbackNormal=widget()
+function button:GetNormalTexture() return fallbackNormal end
 local originalDone = button.cooldown.OnCooldownDone
 BT4Button1 = button
+local empty=widget(); empty.icon,empty.HotKey,empty.Count=widget(),widget(),widget();empty.icon:Hide()
+BT4Button2=empty
+local extra=widget();extra.icon=widget();extra.icon:Hide();BT4Button13=extra
+local callbacks={}
+local lab={RegisterCallback=function(_, event, callback) callbacks[event]=callback end}
+LibStub=function(name) if name=="LibActionButton-1.0" then return lab end end
 check(modules.actionBars.Apply(), "Action style did not apply")
+local function placeholder(b)
+    for _,texture in ipairs(b.textures or {}) do if texture.drawLayer=="BACKGROUND" then return texture end end
+end
+local emptySlot=placeholder(empty)
+check(emptySlot and emptySlot.shown and emptySlot.maskRadius==10 and emptySlot.color[4]==(V.Tokens.alpha.emptySlot or .32),
+    "Empty main slot lacks the faint rounded background")
+check(not placeholder(button).shown and placeholder(extra)==nil,"Occupied/extra button gained an empty slot")
+check(button.NormalTexture.alpha==0 and button.SlotBackground.alpha==0 and fallbackNormal.alpha==0,
+    "Native decorative action chrome remained")
+check(button.Border.alpha==1 and button.CheckedTexture.alpha==1 and button.SpellActivationAlert.alpha==1,
+    "Equipped/checked/proc feedback was hidden")
+local priorRefreshes,priorFonts=refreshes,button.HotKey.fontWrites
+empty.icon:Show();callbacks.OnButtonUpdate("OnButtonUpdate",empty)
+check(not emptySlot.shown and refreshes==priorRefreshes and button.HotKey.fontWrites==priorFonts,
+    "Slot fill update repainted other buttons or refreshed modules")
+empty.icon:Hide();callbacks.OnButtonUpdate("OnButtonUpdate",empty)
+check(emptySlot.shown,"Emptied slot did not regain its background")
+empty.icon.IsShown=function()return {secret=true}end
+callbacks.OnButtonUpdate("OnButtonUpdate",empty)
+check(not emptySlot.shown,"Restricted visibility was inferred")
+empty.icon.IsShown=function(self)return self.shown end
+V.profileReloadPending=true;callbacks.OnButtonUpdate("OnButtonUpdate",empty)
+check(not emptySlot.shown,"Pending setup refreshed stale owner buttons")
+V.profileReloadPending=nil
+combat=true;callbacks.OnButtonUpdate("OnButtonUpdate",empty)
+check(emptySlot.shown and V.lastRefreshModule=="actionBars","Combat slot update did not defer cosmetic geometry")
+combat=false
 check(button.HotKey.alpha==0 and button.Count.point[1]=="TOPRIGHT", "Active cooldown placement")
 check(button.Count.point[4]==6 and button.Count.point[5]==8, "Active count sits outside the top-right edge")
 check(button.cooldown.text.fontSize==18 and button.cooldown.text.point[1]=="CENTER", "Centered cooldown18")
@@ -256,6 +302,9 @@ modules.meter.Apply()
 check(instance.baseframe.surface.alpha==.4 and instance.baseframe.surface.radius==10, "Meter outer surface")
 modules.actionBars.Disable()
 check(button.HotKey.alpha==1, "Disabled module left key hidden")
+check(not emptySlot.shown,"Disabled module left placeholders visible")
+callbacks.OnButtonUpdate("OnButtonUpdate",empty)
+check(not emptySlot.shown,"Owner callback restyled disabled action bars")
 
 -- Real FUF integration: owner pools, including native container records.
 modules.unitframes = {defaultEnabled=true}

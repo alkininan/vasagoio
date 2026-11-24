@@ -1,5 +1,5 @@
 local addonName, V = ...
-V.name, V.version = addonName, "0.2.0-alpha.6"
+V.name, V.version = addonName, "0.2.0-alpha.7"
 V.modules, V.moduleOrder, V.listeners, V.status = {}, {}, {}, {}
 V.adapters, V.adapterOrder = {}, {}
 V.activeModules = {}

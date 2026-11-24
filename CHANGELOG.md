@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0-alpha.7
+
+- Added faint, borderless empty placeholders to the four main Bartender action bars and supported empty Baganator slots. Existing action assignments, bag organization, item indicators and bindings remain owned by their addons.
+- Added an XP-only strip beneath player power without changing the 320×64 frame or its 64px portrait: health42 + gap2 + power14 + gap2 + XP4. Original 46/2/16 rows return at maximum level or when XP is unavailable; target geometry remains unchanged.
+- Disabled Bartender's old StatusTrackingBar through reviewed setup so its long strip no longer crosses the action grid. Setup snapshots preserve restoration.
+- Added `/vasagoio auratest show`, `hide` and `reset` as an optional native buff/debuff comparison. It is closed by default and needs no separate addon. It does not replace existing aura displays or add controls to the two-action setup screen.
+- Documented unresolved aura experiment limits: 40 candidates per native view, gaps in Long, exactly-60-second classification, permanent effects after pool reuse and native combat acceptance. The test is not production duration sorting.
+
+Update from alpha.6 with WoW closed, keeping SavedVariables. Replace only vasagoio, Apply preset and Reload UI. Open the optional aura test manually afterward and hide it when finished. The requested RestedXP redesign and native quest-tracker replacement are still pending; this release does not claim those changes or an accepted fallback.
+
 ## 0.2.0-alpha.6
 
 - Fixed Prat setup resolving the short module name `Font` instead of its actual `Prat_Font` SavedVariables namespace. The adapter verifies the active runtime profile and saved namespace refer to the same data before proposing changes.

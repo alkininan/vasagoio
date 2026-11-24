@@ -4,6 +4,10 @@ local T, A = V.Tokens, V.Tokens.action
 -- Bartender owns actions, state drivers, cooldown values, bindings and usability.
 -- This module only proposes profile geometry and decorates existing widgets.
 local bars = { 1, 3, 4, 5 }
+local mainSlots = {}
+for _, id in ipairs(bars) do
+    for slot = 1, 12 do mainSlots[(id - 1) * 12 + slot] = true end
+end
 -- Source-reviewed normal action pages only. 11/12 and separate stance,
 -- possess, vehicle and extra-action controls are not ordinary extra bars.
 local extraBars = { 2, 6, 7, 8, 9, 10, 13, 14, 15 }
@@ -76,7 +80,7 @@ V:RegisterProfileAdapter("bartender", {
         local profileName = owner.db.keys and owner.db.keys.profile
         if type(profileName) ~= "string" or V:IsSecret(profileName) then return nil, "Bartender active profile could not be resolved" end
         if A.columns ~= 16 or A.rows ~= 3 or A.petCount ~= 10 then return nil, "The native action-slot adapter requires 16x3 main and 10 pet buttons" end
-        local plan = { changes = {}, targetPaths = {}, detail = "Four native 12-button bars (1,3,4,5), each 4x3, form 16x3. Pet: 10x1. Hides extra normal bars through Bartender visibility and disables obsolete Blizzard Art, Bag Bar and Micro Menu. Slots, bindings, paging and special action controls are not rewritten. Reload after applying." }
+        local plan = { changes = {}, targetPaths = {}, detail = "Four native 12-button bars (1,3,4,5), each 4x3, form 16x3 with faint empty slots. Pet: 10x1. Hides extra normal bars through Bartender visibility and disables obsolete Blizzard Art, Bag Bar, Micro Menu and the old Status Tracking Bar. Slots, bindings, paging and special action controls are not rewritten. Reload after applying." }
         for column, id in ipairs(bars) do
             local profile = actions.db.profile.actionbars[id]
             if type(profile) ~= "table" then
@@ -88,6 +92,7 @@ V:RegisterProfileAdapter("bartender", {
             local ok, reason = layoutBar(plan, profile, runtime, A.x + (column-1)*blockStride, A.y, A.size, A.rows, "Bar " .. id)
             if not ok then return nil, reason end
             change(plan, profile, "buttons", 12, "Bar " .. id .. " buttons")
+            change(plan, profile, "showgrid", true, "Bar " .. id .. " faint empty slots")
         end
         plan.targetPaths[pet.db.profile] = { "Bartender4DB", "namespaces", "PetBar", "profiles", profileName }
         local ok, reason = layoutBar(plan, pet.db.profile, pet.bar, A.x, A.petY, A.petSize, 1, "Pet bar")
@@ -114,7 +119,7 @@ V:RegisterProfileAdapter("bartender", {
         -- Bartender's Blizzard preset enables this independent artwork module.
         -- Hiding native MainMenuBar is insufficient: these are owner-created
         -- gryphons and slot textures, with a persistent, reversible owner flag.
-        for _, name in ipairs({"BlizzardArt", "BagBar", "MicroMenu"}) do
+        for _, name in ipairs({"BlizzardArt", "BagBar", "MicroMenu", "StatusTrackingBar"}) do
             local module = getModule(name)
             if module and module.db and type(module.db.profile) == "table" then
                 plan.targetPaths[module.db.profile] = { "Bartender4DB", "namespaces", name, "profiles", profileName }
@@ -216,7 +221,25 @@ local function paintState(button, state)
     end
 end
 
-local function styleButton(button, compact)
+local function updateEmptySlot(button, state)
+    if not state.empty then return end
+    -- The owner already chooses whether icon art exists for the active page.
+    -- Read only its presentation state, never action/charge/usable payloads.
+    local shown = button.icon:IsShown()
+    state.empty:SetShown(enabled() and not V:IsSecret(shown) and shown == false)
+end
+
+local function hideButtonArtwork(button)
+    -- Normal/slot art is decorative. Border is the owner's equipped-item
+    -- signal; checked/highlight/proc/autocast regions also retain their state.
+    for _, field in ipairs({ "NormalTexture", "SlotBackground" }) do
+        if button[field] then V:HideArtwork(button[field]) end
+    end
+    local normal = button.GetNormalTexture and button:GetNormalTexture()
+    if normal and normal ~= button.NormalTexture then V:HideArtwork(normal) end
+end
+
+local function styleButton(button, compact, mainSlot)
     if not button or not button.icon or not button.CreateTexture then return end
     local state = styled[button]
     if not state then
@@ -230,6 +253,14 @@ local function styleButton(button, compact)
         state.range:SetAllPoints(button.icon)
         state.range:SetColorTexture(T.colors.range[1], T.colors.range[2], T.colors.range[3], T.alpha.range)
         state.range:Hide()
+        if mainSlot then
+            state.empty = button:CreateTexture(nil, "BACKGROUND", nil, -8)
+            state.empty.__vasagoio, state.empty.ignoreInLayout = true, true
+            state.empty:SetAllPoints(button.icon)
+            local color = T.colors.raised
+            state.empty:SetColorTexture(color[1], color[2], color[3], T.alpha.emptySlot or .32)
+            state.empty:Hide()
+        end
         if hooksecurefunc then
             -- Preserve owner's usability/desaturation state; multiply only
             -- ordinary RGB values, never inspect restricted colors.
@@ -266,6 +297,7 @@ local function styleButton(button, compact)
         V:MaskIcon(button.icon, T.radius)
         V:MaskIcon(state.elapsed, T.radius)
         V:MaskIcon(state.range, T.radius)
+        if state.empty then V:MaskIcon(state.empty, T.radius) end
     end
     styleFont(button, button.HotKey, "hotkey")
     styleFont(button, button.Count, "count")
@@ -273,9 +305,7 @@ local function styleButton(button, compact)
         button.HotKey:ClearAllPoints()
         button.HotKey:SetPoint("TOPRIGHT", button, "TOPRIGHT", localPixels(button, -2), localPixels(button, -2))
     end
-    for _, field in ipairs({ "NormalTexture", "SlotBackground", "Border" }) do
-        if button[field] then V:HideArtwork(button[field]) end
-    end
+    hideButtonArtwork(button)
     styleCooldown(button, button.cooldown, compact)
     styleCooldown(button, button.chargeCooldown, compact)
     -- Loss-of-control's native danger treatment must remain recognizable.
@@ -284,6 +314,7 @@ local function styleButton(button, compact)
         if text then styleFont(button, text, compact and "compactCountdown" or "countdown") end
     end
     paintState(button, state)
+    updateEmptySlot(button, state)
 end
 
 -- Owner adapters must provide a semantic signal; normal buffs receive none.
@@ -333,7 +364,7 @@ V:RegisterModule("actionBars", {
         local count = 0
         for id = 1, 180 do
             local button = _G["BT4Button" .. id]
-            if button then styleButton(button, false); count = count + 1 end
+            if button then styleButton(button, false, mainSlots[id]); count = count + 1 end
         end
         for id = 1, 10 do styleButton(_G["BT4PetButton" .. id], true) end
         if LibStub and not V.actionButtonCallbacks then
@@ -341,6 +372,20 @@ V:RegisterModule("actionBars", {
             if lab and lab.RegisterCallback then
                 lab.RegisterCallback(V, "OnButtonCreated", function() V:Refresh("new action button", "actionBars") end)
                 lab.RegisterCallback(V, "OnKeybindingChanged", function() V:Refresh("action key labels", "actionBars") end)
+                -- LAB resets decorative art when its active page/action
+                -- changes. This callback updates only the changed button's
+                -- empty/art state, not fonts, geometry or the whole HUD.
+                lab.RegisterCallback(V, "OnButtonUpdate", function(_, button)
+                    if V:IsSecret(button) or not enabled() then return end
+                    local state = styled[button]
+                    if not state then return end
+                    updateEmptySlot(button, state)
+                    if InCombatLockdown() then
+                        V:Refresh("action styling after combat", "actionBars")
+                        return
+                    end
+                    hideButtonArtwork(button)
+                end)
                 V.actionButtonCallbacks = true
             end
         end
@@ -365,6 +410,7 @@ V:RegisterModule("actionBars", {
         active = false
         for button, state in pairs(styled) do
             state.elapsed:Hide(); state.range:Hide()
+            if state.empty then state.empty:Hide() end
             if button.HotKey then button.HotKey:SetAlpha(1) end
         end
     end,

@@ -15,7 +15,8 @@ GetNormalizedRealmName = function() return "TestRealm" end
 RegionalUniqueNamesEnabled = function() return false end
 UnitHealth, UnitPower = function() return secret end, function() return secret end
 UIParent = {}
-local V = { db = { enabled = true, modules = {} } }
+local V = { db = { enabled = true, modules = {}, overrides={} } }
+VasagoioDB=V.db
 function V:RegisterProfileAdapter(id, adapter) adapters[id] = adapter end
 function V:RegisterModule(id, module) modules[id] = module end
 function V:On(event, fn) events[event] = fn end
@@ -64,6 +65,7 @@ end
 local before = clone(ForeverUnitFramesDB)
 local unitPlan = assert(adapters.unitframes:Prepare())
 assert(same(before, ForeverUnitFramesDB), "preparing unit plan wrote to owner data")
+assert(V.db.overrides.playerProgress==nil,"Unit review enabled player XP before Apply")
 local profile = unitPlan.changes[1].value
 assert(profile.target.keepUserBehavior)
 assert(profile.player.width == 320 and profile.player.height + profile.player.spacingPower == 64)
@@ -83,6 +85,7 @@ assert(profile.player.castbarAlwaysShow == false and profile.target.castbarAlway
 assert(profile.player.castbarEnabled == true and profile.player.threatBar == false,
     "Removing idle/threat rows disabled actual casting feedback")
 applyPlan(unitPlan)
+assert(V.db.overrides.playerProgress==true,"Unit setup did not opt into the player XP strip")
 assert(ForeverUnitFramesDB.raid["Example-TestRealm"].r40.customValue == 42)
 assert(ForeverUnitFramesDB.raid["Example-TestRealm"].r40.blocksPerLine == 2)
 assert(ForeverUnitFramesDB.raid["Example-TestRealm"].r40.blockTitles == false)
@@ -182,10 +185,18 @@ versions.ForeverUnitFrames = "0.81.0"
 assert(modules.unitframes:Apply())
 assert(frame.surfaceApplied and frame.health.colors[1] == secret)
 assert(frame.texts.healthRight.value == secret and frame.texts.healthRight.format == "%d")
+local progressDisabled=0
+V.DisablePlayerProgress=function()progressDisabled=progressDisabled+1 end
 versions.ForeverUnitFrames = "future"
-assert(modules.unitframes:Apply() == false, "unreviewed FUF runtime was styled")
+assert(modules.unitframes:Apply() == false and progressDisabled==1, "unreviewed FUF runtime retained progress styling")
 versions.ForeverUnitFrames = "0.79.1"
 assert(modules.unitframes:Apply(), "previously reviewed FUF runtime lost support")
+local selected=ForeverUnitFramesDB.active["Example-TestRealm"]
+ForeverUnitFramesDB.active["Example-TestRealm"]="Default"
+assert(modules.unitframes:Apply()==false and progressDisabled==2,"Changing owner profile retained progress styling")
+ForeverUnitFramesDB.active["Example-TestRealm"]=selected
+assert(V:GetReviewedUnitProfile()==ForeverUnitFramesDB.profiles[selected],"Reviewed profile identity was not returned")
+assert(modules.unitframes:Apply())
 frame.textWord = "Offline"
 frame.texts.healthRight.value = nil
 frame.texts.healthRight:SetText("Offline")

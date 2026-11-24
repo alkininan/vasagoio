@@ -2,19 +2,23 @@
 unpack = unpack or table.unpack
 local root = (arg and arg[1]) or "."
 local combat, refreshes, restores, writes = false, 0, 0, 0
-local versions = {MRT = "5335", Auctionator = "352", TalentsForeverBook = "0.38.28.20261116", Gargul = "8.1.0"}
+local versions = {Baganator = "868", MRT = "5335", Auctionator = "352", TalentsForeverBook = "0.38.28.20261116", Gargul = "8.1.0"}
 local V = {db = {enabled = true, modules = {}}, WindowSkin = {}, InteriorSkin = {}}
 local I, W, calls, hooked = V.InteriorSkin, V.WindowSkin, {}, {}
 local function check(value, message) assert(value, message) end
 local function texture()
-    return {alpha = 1, color = {1,.8,0,1}, GetAlpha = function(s) return s.alpha end,
+    return {alpha = 1, color = {1,.8,0,1}, shown=true, GetAlpha = function(s) return s.alpha end,
         SetAlpha = function(s,v) writes = writes + 1; s.alpha = v end,
+        SetAllPoints = function(s,target) s.target=target; writes=writes+1 end,
+        SetColorTexture = function(s,...) s.fill={...}; writes=writes+1 end,
+        Show = function(s) s.shown=true; writes=writes+1 end,
+        Hide = function(s) s.shown=false; writes=writes+1 end,
         GetVertexColor = function(s) return unpack(s.color) end,
         SetVertexColor = function(s,...) writes = writes + 1; s.color = {...} end}
 end
 local function frame(children)
-    return {children = children or {}, scripts = {},
-        CreateTexture = function() return texture() end,
+    return {children = children or {}, scripts = {}, createdTextures={},
+        CreateTexture = function(s) local t=texture(); s.createdTextures[#s.createdTextures+1]=t; return t end,
         GetChildren = function(s) return unpack(s.children) end,
         GetRegions = function() return end,
         HookScript = function(s,event,fn) s.scripts[event] = fn; writes = writes + 1 end,
@@ -33,6 +37,7 @@ end
 function V:Refresh() refreshes = refreshes + 1 end
 function V:IsSecret(v) return type(v) == "table" and v.secret end
 function V:SafeNumber(v) return type(v) == "number" and v or nil end
+function V:MaskIcon(region,radius) region.maskRadius=radius; writes=writes+1 end
 function I:Control(f,kind,owner,opts) calls[f] = {kind=kind,owner=owner,opts=opts}; writes = writes + 1; return true end
 function I:Panel(f,kind,owner) calls[f] = {panel=kind,owner=owner}; writes = writes + 1; return {} end
 function I:Text(f,role,preserve,owner) f.role, f.preserve, f.owner = role,preserve,owner; writes = writes + 1; return true end
@@ -60,6 +65,45 @@ end
 local item = frame(); item.Count = {}; item.IconBorder = texture(); item.searchOverlay = texture(); item.Cooldown = {value=21}
 A:Bag({region=item,regionType="ItemButton"})
 check(item.Count.role == "count" and item.IconBorder.alpha == 1 and item.searchOverlay.alpha == 1 and item.Cooldown.value == 21, "item semantics changed")
+local function bagButton()
+    local b=frame(); b.icon,b.SlotBackground,b.normal,b.widgetContainer=texture(),texture(),texture(),texture()
+    b.SlotBackground.alpha=.7; b.normal.alpha=.6
+    b.IconBorder,b.searchOverlay,b.NewItemTexture,b.QuestTexture=texture(),texture(),texture(),texture()
+    b.Count={};b.Cooldown={value=21};b.BGR={}
+    b.GetNormalTexture=function(s)return s.normal end
+    b.SetItemDetails=function()end;b.UpdateTextures=function()end
+    return b
+end
+local bag=bagButton()
+A:Bag({region=bag,regionType="ItemButton"})
+local empty=bag.createdTextures[1]
+check(empty and empty.shown and empty.target==bag.icon and empty.maskRadius==10,"Empty bag slot lacks a rounded placeholder")
+check(empty.fill[1]==V.Tokens.colors.raised[1] and empty.fill[4]==(V.Tokens.alpha.emptySlot or .32),"Empty bag slot differs from the shared theme")
+check(bag.SlotBackground.alpha==0 and bag.normal.alpha==0,"Empty slot retained decorative border")
+check(bag.IconBorder.alpha==1 and bag.searchOverlay.alpha==1 and bag.NewItemTexture.alpha==1 and bag.QuestTexture.alpha==1 and bag.Cooldown.value==21,
+    "Placeholder changed item status art")
+bag.widgetContainer:SetAlpha(.4);hooked[bag.widgetContainer].SetAlpha()
+check(empty.alpha==.4 and bag.searchOverlay.alpha==1,"Placeholder ignored owner search/context fading")
+bag.BGR={itemID=123,itemLink="item:123"};hooked[bag].SetItemDetails()
+check(not empty.shown and bag.SlotBackground.alpha==.7 and bag.normal.alpha==.6,"Filled pooled slot retained an empty placeholder or lost its native decoration")
+bag.BGR={};bag.widgetContainer:SetAlpha(1);hooked[bag].SetItemDetails()
+check(empty.shown and empty.alpha==1 and #bag.createdTextures==1,"Reused empty slot lost or duplicated its placeholder")
+bag.BGR={itemID={secret=true}};hooked[bag].SetItemDetails()
+check(not empty.shown and bag.SlotBackground.alpha==.7,"Restricted item identity was treated as an empty slot")
+bag.BGR={};bag.dummyType="add";hooked[bag].SetItemDetails()
+check(not empty.shown,"Category editor control was treated as an empty slot")
+bag.dummyType=nil;hooked[bag].UpdateTextures()
+local bagSelector=bagButton()
+A:Bag({region=bagSelector,regionType="ItemButton",tags={"containerBag"}})
+check(#bagSelector.createdTextures==0 and not hooked[bagSelector],"Container selector was treated as an inventory slot")
+local notInitialized=bagButton();notInitialized.BGR=nil
+A:Bag({region=notInitialized,regionType="ItemButton"})
+check(#notInitialized.createdTextures==0,"Uninitialized item button was assumed empty")
+versions.Baganator="future"
+local futureBag=bagButton()
+A:Bag({region=futureBag,regionType="ItemButton"})
+check(#futureBag.createdTextures==0 and not hooked[futureBag],"Unreviewed Baganator empty-state schema was used")
+versions.Baganator="868"
 local unknown = frame()
 check(not A:Bag({region=unknown,regionType="FutureWidget"}) and not calls[unknown], "unknown API type skinned")
 local secretTab=frame(); secretTab.IsEnabled=function() return {secret=true} end
@@ -192,15 +236,18 @@ check(hiddenWindow.applied,"Newly shown addon root was not styled")
 
 local before=writes; combat=true
 A:Apply(tree,"TalentsForeverBook"); A:Bag({region=item,regionType="ItemButton"}); A:Discover()
+hooked[bag].SetItemDetails()
 check(writes==before,"interior mutation during combat")
 local combatLate=frame(); hooked[Gargul.Interface].set(Gargul.Interface,scope,"Window",{frame=combatLate})
 check(writes==before,"combat creation callback mutated UI")
 combat=false; V.db.modules.addonWindows=false; before=writes
 A:Bag({region=item,regionType="ItemButton"}); A:Discover(); hooked[button].SetSelected(button,true)
+hooked[bag].SetItemDetails()
 check(writes==before,"disabled callback still styled UI")
 V.db.modules.addonWindows=true; V.profileReloadPending=true; before=writes
 A:Bag({region=item,regionType="ItemButton"}); A:Discover(); hooked[button].SetSelected(button,true)
 check(writes==before,"pending reload allowed cosmetic mutation")
 A:Disable(); check(restores==1 and button.plate.body.alpha==1 and tree.edge[1].alpha==1,"disable did not restore decorative state")
+check(not empty.shown and bag.SlotBackground.alpha==.7 and bag.normal.alpha==.6,"Disable left empty-slot decoration behind")
 check(order.top.alpha==1 and order.topEdge[1].alpha==1 and card.solid.color[1]==1,"new Talents decorative state not restored")
 print("addon_interiors_spec: 19 API regions, owner registries, exact Talents/Gargul versions, lazy drawers, semantic states, combat and disable passed")

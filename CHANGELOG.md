@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0-alpha.11 — 2026-11-25
+
+- Support reviewed Details 20261124.15450.172 alongside 20261109.15410.172 after comparing the exact source packages. Meter dimensions, title/menu handling and profile/row contracts remain compatible.
+- Retain strict unknown-version and schema rejection. Cover preparation, headerless runtime appearance and restoration on both builds; preserve the new Details profile-size preference.
+- Verify the remaining installed integration owners still match supported versions. AutoPotion 4.1.3 has no vasagoio adapter change. All 26 selected packages and their required addon folders are present.
+
+Design revision 12 and preset marker 5 are unchanged. A matching applied alpha.10 preset needs no reapplication. A previously blocked setup still needs Apply preset and Reload UI. Native rendering/combat acceptance and production aura routing remain open.
+
 ## 0.2.0-alpha.10 — 2026-11-25
 
 - Keep 42px main/trinket/bag cells and 8px gaps; unify icon crop/brightness and remove extra Skinner backdrop without hiding its child hotkeys, proc or autocast indicators. Style the backpack's FreeSlots text. Accept harmless trinket layout rounding without repeated geometry writes.
@@ -11,7 +19,7 @@
 - Preserve FUF dead/ghost/offline colors and restore raid text/header anchors on disable. Unit dimensions, native clicks and secure unit behavior remain owner-controlled.
 - Strengthen the optional aura experiment with explicit empty zero/expired text defaults. Exact long/permanent routing, pooling, compact packing and combat behavior remain unverified; the production split is not delivered in this alpha.
 
-Design revision12 and preset marker5 require **Apply preset → Reload UI**. Keep SavedVariables when replacing the addon folder. Offline checks cover geometry, lifecycle, failure recovery and bounded refreshes; native visuals, recovery prompts, combat and FPS remain user-run acceptance checks.
+Design revision 12 and preset marker 5 require **Apply preset → Reload UI**. Keep SavedVariables when replacing the addon folder. Offline checks cover geometry, lifecycle, failure recovery and bounded refreshes; native visuals, recovery prompts, combat and FPS remain user-run acceptance checks.
 
 ## 0.2.0-alpha.9 — 2026-11-25
 

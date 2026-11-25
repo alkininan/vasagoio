@@ -7,11 +7,18 @@ local function meterLeft() return mapLeft() - H.splitGap - H.meterWidth end
 local function mapCrop() return (H.mapWidth-H.height)/2 end
 local function meterHeader() return H.meterTitle>0 and H.padding+H.meterTitle or 0 end
 local function meterBody() return H.height-meterHeader() end
+-- Reviewed Forever builds share the instance/row/header contracts below.
+-- 15450 changes native row-icon parenting, which this adapter leaves intact.
+local detailsVersions={
+    ["#Details.20261109.15410.172"]=true,
+    ["#Details.20261124.15450.172"]=true,
+}
 local function supported(addon, wanted)
     local api = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
     if not api then return false end
     local ok, version = pcall(api, addon, "Version")
-    return ok and not V:IsSecret(version) and type(version)=="string" and version==wanted
+    return ok and not V:IsSecret(version) and type(version)=="string" and
+        ((type(wanted)=="table" and wanted[version]==true) or version==wanted)
 end
 
 local function append(plan, target, path, key, value, label)
@@ -211,7 +218,7 @@ end
 V:RegisterProfileAdapter("details", {
     label = "Details: window 1 appearance and placement", addon = "Details",
     Prepare = function()
-        if not supported("Details", "#Details.20261109.15410.172") then return nil, "Details version needs compatibility review (reviewed 20261109.15410.172)" end
+        if not supported("Details", detailsVersions) then return nil, "Details version needs compatibility review (reviewed 20261109.15410.172 / 20261124.15450.172)" end
         local details = _G.Details
         local instance = details and details.GetInstance and details:GetInstance(1)
         if not instance or not details.tabela_instancias or details.tabela_instancias[1] ~= instance or
@@ -659,7 +666,7 @@ V:RegisterModule("meter", {
         if InCombatLockdown() then return false,"Leave combat before refreshing meter styling" end
         if meterReloadPending or V.profileReloadPending then return false,"Reload to activate the reviewed Details settings" end
         if not V.db or not V.db.enabled or V.readOnly then return false,"Meter presentation is paused" end
-        if not supported("Details","#Details.20261109.15410.172") then return false,"Details version needs compatibility review" end
+        if not supported("Details",detailsVersions) then return false,"Details version needs compatibility review" end
         local details=_G.Details
         local instance=details and details.GetInstance and details:GetInstance(1)
         local base=instance and instance.baseframe

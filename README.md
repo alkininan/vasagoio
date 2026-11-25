@@ -2,11 +2,11 @@
 
 A personal World of Warcraft Forever UI built around the Bael design system: neutral black surfaces, restrained blue status colors, native typography, custom HUD geometry, and preserved native window layouts.
 
-**0.2.0-alpha.10 — HUD corrections and native recovery dialogs.** Reapply the preset and reload: matching 42px action/utility cells, wider flat nameplates, headerless Details, cleaned chat/minimap chrome, right-edge RestedXP and full native tracker hiding. Death/release/resurrection prompts are excluded from skinning so native recovery controls retain their ownership. The long/short aura split remains an optional experiment, not a completed HUD feature. See [coverage](docs/COVERAGE.md).
+**0.2.0-alpha.11 — updated Details compatibility.** Supports the reviewed Details build 20261124.15450.172 and retains the previous build. Source review found compatible meter geometry, profile and menu contracts; the installed AutoPotion 4.1.3 update needs no vasagoio adapter change. Alpha.10 HUD/recovery fixes remain included. Design revision 12 and preset marker 5 stay unchanged. Native acceptance and production aura routing remain open; see [coverage](docs/COVERAGE.md).
 
 ## Install
 
-1. Download the **vasagoio-0.2.0-alpha.10.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
+1. Download the **vasagoio-0.2.0-alpha.11.zip** asset from [Releases](https://github.com/alkininan/vasagoio/releases). GitHub's automatically generated source archive is for development.
 2. With WoW closed, extract the `vasagoio` folder into `World of Warcraft/_forever_/Interface/AddOns/`. The result must be `AddOns/vasagoio/vasagoio.toc`.
 3. Install the desired functional addons separately using CurseForge or their official distribution. The [dependency list](docs/dependencies.json) records the complete selected setup. They are not bundled.
 4. Enable vasagoio and those addons in the game's AddOns menu. Log in yourself, let their profiles initialize, and reload once.
@@ -58,7 +58,7 @@ Type **`/vasagoio`**. Setup always opens first. Details contains the current fie
 
 You can also uncheck **vasagoio** in the WoW AddOns menu. Applied settings belong to their functional addons and remain after vasagoio is disabled. To undo those too, use `/vasagoio restore`, then `/vasagoio restore confirm` before disabling, then reload immediately. Restoration stops if a saved field has changed since setup, preserving later edits. A full pre-install WTF backup remains the recovery option for conflicts.
 
-Updating from an earlier alpha: with WoW closed, replace only the `vasagoio` folder and keep SavedVariables. Open `/vasagoio setup`, select **Apply preset**, then **Reload UI** for the revised owner settings. Optional trinket integration accepts reviewed Forever Trinket Menu 1.8.19 and 1.8.20. FUF geometry is rejected at scales where native owner bounds would silently clamp it. The aura experiment remains optional and closed by default; RestedXP and native tracker presentation now require manual combat/restore checks. Long/permanent aura grouping remains unfinished.
+Updating from an earlier alpha: with WoW closed, replace only the `vasagoio` folder and keep SavedVariables. Open `/vasagoio`. If Setup already reports Applied, alpha.11 does not require another preset application. If the previous attempt was blocked or settings are Ready to apply, select **Apply preset**, then **Reload UI**. Optional trinket integration accepts reviewed Forever Trinket Menu 1.8.19 and 1.8.20. FUF geometry is rejected at scales where native owner bounds would silently clamp it. The aura experiment remains optional and closed by default; RestedXP and native tracker presentation now require manual combat/restore checks. Long/permanent aura grouping remains unfinished.
 
 ## Maintenance and sharing
 

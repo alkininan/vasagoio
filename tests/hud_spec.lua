@@ -234,7 +234,8 @@ check(font.db.profile.size.ChatFrame1==16 and font.db.profile.fontface=="Arial N
 
 UnitNameUnmodified = function() return "Example" end
 GetRealmName = function() return "Realm" end
-C_AddOns={GetAddOnMetadata=function(addon) return ({SexyMap="v12.1.7",Details="#Details.20261109.15410.172"})[addon] end}
+local hudVersions={SexyMap="v12.1.7",Details="#Details.20261109.15410.172"}
+C_AddOns={GetAddOnMetadata=function(addon) return hudVersions[addon] end}
 SexyMap = {}
 SexyMap2DB = {["Example-Realm"]={core={},borders={backdrop={},borders={sentinel=true}},zonetext={},clock={},coordinates={enabled=true,coordPrecision="%d,%d"},
     buttons={controlVisibility=false,visibilitySettings={MiniMapMailFrame="always",LibDBIcon10_Test="hover"}}}}
@@ -264,12 +265,22 @@ for i=1,4 do instance.row_info.texts[i]={font={face="Other",size=13,outline="OUT
 function instance:ChangeSkin(value) self.refreshed = true; check(value==nil, "Do not replace the owner's skin") end
 instance.skin="Test"
 Details = {tabela_instancias={instance},skins={Test={instance_cprops={row_info={space={left_noborder=2,right_noborder=-3}}}}}}
+Details.profile_keep_window_sizes=true -- New owner preference is not part of our preset.
 Details.class_colors={ENEMY={1,0,0},ARENA_GREEN={0,1,0}}
 for class in pairs(V.Tokens.class) do Details.class_colors[class]={1,1,1} end
 function Details:GetInstance(id) return self.tabela_instancias[id] end
 instance.baseframe.fullWindowFrame=widget()
 local originalEnemy=Details.class_colors.ENEMY
+local priorMeterPlan = adapters.details.Prepare(); validate(priorMeterPlan)
+hudVersions.Details="#Details.20261124.15450.172"
 local meterPlan = adapters.details.Prepare(); validate(meterPlan)
+check(#meterPlan.changes==#priorMeterPlan.changes,"Reviewed builds produced different meter plans")
+local menuIcons=instance.menu_icons;instance.menu_icons=nil
+check(adapters.details.Prepare()==nil,"New reviewed version bypassed instance schema checks")
+instance.menu_icons=menuIcons
+hudVersions.Details="#Details.20261125.15451.172"
+check(adapters.details.Prepare()==nil,"Unreviewed newer Details build was automatically accepted")
+hudVersions.Details="#Details.20261124.15450.172"
 check(instance.posicao.normal.w==300 and not instance.refreshed, "Meter review caused mutations")
 commit(meterPlan)
 check(Details.class_colors.MAGE[1]==V.Tokens.class.MAGE[1] and Details.class_colors.ENEMY==originalEnemy,"Details palette must use shared classes and preserve semantic colors")
@@ -283,6 +294,7 @@ check(instance.row_info.space.left+instance.row_info.row_offsets.left==8 and ins
 check(instance.row_info.height==24 and instance.row_info.space.between==4 and instance.row_info.font_size==16,"Meter shared row rhythm")
 check(instance.row_info.texts[1].color.byClass and not instance.row_info.texts[2].color.byClass and not instance.row_info.texture_class_colors,"Meter class names with neutral values/fills")
 check(instance.bg_alpha==0 and not instance.refreshed, "Meter review must not invoke a broad live skin refresh")
+check(Details.profile_keep_window_sizes==true,"Meter preset overwrote the owner's new profile-size preference")
 check(instance.row_info.texts[1].font.face==nil and instance.row_info.texts[1].font.outline=="", "Meter typography inheritance")
 
 local function cooldown()

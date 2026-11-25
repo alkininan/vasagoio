@@ -241,6 +241,19 @@ local restored,restoreReason=modules.hud.Disable()
 eq(restored,false);assert(restoreReason:find("Reload UI",1,true));eq(addonIcon.parent,hiddenParent)
 assert(modules.hud.Disable());eq(addonIcon.parent,Minimap,"Failed icon restoration record was discarded")
 SexyMap.buttons.ChangeFrameVisibility=visibilitySetter
+-- Both source-reviewed builds preserve the same headerless runtime envelope
+-- and reversible native anchors. A newer number alone must not grant support.
+for _,version in ipairs({"#Details.20261124.15450.172","#Details.20261109.15410.172"}) do
+    versions.Details=version
+    assert(modules.meter.Apply(),"Reviewed Details build failed runtime presentation")
+    eq(instance.baseframe.fullWindowFrame.points[1][2],instance.baseframe)
+    eq(instance.baseframe.fullWindowFrame.surface.alpha,.4)
+    assert(modules.meter.Disable())
+    eq(instance.baseframe.fullWindowFrame.points[1][2],oldTitleFrame,"Reviewed build failed native anchor restoration")
+end
+versions.Details="#Details.20261125.15451.172"
+eq(modules.meter.Apply(),false,"Unreviewed newer Details build passed runtime gate")
+eq(instance.baseframe.fullWindowFrame.surface.shown,false)
 versions.SexyMap="unreviewed";versions.Details="unreviewed"
 eq(adapters.sexymap.Prepare(),nil);eq(adapters.details.Prepare(),nil)
 modules.hud.Apply();eq(named.VasagoioMapPanel.shown,false,"Unreviewed map retained our runtime surface")
